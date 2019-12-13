@@ -1,0 +1,4 @@
+"STARTUP.obj",
+"Timer_basic.obj" 
+TO "Timer_basic" 
+RAMSIZE(256) 

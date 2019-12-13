@@ -1,0 +1,19 @@
+<html>
+<body>
+<pre>
+<h1>礦ision Build Log</h1>
+<h2>Project:</h2>
+E:\51\CT107D_IAP15F2K61S2\定时器的进阶综合案例\Timer_senior.uvproj
+Project File Date:  12/11/2019
+
+<h2>Output:</h2>
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Timer_senior.c...
+TIMER_SENIOR.C(21): warning C290: missing return value
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_SELECTHC138?TIMER_SENIOR
+Program Size: data=9.0 xdata=0 code=68
+creating hex file from "Timer_senior"...
+"Timer_senior" - 0 Error(s), 2 Warning(s).

@@ -1,0 +1,93 @@
+C51 COMPILER V9.01   TIMER_BASIC                                                           12/11/2019 21:52:47 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE TIMER_BASIC
+OBJECT MODULE PLACED IN Timer_basic.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Timer_basic.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include<reg52.h>
+   2          typedef unsigned char uchar;
+   3          typedef unsigned int uint;
+   4          sbit LED1=P0^0;
+   5          sbit LED2=P0^1;
+   6          
+   7          
+   8          uint count=0;
+   9          
+  10          void SelectHC138(uchar channel)
+  11          {
+  12   1              switch(channel)
+  13   1              {
+  14   2                      case 4:
+  15   2                      P2=(P2&0x1f)|0x80;
+  16   2                      break;
+  17   2                      case 5:
+  18   2                      P2=(P2&0x1f)|0xa0;
+  19   2                      break;
+  20   2                      case 6:
+  21   2                      P2=(P2&0x1f)|0xc0;
+  22   2                      break;
+  23   2                      case 7:
+  24   2                      P2=(P2&0x1f)|0xe0;
+  25   2                      break;
+  26   2              }       
+  27   1      }
+  28          
+  29          void interrupt_int()
+  30          {
+  31   1              TMOD=0X01;
+  32   1              TH0=(65536-50000)/256;
+  33   1              TL0=(65536-50000)%256;
+  34   1              ET0=1;
+  35   1              EA=1;
+  36   1              TR0=1;
+  37   1      }
+  38          
+  39          void interrupt_service() interrupt 1
+  40          {
+  41   1              TMOD=0X01;
+  42   1              TH0=(65536-50000)/256;
+  43   1              TL0=(65536-50000)%256;
+  44   1              count++;
+  45   1              if(count==10)
+  46   1              {
+  47   2                      LED1=~LED1;
+  48   2              }
+  49   1              if(count==20)
+  50   1              {
+  51   2                      LED2=~LED2;
+  52   2                      count=0;
+  53   2              }
+  54   1      }
+  55          
+C51 COMPILER V9.01   TIMER_BASIC                                                           12/11/2019 21:52:47 PAGE 2   
+
+  56          int main()
+  57          {
+  58   1              SelectHC138(5);
+  59   1              P0=0X00;
+  60   1              SelectHC138(4);
+  61   1              P0=0Xff; 
+  62   1              SelectHC138(4); 
+  63   1              interrupt_int();
+  64   1              while(1)
+  65   1              {
+  66   2                      
+  67   2              }
+  68   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    134    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      2    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

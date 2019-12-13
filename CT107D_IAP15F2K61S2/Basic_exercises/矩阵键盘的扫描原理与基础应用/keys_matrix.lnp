@@ -1,0 +1,4 @@
+"STARTUP.obj",
+"keys_matrix.obj" 
+TO "keys_matrix" 
+RAMSIZE(256) 

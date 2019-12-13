@@ -1,0 +1,202 @@
+BL51 BANKED LINKER/LOCATER V6.22                                                        12/02/2019  23:38:00  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
+C:\KEIL\C51\BIN\BL51.EXE STARTUP.obj, beep_relay.obj TO beep_relay RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  STARTUP.obj (?C_STARTUP)
+  beep_relay.obj (BEEP_RELAY)
+
+
+LINK MAP OF MODULE:  beep_relay (?C_STARTUP)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            IDATA   0008H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     0034H     UNIT         ?PR?LEDS?BEEP_RELAY
+            CODE    0037H     0018H     UNIT         ?PR?_DELAY?BEEP_RELAY
+            CODE    004FH     000EH     UNIT         ?PR?MAIN?BEEP_RELAY
+            CODE    005DH     000CH     UNIT         ?C_C51STARTUP
+            CODE    0069H     000AH     UNIT         ?PR?INITSYS?BEEP_RELAY
+            CODE    0073H     0007H     UNIT         ?PR?BEEP?BEEP_RELAY
+            CODE    007AH     0007H     UNIT         ?PR?RELAY?BEEP_RELAY
+
+
+
+OVERLAY MAP OF MODULE:   beep_relay (?C_STARTUP)
+
+
+SEGMENT
+  +--> CALLED SEGMENT
+---------------------
+?C_C51STARTUP
+  +--> ?PR?MAIN?BEEP_RELAY
+
+?PR?MAIN?BEEP_RELAY
+  +--> ?PR?INITSYS?BEEP_RELAY
+  +--> ?PR?LEDS?BEEP_RELAY
+  +--> ?PR?BEEP?BEEP_RELAY
+  +--> ?PR?RELAY?BEEP_RELAY
+
+?PR?LEDS?BEEP_RELAY
+  +--> ?PR?_DELAY?BEEP_RELAY
+
+?PR?BEEP?BEEP_RELAY
+  +--> ?PR?_DELAY?BEEP_RELAY
+
+?PR?RELAY?BEEP_RELAY
+  +--> ?PR?_DELAY?BEEP_RELAY
+
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/02/2019  23:38:00  PAGE 2
+
+
+
+
+SYMBOL TABLE OF MODULE:  beep_relay (?C_STARTUP)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        ?C_STARTUP
+  C:005DH         SEGMENT       ?C_C51STARTUP
+  I:0008H         SEGMENT       ?STACK
+  C:0000H         PUBLIC        ?C_STARTUP
+  D:00E0H         SYMBOL        ACC
+  D:00F0H         SYMBOL        B
+  D:0083H         SYMBOL        DPH
+  D:0082H         SYMBOL        DPL
+  N:0000H         SYMBOL        IBPSTACK
+  N:0100H         SYMBOL        IBPSTACKTOP
+  N:0080H         SYMBOL        IDATALEN
+  C:0060H         SYMBOL        IDATALOOP
+  N:0000H         SYMBOL        PBPSTACK
+  N:0100H         SYMBOL        PBPSTACKTOP
+  N:0000H         SYMBOL        PDATALEN
+  N:0000H         SYMBOL        PDATASTART
+  N:0000H         SYMBOL        PPAGE
+  N:0000H         SYMBOL        PPAGEENABLE
+  D:00A0H         SYMBOL        PPAGE_SFR
+  D:0081H         SYMBOL        SP
+  C:005DH         SYMBOL        STARTUP1
+  N:0000H         SYMBOL        XBPSTACK
+  N:0000H         SYMBOL        XBPSTACKTOP
+  N:0000H         SYMBOL        XDATALEN
+  N:0000H         SYMBOL        XDATASTART
+  C:0000H         LINE#         126
+  C:005DH         LINE#         133
+  C:005FH         LINE#         134
+  C:0060H         LINE#         135
+  C:0061H         LINE#         136
+  C:0063H         LINE#         185
+  C:0066H         LINE#         196
+  -------         ENDMOD        ?C_STARTUP
+
+  -------         MODULE        BEEP_RELAY
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0080H         PUBLIC        P0
+  D:00A0H         PUBLIC        P2
+  C:0073H         PUBLIC        beep
+  C:007AH         PUBLIC        relay
+  C:004FH         PUBLIC        main
+  C:0003H         PUBLIC        leds
+  B:00A0H.5       PUBLIC        HC138_A
+  B:00A0H.6       PUBLIC        HC138_B
+  B:00A0H.7       PUBLIC        HC138_C
+  C:0044H         PUBLIC        _Delay
+  C:0069H         PUBLIC        Initsys
+  C:0040H         SYMBOL        L?0023
+  -------         PROC          L?0022
+  -------         ENDPROC       L?0022
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/02/2019  23:38:00  PAGE 3
+
+
+  C:0040H         SYMBOL        L?0023
+  -------         PROC          _DELAY
+  D:0006H         SYMBOL        t
+  C:0044H         LINE#         8
+  C:0044H         LINE#         9
+  C:0044H         LINE#         10
+  C:004EH         LINE#         11
+  -------         ENDPROC       _DELAY
+  -------         PROC          INITSYS
+  C:0069H         LINE#         13
+  C:0069H         LINE#         14
+  C:0069H         LINE#         15
+  C:006BH         LINE#         16
+  C:006DH         LINE#         17
+  C:006FH         LINE#         18
+  C:0072H         LINE#         19
+  -------         ENDPROC       INITSYS
+  -------         PROC          BEEP
+  C:0073H         LINE#         21
+  C:0073H         LINE#         22
+  C:0073H         LINE#         23
+  C:0073H         LINE#         24
+  C:0073H         LINE#         25
+  C:0073H         LINE#         26
+  C:0073H         LINE#         27
+  C:0076H         LINE#         28
+  C:0079H         LINE#         29
+  -------         ENDPROC       BEEP
+  -------         PROC          RELAY
+  C:007AH         LINE#         31
+  C:007AH         LINE#         32
+  C:007AH         LINE#         33
+  C:007AH         LINE#         34
+  C:007AH         LINE#         35
+  C:007AH         LINE#         36
+  C:007AH         LINE#         37
+  C:007DH         LINE#         38
+  C:0080H         LINE#         39
+  -------         ENDPROC       RELAY
+  -------         PROC          LEDS
+  -------         DO            
+  D:0005H         SYMBOL        i
+  -------         ENDDO         
+  C:0003H         LINE#         43
+  C:0003H         LINE#         44
+  C:0003H         LINE#         46
+  C:0005H         LINE#         47
+  C:0007H         LINE#         48
+  C:0009H         LINE#         49
+  C:000BH         LINE#         50
+  C:000BH         LINE#         51
+  C:0018H         LINE#         52
+  C:001BH         LINE#         53
+  C:001FH         LINE#         54
+  C:0021H         LINE#         55
+  C:0021H         LINE#         56
+  C:002FH         LINE#         57
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/02/2019  23:38:00  PAGE 4
+
+
+  C:0032H         LINE#         58
+  C:0036H         LINE#         59
+  -------         ENDPROC       LEDS
+  -------         PROC          MAIN
+  C:004FH         LINE#         61
+  C:004FH         LINE#         62
+  C:004FH         LINE#         63
+  C:0052H         LINE#         64
+  C:0052H         LINE#         65
+  C:0052H         LINE#         66
+  C:0055H         LINE#         67
+  C:0058H         LINE#         68
+  C:005BH         LINE#         69
+  -------         ENDPROC       MAIN
+  -------         ENDMOD        BEEP_RELAY
+
+Program Size: data=9.0 xdata=0 code=129
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

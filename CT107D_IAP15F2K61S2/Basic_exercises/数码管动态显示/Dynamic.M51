@@ -1,0 +1,234 @@
+BL51 BANKED LINKER/LOCATER V6.22                                                        12/05/2019  21:03:04  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
+C:\KEIL\C51\BIN\BL51.EXE STARTUP.obj, Dynamic.obj TO Dynamic RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  STARTUP.obj (?C_STARTUP)
+  Dynamic.obj (DYNAMIC)
+  C:\KEIL\C51\LIB\C51S.LIB (?C_INIT)
+
+
+LINK MAP OF MODULE:  Dynamic (?C_STARTUP)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0002H     UNIT         _DATA_GROUP_
+            DATA    000AH     0001H     UNIT         ?DT?DYNAMIC
+            IDATA   000BH     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     008CH     UNIT         ?C_C51STARTUP
+            CODE    008FH     004EH     UNIT         ?PR?DISPLAY_DYNAMIC?DYNAMIC
+            CODE    00DDH     0033H     UNIT         ?PR?_SELECTHC573?DYNAMIC
+            CODE    0110H     001EH     UNIT         ?PR?_DISPLAYSMG_BIT?DYNAMIC
+            CODE    012EH     0018H     UNIT         ?PR?_DELAY?DYNAMIC
+            CODE    0146H     0018H     UNIT         ?PR?MAIN?DYNAMIC
+            CODE    015EH     0017H     UNIT         ?PR?_DELAY0?DYNAMIC
+            CODE    0175H     0012H     UNIT         ?CO?DYNAMIC
+            CODE    0187H     0004H     UNIT         ?C_INITSEG
+
+
+
+OVERLAY MAP OF MODULE:   Dynamic (?C_STARTUP)
+
+
+SEGMENT                               DATA_GROUP 
+  +--> CALLED SEGMENT               START    LENGTH
+---------------------------------------------------
+?C_C51STARTUP                       -----    -----
+  +--> ?PR?MAIN?DYNAMIC
+  +--> ?C_INITSEG
+
+?PR?MAIN?DYNAMIC                    -----    -----
+  +--> ?PR?DISPLAY_DYNAMIC?DYNAMIC
+  +--> ?PR?_DELAY0?DYNAMIC
+
+?PR?DISPLAY_DYNAMIC?DYNAMIC         -----    -----
+  +--> ?CO?DYNAMIC
+  +--> ?PR?_DELAY?DYNAMIC
+
+?PR?_DELAY?DYNAMIC                  -----    -----
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/05/2019  21:03:04  PAGE 2
+
+
+  +--> ?CO?DYNAMIC
+  +--> ?PR?_DISPLAYSMG_BIT?DYNAMIC
+
+?PR?_DISPLAYSMG_BIT?DYNAMIC         -----    -----
+  +--> ?PR?_SELECTHC573?DYNAMIC
+
+?PR?_DELAY0?DYNAMIC                 0008H    0002H
+  +--> ?PR?DISPLAY_DYNAMIC?DYNAMIC
+
+
+
+SYMBOL TABLE OF MODULE:  Dynamic (?C_STARTUP)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        ?C_STARTUP
+  C:0003H         SEGMENT       ?C_C51STARTUP
+  I:000BH         SEGMENT       ?STACK
+  C:0000H         PUBLIC        ?C_STARTUP
+  D:00E0H         SYMBOL        ACC
+  D:00F0H         SYMBOL        B
+  D:0083H         SYMBOL        DPH
+  D:0082H         SYMBOL        DPL
+  N:0000H         SYMBOL        IBPSTACK
+  N:0100H         SYMBOL        IBPSTACKTOP
+  N:0080H         SYMBOL        IDATALEN
+  C:0006H         SYMBOL        IDATALOOP
+  N:0000H         SYMBOL        PBPSTACK
+  N:0100H         SYMBOL        PBPSTACKTOP
+  N:0000H         SYMBOL        PDATALEN
+  N:0000H         SYMBOL        PDATASTART
+  N:0000H         SYMBOL        PPAGE
+  N:0000H         SYMBOL        PPAGEENABLE
+  D:00A0H         SYMBOL        PPAGE_SFR
+  D:0081H         SYMBOL        SP
+  C:0003H         SYMBOL        STARTUP1
+  N:0000H         SYMBOL        XBPSTACK
+  N:0000H         SYMBOL        XBPSTACKTOP
+  N:0000H         SYMBOL        XDATALEN
+  N:0000H         SYMBOL        XDATASTART
+  C:0000H         LINE#         126
+  C:0003H         LINE#         133
+  C:0005H         LINE#         134
+  C:0006H         LINE#         135
+  C:0007H         LINE#         136
+  C:0009H         LINE#         185
+  C:000CH         LINE#         196
+  -------         ENDMOD        ?C_STARTUP
+
+  -------         MODULE        DYNAMIC
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0080H         PUBLIC        P0
+  D:00A0H         PUBLIC        P2
+  C:008FH         PUBLIC        Display_Dynamic
+  C:015EH         PUBLIC        _Delay0
+  C:0146H         PUBLIC        main
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/05/2019  21:03:04  PAGE 3
+
+
+  C:00DDH         PUBLIC        _selectHC573
+  C:0175H         PUBLIC        dig_code
+  C:0110H         PUBLIC        _DisplaySMG_Bit
+  D:000AH         PUBLIC        i
+  C:013BH         PUBLIC        _Delay
+  C:0131H         SYMBOL        L?0024
+  C:0134H         SYMBOL        L?0025
+  -------         PROC          L?0023
+  -------         ENDPROC       L?0023
+  C:0131H         SYMBOL        L?0024
+  C:0134H         SYMBOL        L?0025
+  -------         PROC          _DELAY
+  D:0006H         SYMBOL        t
+  C:013BH         LINE#         8
+  C:013BH         LINE#         9
+  C:013BH         LINE#         10
+  C:0145H         LINE#         11
+  -------         ENDPROC       _DELAY
+  -------         PROC          _DELAY0
+  D:0008H         SYMBOL        t
+  C:015EH         LINE#         13
+  C:0162H         LINE#         14
+  C:0162H         LINE#         15
+  C:016FH         LINE#         16
+  C:016FH         LINE#         17
+  C:0172H         LINE#         18
+  C:0174H         LINE#         19
+  -------         ENDPROC       _DELAY0
+  -------         PROC          _SELECTHC573
+  D:0007H         SYMBOL        channel
+  C:00DDH         LINE#         21
+  C:00DDH         LINE#         22
+  C:00DDH         LINE#         23
+  C:00ECH         LINE#         24
+  C:00ECH         LINE#         25
+  C:00ECH         LINE#         26
+  C:00F4H         LINE#         27
+  C:00F5H         LINE#         28
+  C:00F5H         LINE#         29
+  C:00FDH         LINE#         30
+  C:00FEH         LINE#         31
+  C:00FEH         LINE#         32
+  C:0106H         LINE#         33
+  C:0107H         LINE#         34
+  C:0107H         LINE#         35
+  C:010FH         LINE#         36
+  C:010FH         LINE#         37
+  C:010FH         LINE#         38
+  -------         ENDPROC       _SELECTHC573
+  -------         PROC          _DISPLAYSMG_BIT
+  D:0006H         SYMBOL        value
+  D:0005H         SYMBOL        pos
+  C:0110H         LINE#         40
+  C:0112H         LINE#         41
+  C:0112H         LINE#         42
+  C:0117H         LINE#         43
+  C:0126H         LINE#         44
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/05/2019  21:03:04  PAGE 4
+
+
+  C:012BH         LINE#         45
+  C:012DH         LINE#         46
+  -------         ENDPROC       _DISPLAYSMG_BIT
+  -------         PROC          DISPLAY_DYNAMIC
+  C:008FH         LINE#         48
+  C:008FH         LINE#         49
+  C:008FH         LINE#         50
+  C:0097H         LINE#         51
+  C:009AH         LINE#         52
+  C:009DH         LINE#         53
+  C:009DH         LINE#         54
+  C:00A0H         LINE#         55
+  C:00A3H         LINE#         56
+  C:00A4H         LINE#         57
+  C:00A7H         LINE#         58
+  C:00AAH         LINE#         59
+  C:00ADH         LINE#         60
+  C:00B0H         LINE#         61
+  C:00B3H         LINE#         62
+  C:00B6H         LINE#         63
+  C:00B9H         LINE#         64
+  C:00BCH         LINE#         65
+  C:00BCH         LINE#         66
+  C:00BFH         LINE#         67
+  C:00C2H         LINE#         68
+  C:00C8H         LINE#         69
+  C:00CBH         LINE#         70
+  C:00CEH         LINE#         71
+  C:00D6H         LINE#         72
+  C:00D9H         LINE#         73
+  C:00DCH         LINE#         74
+  -------         ENDPROC       DISPLAY_DYNAMIC
+  -------         PROC          MAIN
+  C:0146H         LINE#         76
+  C:0146H         LINE#         77
+  C:0146H         LINE#         78
+  C:0146H         LINE#         79
+  C:0146H         LINE#         80
+  C:0149H         LINE#         81
+  C:014BH         LINE#         82
+  C:0152H         LINE#         83
+  C:0152H         LINE#         84
+  C:0155H         LINE#         85
+  C:0155H         LINE#         86
+  C:015CH         LINE#         87
+  -------         ENDPROC       MAIN
+  -------         ENDMOD        DYNAMIC
+
+Program Size: data=12.0 xdata=0 code=395
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

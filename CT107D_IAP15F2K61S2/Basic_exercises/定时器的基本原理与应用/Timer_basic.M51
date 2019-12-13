@@ -1,0 +1,195 @@
+BL51 BANKED LINKER/LOCATER V6.22                                                        12/11/2019  21:52:47  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
+C:\KEIL\C51\BIN\BL51.EXE STARTUP.obj, Timer_basic.obj TO Timer_basic RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  STARTUP.obj (?C_STARTUP)
+  Timer_basic.obj (TIMER_BASIC)
+  C:\KEIL\C51\LIB\C51S.LIB (?C_INIT)
+
+
+LINK MAP OF MODULE:  Timer_basic (?C_STARTUP)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0002H     UNIT         ?DT?TIMER_BASIC
+            IDATA   000AH     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     0005H     UNIT         ?C_INITSEG
+                    0008H     0003H                  *** GAP ***
+            CODE    000BH     0003H     ABSOLUTE     
+            CODE    000EH     008CH     UNIT         ?C_C51STARTUP
+            CODE    009AH     0033H     UNIT         ?PR?_SELECTHC138?TIMER_BASIC
+            CODE    00CDH     002CH     UNIT         ?PR?INTERRUPT_SERVICE?TIMER_BASIC
+            CODE    00F9H     0017H     UNIT         ?PR?MAIN?TIMER_BASIC
+            CODE    0110H     0010H     UNIT         ?PR?INTERRUPT_INT?TIMER_BASIC
+
+
+
+OVERLAY MAP OF MODULE:   Timer_basic (?C_STARTUP)
+
+
+SEGMENT
+  +--> CALLED SEGMENT
+---------------------
+?C_C51STARTUP
+  +--> ?PR?MAIN?TIMER_BASIC
+  +--> ?C_INITSEG
+
+?PR?MAIN?TIMER_BASIC
+  +--> ?PR?_SELECTHC138?TIMER_BASIC
+  +--> ?PR?INTERRUPT_INT?TIMER_BASIC
+
+
+
+SYMBOL TABLE OF MODULE:  Timer_basic (?C_STARTUP)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/11/2019  21:52:47  PAGE 2
+
+
+  -------         MODULE        ?C_STARTUP
+  C:000EH         SEGMENT       ?C_C51STARTUP
+  I:000AH         SEGMENT       ?STACK
+  C:0000H         PUBLIC        ?C_STARTUP
+  D:00E0H         SYMBOL        ACC
+  D:00F0H         SYMBOL        B
+  D:0083H         SYMBOL        DPH
+  D:0082H         SYMBOL        DPL
+  N:0000H         SYMBOL        IBPSTACK
+  N:0100H         SYMBOL        IBPSTACKTOP
+  N:0080H         SYMBOL        IDATALEN
+  C:0011H         SYMBOL        IDATALOOP
+  N:0000H         SYMBOL        PBPSTACK
+  N:0100H         SYMBOL        PBPSTACKTOP
+  N:0000H         SYMBOL        PDATALEN
+  N:0000H         SYMBOL        PDATASTART
+  N:0000H         SYMBOL        PPAGE
+  N:0000H         SYMBOL        PPAGEENABLE
+  D:00A0H         SYMBOL        PPAGE_SFR
+  D:0081H         SYMBOL        SP
+  C:000EH         SYMBOL        STARTUP1
+  N:0000H         SYMBOL        XBPSTACK
+  N:0000H         SYMBOL        XBPSTACKTOP
+  N:0000H         SYMBOL        XDATALEN
+  N:0000H         SYMBOL        XDATASTART
+  C:0000H         LINE#         126
+  C:000EH         LINE#         133
+  C:0010H         LINE#         134
+  C:0011H         LINE#         135
+  C:0012H         LINE#         136
+  C:0014H         LINE#         185
+  C:0017H         LINE#         196
+  -------         ENDMOD        ?C_STARTUP
+
+  -------         MODULE        TIMER_BASIC
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0080H         PUBLIC        P0
+  D:0090H         PUBLIC        P1
+  D:00A0H         PUBLIC        P2
+  D:00B0H         PUBLIC        P3
+  B:00A8H.7       PUBLIC        EA
+  B:0080H.0       PUBLIC        LED1
+  B:0080H.1       PUBLIC        LED2
+  C:009AH         PUBLIC        _SelectHC138
+  D:00A8H         PUBLIC        IE
+  D:00B8H         PUBLIC        IP
+  C:0110H         PUBLIC        interrupt_int
+  C:00F9H         PUBLIC        main
+  D:0008H         PUBLIC        count
+  D:0098H         PUBLIC        SCON
+  D:0089H         PUBLIC        TMOD
+  D:0088H         PUBLIC        TCON
+  B:00A8H.1       PUBLIC        ET0
+  C:00CDH         PUBLIC        interrupt_service
+  D:008CH         PUBLIC        TH0
+  D:008AH         PUBLIC        TL0
+  B:0088H.4       PUBLIC        TR0
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/11/2019  21:52:47  PAGE 3
+
+
+  D:00C8H         PUBLIC        T2CON
+  D:00D0H         PUBLIC        PSW
+  -------         PROC          _SELECTHC138
+  D:0007H         SYMBOL        channel
+  C:009AH         LINE#         10
+  C:009AH         LINE#         11
+  C:009AH         LINE#         12
+  C:00A9H         LINE#         13
+  C:00A9H         LINE#         14
+  C:00A9H         LINE#         15
+  C:00B1H         LINE#         16
+  C:00B2H         LINE#         17
+  C:00B2H         LINE#         18
+  C:00BAH         LINE#         19
+  C:00BBH         LINE#         20
+  C:00BBH         LINE#         21
+  C:00C3H         LINE#         22
+  C:00C4H         LINE#         23
+  C:00C4H         LINE#         24
+  C:00CCH         LINE#         25
+  C:00CCH         LINE#         26
+  C:00CCH         LINE#         27
+  -------         ENDPROC       _SELECTHC138
+  -------         PROC          INTERRUPT_INT
+  C:0110H         LINE#         29
+  C:0110H         LINE#         30
+  C:0110H         LINE#         31
+  C:0113H         LINE#         32
+  C:0116H         LINE#         33
+  C:0119H         LINE#         34
+  C:011BH         LINE#         35
+  C:011DH         LINE#         36
+  C:011FH         LINE#         37
+  -------         ENDPROC       INTERRUPT_INT
+  -------         PROC          INTERRUPT_SERVICE
+  C:00CDH         LINE#         39
+  C:00CFH         LINE#         41
+  C:00D2H         LINE#         42
+  C:00D5H         LINE#         43
+  C:00D8H         LINE#         44
+  C:00E0H         LINE#         45
+  C:00E6H         LINE#         46
+  C:00E6H         LINE#         47
+  C:00E8H         LINE#         48
+  C:00E8H         LINE#         49
+  C:00F0H         LINE#         50
+  C:00F0H         LINE#         51
+  C:00F2H         LINE#         52
+  C:00F6H         LINE#         53
+  C:00F6H         LINE#         54
+  -------         ENDPROC       INTERRUPT_SERVICE
+  -------         PROC          MAIN
+  C:00F9H         LINE#         56
+  C:00F9H         LINE#         57
+  C:00F9H         LINE#         58
+  C:00FEH         LINE#         59
+  C:0101H         LINE#         60
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/11/2019  21:52:47  PAGE 4
+
+
+  C:0105H         LINE#         61
+  C:0108H         LINE#         62
+  C:010BH         LINE#         63
+  C:010EH         LINE#         64
+  C:010EH         LINE#         65
+  C:010EH         LINE#         67
+  -------         ENDPROC       MAIN
+  -------         ENDMOD        TIMER_BASIC
+
+Program Size: data=11.0 xdata=0 code=285
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

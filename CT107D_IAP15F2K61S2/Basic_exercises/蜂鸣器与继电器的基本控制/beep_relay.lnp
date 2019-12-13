@@ -1,0 +1,4 @@
+"STARTUP.obj",
+"beep_relay.obj" 
+TO "beep_relay" 
+RAMSIZE(256) 

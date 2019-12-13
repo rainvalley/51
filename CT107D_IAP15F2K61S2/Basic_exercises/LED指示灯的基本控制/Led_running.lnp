@@ -1,0 +1,5 @@
+"STARTUP.obj",
+"Led_running.obj",
+".\test.obj" 
+TO "Led_running" 
+RAMSIZE(256) 

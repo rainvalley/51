@@ -1,0 +1,4 @@
+"STARTUP.obj",
+"Interrupt.obj" 
+TO "Interrupt" 
+RAMSIZE(256) 

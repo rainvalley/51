@@ -1,0 +1,4 @@
+"STARTUP.obj",
+"Static.obj" 
+TO "Static" 
+RAMSIZE(256) 
