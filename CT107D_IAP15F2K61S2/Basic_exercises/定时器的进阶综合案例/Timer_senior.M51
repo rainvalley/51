@@ -1,4 +1,4 @@
-BL51 BANKED LINKER/LOCATER V6.22                                                        12/11/2019  22:34:19  PAGE 1
+BL51 BANKED LINKER/LOCATER V6.22                                                        12/14/2019  20:05:01  PAGE 1
 
 
 BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
@@ -11,6 +11,8 @@ MEMORY MODEL: SMALL
 INPUT MODULES INCLUDED:
   STARTUP.obj (?C_STARTUP)
   Timer_senior.obj (TIMER_SENIOR)
+  C:\KEIL\C51\LIB\C51S.LIB (?C_INIT)
+  C:\KEIL\C51\LIB\C51S.LIB (?C?UIDIV)
 
 
 LINK MAP OF MODULE:  Timer_senior (?C_STARTUP)
@@ -21,13 +23,25 @@ LINK MAP OF MODULE:  Timer_senior (?C_STARTUP)
 
             * * * * * * *   D A T A   M E M O R Y   * * * * * * *
             REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
-            IDATA   0008H     0001H     UNIT         ?STACK
+            DATA    0008H     000AH     UNIT         ?DT?TIMER_SENIOR
+            IDATA   0012H     0001H     UNIT         ?STACK
 
             * * * * * * *   C O D E   M E M O R Y   * * * * * * *
             CODE    0000H     0003H     ABSOLUTE     
-            CODE    0003H     0033H     UNIT         ?PR?_SELECTHC138?TIMER_SENIOR
-            CODE    0036H     000CH     UNIT         ?C_C51STARTUP
-            CODE    0042H     0002H     UNIT         ?PR?MAIN?TIMER_SENIOR
+                    0003H     0008H                  *** GAP ***
+            CODE    000BH     0003H     ABSOLUTE     
+            CODE    000EH     008CH     UNIT         ?C_C51STARTUP
+            CODE    009AH     006DH     UNIT         ?PR?DISPLAY?TIMER_SENIOR
+            CODE    0107H     005BH     UNIT         ?PR?INTERRUPT_SERVICE?TIMER_SENIOR
+            CODE    0162H     0055H     UNIT         ?C?LIB_CODE
+            CODE    01B7H     003CH     UNIT         ?PR?SCANKEY?TIMER_SENIOR
+            CODE    01F3H     0033H     UNIT         ?PR?_SELECTHC138?TIMER_SENIOR
+            CODE    0226H     0023H     UNIT         ?PR?_DISPLAYBIT?TIMER_SENIOR
+            CODE    0249H     001FH     UNIT         ?PR?_DELAY?TIMER_SENIOR
+            CODE    0268H     001DH     UNIT         ?PR?MAIN?TIMER_SENIOR
+            CODE    0285H     0015H     UNIT         ?C_INITSEG
+            CODE    029AH     0012H     UNIT         ?CO?TIMER_SENIOR
+            CODE    02ACH     0010H     UNIT         ?PR?INTERRUPT_INIT?TIMER_SENIOR
 
 
 
@@ -39,6 +53,31 @@ SEGMENT
 ---------------------
 ?C_C51STARTUP
   +--> ?PR?MAIN?TIMER_SENIOR
+  +--> ?C_INITSEG
+
+?PR?MAIN?TIMER_SENIOR
+  +--> ?PR?_SELECTHC138?TIMER_SENIOR
+  +--> ?PR?INTERRUPT_INIT?TIMER_SENIOR
+  +--> ?PR?DISPLAY?TIMER_SENIOR
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/14/2019  20:05:01  PAGE 2
+
+
+  +--> ?PR?SCANKEY?TIMER_SENIOR
+
+?PR?DISPLAY?TIMER_SENIOR
+  +--> ?PR?_DELAY?TIMER_SENIOR
+  +--> ?PR?_DISPLAYBIT?TIMER_SENIOR
+
+?PR?_DELAY?TIMER_SENIOR
+  +--> ?PR?_DISPLAYBIT?TIMER_SENIOR
+
+?PR?_DISPLAYBIT?TIMER_SENIOR
+  +--> ?PR?_SELECTHC138?TIMER_SENIOR
+  +--> ?CO?TIMER_SENIOR
+
+?PR?SCANKEY?TIMER_SENIOR
+  +--> ?PR?_DELAY?TIMER_SENIOR
+  +--> ?PR?DISPLAY?TIMER_SENIOR
 
 
 
@@ -48,8 +87,8 @@ SYMBOL TABLE OF MODULE:  Timer_senior (?C_STARTUP)
   ----------------------------------
 
   -------         MODULE        ?C_STARTUP
-  C:0036H         SEGMENT       ?C_C51STARTUP
-  I:0008H         SEGMENT       ?STACK
+  C:000EH         SEGMENT       ?C_C51STARTUP
+  I:0012H         SEGMENT       ?STACK
   C:0000H         PUBLIC        ?C_STARTUP
   D:00E0H         SYMBOL        ACC
   D:00F0H         SYMBOL        B
@@ -58,10 +97,7 @@ SYMBOL TABLE OF MODULE:  Timer_senior (?C_STARTUP)
   N:0000H         SYMBOL        IBPSTACK
   N:0100H         SYMBOL        IBPSTACKTOP
   N:0080H         SYMBOL        IDATALEN
-  C:0039H         SYMBOL        IDATALOOP
-BL51 BANKED LINKER/LOCATER V6.22                                                      12/11/2019  22:34:19  PAGE 2
-
-
+  C:0011H         SYMBOL        IDATALOOP
   N:0000H         SYMBOL        PBPSTACK
   N:0100H         SYMBOL        PBPSTACKTOP
   N:0000H         SYMBOL        PDATALEN
@@ -70,65 +106,217 @@ SYMBOL TABLE OF MODULE:  Timer_senior (?C_STARTUP)
   N:0000H         SYMBOL        PPAGEENABLE
   D:00A0H         SYMBOL        PPAGE_SFR
   D:0081H         SYMBOL        SP
-  C:0036H         SYMBOL        STARTUP1
+  C:000EH         SYMBOL        STARTUP1
   N:0000H         SYMBOL        XBPSTACK
   N:0000H         SYMBOL        XBPSTACKTOP
   N:0000H         SYMBOL        XDATALEN
   N:0000H         SYMBOL        XDATASTART
   C:0000H         LINE#         126
-  C:0036H         LINE#         133
-  C:0038H         LINE#         134
-  C:0039H         LINE#         135
-  C:003AH         LINE#         136
-  C:003CH         LINE#         185
-  C:003FH         LINE#         196
+  C:000EH         LINE#         133
+  C:0010H         LINE#         134
+  C:0011H         LINE#         135
+  C:0012H         LINE#         136
+  C:0014H         LINE#         185
+  C:0017H         LINE#         196
   -------         ENDMOD        ?C_STARTUP
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/14/2019  20:05:01  PAGE 3
+
+
 
   -------         MODULE        TIMER_SENIOR
   C:0000H         SYMBOL        _ICE_DUMMY_
   D:0080H         PUBLIC        P0
   D:0090H         PUBLIC        P1
+  D:00A0H         PUBLIC        P2
   D:00B0H         PUBLIC        P3
-  C:0003H         PUBLIC        _SelectHC138
+  B:00A8H.7       PUBLIC        EA
+  B:00B0H.3       PUBLIC        S4
+  B:00B0H.2       PUBLIC        S5
+  C:02ACH         PUBLIC        interrupt_init
+  C:01F3H         PUBLIC        _SelectHC138
   D:00A8H         PUBLIC        IE
+  C:025DH         PUBLIC        _delay
   D:00B8H         PUBLIC        IP
-  C:0042H         PUBLIC        main
+  C:0268H         PUBLIC        main
+  D:0008H         PUBLIC        count
+  C:029AH         PUBLIC        dig_code
   D:0098H         PUBLIC        SCON
+  D:0089H         PUBLIC        TMOD
   D:0088H         PUBLIC        TCON
+  C:0226H         PUBLIC        _displaybit
+  B:00A8H.1       PUBLIC        ET0
+  C:0107H         PUBLIC        interrupt_service
+  D:008CH         PUBLIC        TH0
+  D:008AH         PUBLIC        TL0
+  B:0088H.4       PUBLIC        TR0
+  D:000AH         PUBLIC        ms
+  D:000CH         PUBLIC        h
   D:00C8H         PUBLIC        T2CON
+  D:000EH         PUBLIC        m
+  C:01B7H         PUBLIC        scankey
+  D:0010H         PUBLIC        s
+  C:009AH         PUBLIC        display
   D:00D0H         PUBLIC        PSW
+  C:0256H         SYMBOL        L?0042
+  -------         PROC          L?0041
+  -------         ENDPROC       L?0041
+  C:0256H         SYMBOL        L?0042
+  -------         PROC          _DELAY
+  D:0006H         SYMBOL        t
+  C:025DH         LINE#         13
+  C:025DH         LINE#         14
+  C:025DH         LINE#         15
+  C:0267H         LINE#         16
+  -------         ENDPROC       _DELAY
   -------         PROC          _SELECTHC138
   D:0007H         SYMBOL        n
-  C:0003H         LINE#         5
-  C:0003H         LINE#         6
-  C:0003H         LINE#         7
-  C:0012H         LINE#         8
-  C:0012H         LINE#         9
-  C:0012H         LINE#         10
-  C:001AH         LINE#         11
-  C:001BH         LINE#         12
-  C:001BH         LINE#         13
-  C:0023H         LINE#         14
-  C:0024H         LINE#         15
-  C:0024H         LINE#         16
-  C:002CH         LINE#         17
-  C:002DH         LINE#         18
-  C:002DH         LINE#         19
-  C:0035H         LINE#         20
-  C:0035H         LINE#         21
+  C:01F3H         LINE#         18
+  C:01F3H         LINE#         19
+  C:01F3H         LINE#         20
+  C:0202H         LINE#         21
+  C:0202H         LINE#         22
+  C:0202H         LINE#         23
+  C:020AH         LINE#         24
+  C:020BH         LINE#         25
+  C:020BH         LINE#         26
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/14/2019  20:05:01  PAGE 4
+
+
+  C:0213H         LINE#         27
+  C:0214H         LINE#         28
+  C:0214H         LINE#         29
+  C:021CH         LINE#         30
+  C:021DH         LINE#         31
+  C:021DH         LINE#         32
+  C:0225H         LINE#         33
+  C:0225H         LINE#         34
   -------         ENDPROC       _SELECTHC138
+  -------         PROC          _DISPLAYBIT
+  D:0006H         SYMBOL        num
+  D:0005H         SYMBOL        pos
+  C:0226H         LINE#         36
+  C:0228H         LINE#         37
+  C:0228H         LINE#         38
+  C:022DH         LINE#         39
+  C:023CH         LINE#         40
+  C:0241H         LINE#         41
+  C:0248H         LINE#         42
+  -------         ENDPROC       _DISPLAYBIT
+  -------         PROC          DISPLAY
+  C:009AH         LINE#         44
+  C:009AH         LINE#         45
+  C:009AH         LINE#         46
+  C:00A9H         LINE#         47
+  C:00ACH         LINE#         48
+  C:00B9H         LINE#         49
+  C:00B9H         LINE#         50
+  C:00B9H         LINE#         51
+  C:00BCH         LINE#         52
+  C:00CBH         LINE#         53
+  C:00CEH         LINE#         54
+  C:00DBH         LINE#         55
+  C:00DBH         LINE#         56
+  C:00DBH         LINE#         57
+  C:00DEH         LINE#         58
+  C:00EDH         LINE#         59
+  C:00F0H         LINE#         60
+  C:0100H         LINE#         61
+  -------         ENDPROC       DISPLAY
+  -------         PROC          INTERRUPT_INIT
+  C:02ACH         LINE#         64
+  C:02ACH         LINE#         65
+  C:02ACH         LINE#         66
+  C:02AFH         LINE#         67
+  C:02B2H         LINE#         68
+  C:02B5H         LINE#         69
+  C:02B7H         LINE#         70
+  C:02B9H         LINE#         71
+  C:02BBH         LINE#         72
+  -------         ENDPROC       INTERRUPT_INIT
+  -------         PROC          INTERRUPT_SERVICE
+  C:0107H         LINE#         74
+  C:0109H         LINE#         76
+  C:010CH         LINE#         77
+  C:010FH         LINE#         78
+  C:0117H         LINE#         79
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/14/2019  20:05:01  PAGE 5
+
+
+  C:011DH         LINE#         80
+  C:011DH         LINE#         81
+  C:0125H         LINE#         82
+  C:012BH         LINE#         83
+  C:0131H         LINE#         84
+  C:0131H         LINE#         85
+  C:0139H         LINE#         86
+  C:013FH         LINE#         87
+  C:0145H         LINE#         88
+  C:0145H         LINE#         89
+  C:014DH         LINE#         90
+  C:0153H         LINE#         91
+  C:0153H         LINE#         92
+  C:015BH         LINE#         93
+  C:015BH         LINE#         94
+  C:015FH         LINE#         95
+  C:015FH         LINE#         96
+  C:015FH         LINE#         99
+  C:015FH         LINE#         100
+  -------         ENDPROC       INTERRUPT_SERVICE
+  -------         PROC          SCANKEY
+  C:01B7H         LINE#         102
+  C:01B7H         LINE#         103
+  C:01B7H         LINE#         104
+  C:01BAH         LINE#         105
+  C:01BAH         LINE#         106
+  C:01C1H         LINE#         107
+  C:01C4H         LINE#         108
+  C:01C4H         LINE#         109
+  C:01C6H         LINE#         110
+  C:01C9H         LINE#         111
+  C:01C9H         LINE#         112
+  C:01CCH         LINE#         113
+  C:01CEH         LINE#         115
+  C:01CEH         LINE#         116
+  C:01CEH         LINE#         117
+  C:01D1H         LINE#         118
+  C:01D1H         LINE#         119
+  C:01D8H         LINE#         120
+  C:01DBH         LINE#         121
+  C:01DBH         LINE#         122
+  C:01DDH         LINE#         123
+  C:01E2H         LINE#         124
+  C:01E6H         LINE#         125
+  C:01EAH         LINE#         126
+  C:01EDH         LINE#         127
+  C:01EDH         LINE#         128
+  C:01F0H         LINE#         129
+  C:01F2H         LINE#         130
+  C:01F2H         LINE#         131
+  C:01F2H         LINE#         132
+  -------         ENDPROC       SCANKEY
   -------         PROC          MAIN
-  C:0042H         LINE#         23
-BL51 BANKED LINKER/LOCATER V6.22                                                      12/11/2019  22:34:19  PAGE 3
+  C:0268H         LINE#         134
+  C:0268H         LINE#         135
+  C:0268H         LINE#         136
+  C:026DH         LINE#         137
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/14/2019  20:05:01  PAGE 6
 
 
-  C:0042H         LINE#         24
-  C:0042H         LINE#         25
+  C:0270H         LINE#         138
+  C:0274H         LINE#         139
+  C:0277H         LINE#         140
+  C:027AH         LINE#         141
+  C:027DH         LINE#         142
+  C:027DH         LINE#         143
+  C:027DH         LINE#         144
+  C:0280H         LINE#         145
+  C:0283H         LINE#         146
   -------         ENDPROC       MAIN
   -------         ENDMOD        TIMER_SENIOR
 
-*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
-    SEGMENT: ?PR?_SELECTHC138?TIMER_SENIOR
+  -------         MODULE        ?C?UIDIV
+  C:0162H         PUBLIC        ?C?UIDIV
+  -------         ENDMOD        ?C?UIDIV
 
-Program Size: data=9.0 xdata=0 code=68
-LINK/LOCATE RUN COMPLETE.  1 WARNING(S),  0 ERROR(S)
+Program Size: data=19.0 xdata=0 code=692
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

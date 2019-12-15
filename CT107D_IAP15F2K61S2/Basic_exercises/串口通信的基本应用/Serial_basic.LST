@@ -1,0 +1,65 @@
+C51 COMPILER V9.01   SERIAL_BASIC                                                          12/15/2019 19:40:06 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE SERIAL_BASIC
+OBJECT MODULE PLACED IN Serial_basic.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Serial_basic.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include<reg52.h>
+   2          sfr AUXR=0x8e;
+   3          typedef unsigned int uint;
+   4          typedef unsigned char uchar;
+   5          uchar temprecv;
+   6          void Init_uart()
+   7          {
+   8   1              TMOD=0X20;
+   9   1              TH1=0XFD;
+  10   1              TL1=0XFD;
+  11   1              AUXR=0X00;
+  12   1              TR1=1;
+  13   1              SCON=0X50;
+  14   1              ES=1;
+  15   1              EA=1;
+  16   1      }
+  17          
+  18          void Send(uchar bytes)
+  19          {
+  20   1              SBUF=bytes;
+  21   1              while(TI=0);
+*** WARNING C276 IN LINE 21 OF SERIAL_BASIC.C: constant in condition expression
+  22   1              TI=0;
+  23   1      }
+  24          
+  25          void uart_ser() interrupt 4
+  26          {
+  27   1              if(RI==1)
+  28   1              {
+  29   2                      RI=0;
+  30   2                      temprecv=SBUF;
+  31   2                      Send(temprecv+1);
+  32   2              }
+  33   1      }
+  34          
+  35          int main()
+  36          {
+  37   1              Init_uart();
+  38   1              Send(0xff);
+  39   1              Send(0x00);     
+  40   1              while(1);
+  41   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     76    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      1    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

@@ -3,17 +3,224 @@
 <pre>
 <h1>礦ision Build Log</h1>
 <h2>Project:</h2>
-E:\51\CT107D_IAP15F2K61S2\定时器的进阶综合案例\Timer_senior.uvproj
-Project File Date:  12/11/2019
+E:\51\CT107D_IAP15F2K61S2\Basic_exercises\定时器的进阶综合案例\Timer_senior.uvproj
+Project File Date:  12/12/2019
 
 <h2>Output:</h2>
 Build target 'Target 1'
 assembling STARTUP.A51...
 compiling Timer_senior.c...
-TIMER_SENIOR.C(21): warning C290: missing return value
+TIMER_SENIOR.C(31): warning C290: missing return value
+compiling Dynamic.c...
 linking...
+*** ERROR L104: MULTIPLE PUBLIC DEFINITIONS
+    SYMBOL:  DIG_CODE
+    MODULE:  .\Dynamic.obj (DYNAMIC)
+*** ERROR L104: MULTIPLE PUBLIC DEFINITIONS
+    SYMBOL:  MAIN
+    MODULE:  .\Dynamic.obj (DYNAMIC)
+*** ERROR L104: MULTIPLE PUBLIC DEFINITIONS
+    SYMBOL:  _DELAY
+    MODULE:  .\Dynamic.obj (DYNAMIC)
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
-    SEGMENT: ?PR?_SELECTHC138?TIMER_SENIOR
-Program Size: data=9.0 xdata=0 code=68
+    SEGMENT: ?PR?DISPLAY?TIMER_SENIOR
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?MAIN?DYNAMIC
+*** ERROR L118: REFERENCE MADE TO ERRONEOUS EXTERNAL
+    SYMBOL:  MAIN
+    MODULE:  C:\KEIL\C51\LIB\C51S.LIB (?C_INIT)
+    ADDRESS: 001BH
+Program Size: data=20.0 xdata=0 code=831
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Timer_senior.c...
+TIMER_SENIOR.C(31): warning C290: missing return value
+compiling Dynamic.c...
+linking...
+*** ERROR L104: MULTIPLE PUBLIC DEFINITIONS
+    SYMBOL:  DIG_CODE
+    MODULE:  .\Dynamic.obj (DYNAMIC)
+*** ERROR L104: MULTIPLE PUBLIC DEFINITIONS
+    SYMBOL:  MAIN
+    MODULE:  .\Dynamic.obj (DYNAMIC)
+*** ERROR L104: MULTIPLE PUBLIC DEFINITIONS
+    SYMBOL:  _DELAY
+    MODULE:  .\Dynamic.obj (DYNAMIC)
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?MAIN?DYNAMIC
+*** ERROR L118: REFERENCE MADE TO ERRONEOUS EXTERNAL
+    SYMBOL:  MAIN
+    MODULE:  C:\KEIL\C51\LIB\C51S.LIB (?C_INIT)
+    ADDRESS: 001BH
+Program Size: data=20.0 xdata=0 code=834
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Timer_senior.c...
+compiling Dynamic.c...
+linking...
+*** ERROR L104: MULTIPLE PUBLIC DEFINITIONS
+    SYMBOL:  DIG_CODE
+    MODULE:  .\Dynamic.obj (DYNAMIC)
+*** ERROR L104: MULTIPLE PUBLIC DEFINITIONS
+    SYMBOL:  MAIN
+    MODULE:  .\Dynamic.obj (DYNAMIC)
+*** ERROR L104: MULTIPLE PUBLIC DEFINITIONS
+    SYMBOL:  _DELAY
+    MODULE:  .\Dynamic.obj (DYNAMIC)
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?MAIN?DYNAMIC
+*** ERROR L118: REFERENCE MADE TO ERRONEOUS EXTERNAL
+    SYMBOL:  MAIN
+    MODULE:  C:\KEIL\C51\LIB\C51S.LIB (?C_INIT)
+    ADDRESS: 001BH
+Program Size: data=20.0 xdata=0 code=834
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Timer_senior.c...
+compiling Dynamic.c...
+linking...
+*** ERROR L104: MULTIPLE PUBLIC DEFINITIONS
+    SYMBOL:  DIG_CODE
+    MODULE:  .\Dynamic.obj (DYNAMIC)
+*** ERROR L104: MULTIPLE PUBLIC DEFINITIONS
+    SYMBOL:  MAIN
+    MODULE:  .\Dynamic.obj (DYNAMIC)
+*** ERROR L104: MULTIPLE PUBLIC DEFINITIONS
+    SYMBOL:  _DELAY
+    MODULE:  .\Dynamic.obj (DYNAMIC)
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?MAIN?DYNAMIC
+*** ERROR L118: REFERENCE MADE TO ERRONEOUS EXTERNAL
+    SYMBOL:  MAIN
+    MODULE:  C:\KEIL\C51\LIB\C51S.LIB (?C_INIT)
+    ADDRESS: 001BH
+Program Size: data=20.0 xdata=0 code=834
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Timer_senior.c...
+compiling Dynamic.c...
+linking...
+*** ERROR L104: MULTIPLE PUBLIC DEFINITIONS
+    SYMBOL:  DIG_CODE
+    MODULE:  .\Dynamic.obj (DYNAMIC)
+*** ERROR L104: MULTIPLE PUBLIC DEFINITIONS
+    SYMBOL:  MAIN
+    MODULE:  .\Dynamic.obj (DYNAMIC)
+*** ERROR L104: MULTIPLE PUBLIC DEFINITIONS
+    SYMBOL:  _DELAY
+    MODULE:  .\Dynamic.obj (DYNAMIC)
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?MAIN?DYNAMIC
+*** ERROR L118: REFERENCE MADE TO ERRONEOUS EXTERNAL
+    SYMBOL:  MAIN
+    MODULE:  C:\KEIL\C51\LIB\C51S.LIB (?C_INIT)
+    ADDRESS: 001BH
+Program Size: data=20.0 xdata=0 code=846
+Target not created
+compiling Timer_senior.c...
+Timer_senior.c - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+linking...
+Program Size: data=17.0 xdata=0 code=595
 creating hex file from "Timer_senior"...
-"Timer_senior" - 0 Error(s), 2 Warning(s).
+"Timer_senior" - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Timer_senior.c...
+linking...
+Program Size: data=17.0 xdata=0 code=602
+creating hex file from "Timer_senior"...
+"Timer_senior" - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Timer_senior.c...
+compiling Timer_basic.c...
+linking...
+*** ERROR L104: MULTIPLE PUBLIC DEFINITIONS
+    SYMBOL:  COUNT
+    MODULE:  .\Timer_basic.obj (TIMER_BASIC)
+*** ERROR L104: MULTIPLE PUBLIC DEFINITIONS
+    SYMBOL:  MAIN
+    MODULE:  .\Timer_basic.obj (TIMER_BASIC)
+*** ERROR L104: MULTIPLE PUBLIC DEFINITIONS
+    SYMBOL:  INTERRUPT_SERVICE
+    MODULE:  .\Timer_basic.obj (TIMER_BASIC)
+*** ERROR L104: MULTIPLE PUBLIC DEFINITIONS
+    SYMBOL:  _SELECTHC138
+    MODULE:  .\Timer_basic.obj (TIMER_BASIC)
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?MAIN?TIMER_BASIC
+*** WARNING L5: CODE SPACE MEMORY OVERLAP
+    FROM:    000BH
+    TO:      000DH
+*** ERROR L118: REFERENCE MADE TO ERRONEOUS EXTERNAL
+    SYMBOL:  MAIN
+    MODULE:  C:\KEIL\C51\LIB\C51S.LIB (?C_INIT)
+    ADDRESS: 001BH
+Program Size: data=19.0 xdata=0 code=743
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Timer_senior.c...
+linking...
+Program Size: data=17.0 xdata=0 code=602
+creating hex file from "Timer_senior"...
+"Timer_senior" - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Timer_senior.c...
+linking...
+Program Size: data=17.0 xdata=0 code=605
+creating hex file from "Timer_senior"...
+"Timer_senior" - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Timer_senior.c...
+linking...
+Program Size: data=17.0 xdata=0 code=605
+creating hex file from "Timer_senior"...
+"Timer_senior" - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Timer_senior.c...
+linking...
+Program Size: data=17.0 xdata=0 code=668
+creating hex file from "Timer_senior"...
+"Timer_senior" - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Timer_senior.c...
+linking...
+Program Size: data=17.0 xdata=0 code=668
+creating hex file from "Timer_senior"...
+"Timer_senior" - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Timer_senior.c...
+TIMER_SENIOR.C(79): error C141: syntax error near 'if'
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Timer_senior.c...
+linking...
+Program Size: data=19.0 xdata=0 code=692
+creating hex file from "Timer_senior"...
+"Timer_senior" - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Timer_senior.c...
+linking...
+Program Size: data=19.0 xdata=0 code=692
+creating hex file from "Timer_senior"...
+"Timer_senior" - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Timer_senior.c...
+linking...
+Program Size: data=19.0 xdata=0 code=692
+creating hex file from "Timer_senior"...
+"Timer_senior" - 0 Error(s), 0 Warning(s).

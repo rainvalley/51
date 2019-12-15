@@ -1,0 +1,4 @@
+"STARTUP.obj",
+"Serial_senior.obj" 
+TO "Serial_senior" 
+RAMSIZE(256) 

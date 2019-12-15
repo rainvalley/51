@@ -1,0 +1,39 @@
+<html>
+<body>
+<pre>
+<h1>礦ision Build Log</h1>
+<h2>Project:</h2>
+E:\51\CT107D_IAP15F2K61S2\Basic_exercises\串口通信的进阶综合案例\Serial_senior.uvproj
+Project File Date:  12/15/2019
+
+<h2>Output:</h2>
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Serial_senior.c...
+SERIAL_SENIOR.C(36): error C141: syntax error near ')'
+SERIAL_SENIOR.C(38): error C141: syntax error near 'data'
+SERIAL_SENIOR.C(65): error C202: 'R1': undefined identifier
+SERIAL_SENIOR.C(74): error C202: 'Hello': undefined identifier
+SERIAL_SENIOR.C(74): error C141: syntax error near 'World'
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Serial_senior.c...
+SERIAL_SENIOR.C(36): error C141: syntax error near ')'
+SERIAL_SENIOR.C(38): error C141: syntax error near 'data'
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Serial_senior.c...
+SERIAL_SENIOR.C(36): error C141: syntax error near ')'
+SERIAL_SENIOR.C(38): error C141: syntax error near 'data'
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling Serial_senior.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?SER_UART?SERIAL_SENIOR
+Program Size: data=12.0 xdata=0 code=219
+creating hex file from "Serial_senior"...
+"Serial_senior" - 0 Error(s), 1 Warning(s).

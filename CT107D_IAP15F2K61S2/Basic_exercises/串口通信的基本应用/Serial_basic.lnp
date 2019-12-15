@@ -1,0 +1,4 @@
+"STARTUP.obj",
+"Serial_basic.obj" 
+TO "Serial_basic" 
+RAMSIZE(256) 

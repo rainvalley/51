@@ -153,7 +153,7 @@
         <aSer4>0</aSer4>
         <StkLoc>0</StkLoc>
         <TrcWin>0</TrcWin>
-        <newCpu>0</newCpu>
+        <newCpu>1</newCpu>
         <uProt>0</uProt>
       </DebugFlag>
       <LintExecutable></LintExecutable>
@@ -167,8 +167,8 @@
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <File>
-      <GroupNumber>1</GroupNumber>
-      <FileNumber>1</FileNumber>
+      <GroupNumber>0</GroupNumber>
+      <FileNumber>0</FileNumber>
       <FileType>2</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
@@ -181,25 +181,25 @@
       <FilenameWithoutPath>STARTUP.A51</FilenameWithoutPath>
     </File>
     <File>
-      <GroupNumber>1</GroupNumber>
-      <FileNumber>2</FileNumber>
+      <GroupNumber>0</GroupNumber>
+      <FileNumber>0</FileNumber>
       <FileType>1</FileType>
-      <tvExp>0</tvExp>
+      <tvExp>1</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>12</ColumnNumber>
+      <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>116</TopLine>
-      <CurrentLine>118</CurrentLine>
+      <TopLine>17</TopLine>
+      <CurrentLine>38</CurrentLine>
       <bDave2>0</bDave2>
-      <PathWithFileName>.\Timer_senior.c</PathWithFileName>
-      <FilenameWithoutPath>Timer_senior.c</FilenameWithoutPath>
+      <PathWithFileName>.\Serial_basic.c</PathWithFileName>
+      <FilenameWithoutPath>Serial_basic.c</FilenameWithoutPath>
     </File>
   </Group>
 
   <AlienFiles>
-    <PathWithFilename>E:\51\CT107D_IAP15F2K61S2\Basic_exercises\定时器的基本原理与应用\Timer_basic.c</PathWithFilename>
-    <TopLine>1</TopLine>
-    <CurrentLine>1</CurrentLine>
+    <PathWithFilename>C:\KEIL\C51\INC\REG52.H</PathWithFilename>
+    <TopLine>43</TopLine>
+    <CurrentLine>54</CurrentLine>
     <Constant>0</Constant>
     <WindowPosition>
       <length>0</length>
@@ -1566,16 +1566,16 @@
       <ActiveTab>0</ActiveTab>
       <Documents>
         <Doc>
-          <Name>.\Timer_senior.c</Name>
-          <ColumnNumber>12</ColumnNumber>
-          <TopLine>116</TopLine>
-          <CurrentLine>118</CurrentLine>
+          <Name>.\Serial_basic.c</Name>
+          <ColumnNumber>0</ColumnNumber>
+          <TopLine>17</TopLine>
+          <CurrentLine>38</CurrentLine>
         </Doc>
         <Doc>
-          <Name>E:\51\CT107D_IAP15F2K61S2\Basic_exercises\定时器的基本原理与应用\Timer_basic.c</Name>
-          <ColumnNumber>13</ColumnNumber>
-          <TopLine>1</TopLine>
-          <CurrentLine>1</CurrentLine>
+          <Name>C:\KEIL\C51\INC\REG52.H</Name>
+          <ColumnNumber>47</ColumnNumber>
+          <TopLine>43</TopLine>
+          <CurrentLine>54</CurrentLine>
         </Doc>
       </Documents>
     </MDIGroup>

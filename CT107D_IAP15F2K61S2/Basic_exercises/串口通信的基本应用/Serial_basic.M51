@@ -1,0 +1,172 @@
+BL51 BANKED LINKER/LOCATER V6.22                                                        12/15/2019  19:40:06  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
+C:\KEIL\C51\BIN\BL51.EXE STARTUP.obj, Serial_basic.obj TO Serial_basic RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  STARTUP.obj (?C_STARTUP)
+  Serial_basic.obj (SERIAL_BASIC)
+
+
+LINK MAP OF MODULE:  Serial_basic (?C_STARTUP)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0001H     UNIT         ?DT?SERIAL_BASIC
+            IDATA   0009H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     001FH     UNIT         ?PR?UART_SER?SERIAL_BASIC
+                    0022H     0001H                  *** GAP ***
+            CODE    0023H     0003H     ABSOLUTE     
+            CODE    0026H     0016H     UNIT         ?PR?INIT_UART?SERIAL_BASIC
+            CODE    003CH     000FH     UNIT         ?PR?MAIN?SERIAL_BASIC
+            CODE    004BH     000CH     UNIT         ?C_C51STARTUP
+            CODE    0057H     0008H     UNIT         ?PR?_SEND?SERIAL_BASIC
+
+
+
+OVERLAY MAP OF MODULE:   Serial_basic (?C_STARTUP)
+
+
+SEGMENT
+  +--> CALLED SEGMENT
+---------------------
+?C_C51STARTUP
+  +--> ?PR?MAIN?SERIAL_BASIC
+
+?PR?MAIN?SERIAL_BASIC
+  +--> ?PR?INIT_UART?SERIAL_BASIC
+  +--> ?PR?_SEND?SERIAL_BASIC
+
+*** NEW ROOT ***************************************************
+
+?PR?UART_SER?SERIAL_BASIC
+  +--> ?PR?_SEND?SERIAL_BASIC
+
+
+
+SYMBOL TABLE OF MODULE:  Serial_basic (?C_STARTUP)
+
+  VALUE           TYPE          NAME
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/15/2019  19:40:06  PAGE 2
+
+
+  ----------------------------------
+
+  -------         MODULE        ?C_STARTUP
+  C:004BH         SEGMENT       ?C_C51STARTUP
+  I:0009H         SEGMENT       ?STACK
+  C:0000H         PUBLIC        ?C_STARTUP
+  D:00E0H         SYMBOL        ACC
+  D:00F0H         SYMBOL        B
+  D:0083H         SYMBOL        DPH
+  D:0082H         SYMBOL        DPL
+  N:0000H         SYMBOL        IBPSTACK
+  N:0100H         SYMBOL        IBPSTACKTOP
+  N:0080H         SYMBOL        IDATALEN
+  C:004EH         SYMBOL        IDATALOOP
+  N:0000H         SYMBOL        PBPSTACK
+  N:0100H         SYMBOL        PBPSTACKTOP
+  N:0000H         SYMBOL        PDATALEN
+  N:0000H         SYMBOL        PDATASTART
+  N:0000H         SYMBOL        PPAGE
+  N:0000H         SYMBOL        PPAGEENABLE
+  D:00A0H         SYMBOL        PPAGE_SFR
+  D:0081H         SYMBOL        SP
+  C:004BH         SYMBOL        STARTUP1
+  N:0000H         SYMBOL        XBPSTACK
+  N:0000H         SYMBOL        XBPSTACKTOP
+  N:0000H         SYMBOL        XDATALEN
+  N:0000H         SYMBOL        XDATASTART
+  C:0000H         LINE#         126
+  C:004BH         LINE#         133
+  C:004DH         LINE#         134
+  C:004EH         LINE#         135
+  C:004FH         LINE#         136
+  C:0051H         LINE#         185
+  C:0054H         LINE#         196
+  -------         ENDMOD        ?C_STARTUP
+
+  -------         MODULE        SERIAL_BASIC
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0090H         PUBLIC        P1
+  D:00B0H         PUBLIC        P3
+  B:00A8H.7       PUBLIC        EA
+  C:0057H         PUBLIC        _Send
+  D:00A8H         PUBLIC        IE
+  B:00A8H.4       PUBLIC        ES
+  D:00B8H         PUBLIC        IP
+  B:0098H.0       PUBLIC        RI
+  B:0098H.1       PUBLIC        TI
+  C:003CH         PUBLIC        main
+  D:0099H         PUBLIC        SBUF
+  D:0098H         PUBLIC        SCON
+  C:0026H         PUBLIC        Init_uart
+  D:0089H         PUBLIC        TMOD
+  D:0088H         PUBLIC        TCON
+  D:008EH         PUBLIC        AUXR
+  D:008DH         PUBLIC        TH1
+  D:008BH         PUBLIC        TL1
+  B:0088H.6       PUBLIC        TR1
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/15/2019  19:40:06  PAGE 3
+
+
+  D:00C8H         PUBLIC        T2CON
+  C:0003H         PUBLIC        uart_ser
+  D:0008H         PUBLIC        temprecv
+  D:00D0H         PUBLIC        PSW
+  -------         PROC          INIT_UART
+  C:0026H         LINE#         6
+  C:0026H         LINE#         7
+  C:0026H         LINE#         8
+  C:0029H         LINE#         9
+  C:002CH         LINE#         10
+  C:002FH         LINE#         11
+  C:0032H         LINE#         12
+  C:0034H         LINE#         13
+  C:0037H         LINE#         14
+  C:0039H         LINE#         15
+  C:003BH         LINE#         16
+  -------         ENDPROC       INIT_UART
+  -------         PROC          _SEND
+  D:0007H         SYMBOL        bytes
+  C:0057H         LINE#         18
+  C:0057H         LINE#         19
+  C:0057H         LINE#         20
+  C:0059H         LINE#         21
+  C:005CH         LINE#         22
+  C:005EH         LINE#         23
+  -------         ENDPROC       _SEND
+  -------         PROC          UART_SER
+  C:0003H         LINE#         25
+  C:000CH         LINE#         27
+  C:000FH         LINE#         28
+  C:000FH         LINE#         29
+  C:0011H         LINE#         30
+  C:0014H         LINE#         31
+  C:001BH         LINE#         32
+  C:001BH         LINE#         33
+  -------         ENDPROC       UART_SER
+  -------         PROC          MAIN
+  C:003CH         LINE#         35
+  C:003CH         LINE#         36
+  C:003CH         LINE#         37
+  C:003FH         LINE#         38
+  C:0044H         LINE#         39
+  C:0049H         LINE#         40
+  -------         ENDPROC       MAIN
+  -------         ENDMOD        SERIAL_BASIC
+
+Program Size: data=10.0 xdata=0 code=94
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)
