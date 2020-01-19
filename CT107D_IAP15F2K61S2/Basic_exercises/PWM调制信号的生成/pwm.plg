@@ -1,0 +1,65 @@
+<html>
+<body>
+<pre>
+<h1>礦ision Build Log</h1>
+<h2>Project:</h2>
+E:\51\CT107D_IAP15F2K61S2\Basic_exercises\PWM调制信号的生成\pwm.uvproj
+Project File Date:  01/12/2020
+
+<h2>Output:</h2>
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling pwm.c...
+PWM.C(43): warning C206: 'delay': missing function-prototype
+PWM.C(43): error C267: 'delay': requires ANSI-style prototype
+PWM.C(50): error C202: 'mdoe': undefined identifier
+PWM.C(60): error C231: 'delay': redefinition
+PWM.C(62): error C205: can't call an interrupt function
+PWM.C(63): error C141: syntax error near 'while'
+PWM.C(67): error C231: 'delay': redefinition
+Target not created
+Build target 'Target 1'
+compiling pwm.c...
+PWM.C(55): error C202: 'mdoe': undefined identifier
+PWM.C(67): error C205: can't call an interrupt function
+PWM.C(68): error C141: syntax error near 'while'
+Target not created
+Build target 'Target 1'
+compiling pwm.c...
+linking...
+Program Size: data=14.0 xdata=0 code=328
+creating hex file from "pwm"...
+"pwm" - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling pwm.c...
+PWM.C(14): error C141: syntax error near '='
+PWM.C(15): error C141: syntax error near '='
+PWM.C(16): error C141: syntax error near '='
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling pwm.c...
+PWM.C(14): error C141: syntax error near '='
+PWM.C(15): error C141: syntax error near '='
+PWM.C(16): error C141: syntax error near '='
+Target not created
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling pwm.c...
+PWM.C(14): error C141: syntax error near '='
+PWM.C(15): error C141: syntax error near '='
+PWM.C(16): error C141: syntax error near '='
+Target not created
+Build target 'Target 1'
+compiling pwm.c...
+linking...
+Program Size: data=14.0 xdata=0 code=339
+creating hex file from "pwm"...
+"pwm" - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+compiling pwm.c...
+linking...
+Program Size: data=14.0 xdata=0 code=342
+creating hex file from "pwm"...
+"pwm" - 0 Error(s), 0 Warning(s).

@@ -1,0 +1,177 @@
+C51 COMPILER V9.01   MAIN                                                                  01/19/2020 16:49:53 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE main.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include<reg52.h>
+   2          #include"onewire.h"
+   3          #include"ds1302.h"
+   4          void Display_Dynamic();
+   5          typedef unsigned char uchar;
+   6          typedef unsigned int uint;
+   7          uchar code dig_code[]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90,0x88,0x80,0xc6,0xc0,0x86,0x8e,0xb
+             -f,0x7f};//数码管显示内容
+   8          uchar time[7]={0x00,0x00,0x00,0x01,0x01,0x01,0x20};//DS1302初始化内容
+   9          uint temp=0;
+  10          
+  11          //延时函数
+  12          void Delay(uint t)
+  13          {
+  14   1              while(t--);
+  15   1      }
+  16          
+  17          //选择138译码器输出端
+  18          void selectHC573(uchar channel)
+  19          {
+  20   1              switch(channel)
+  21   1              {
+  22   2                      case 4:
+  23   2                      P2=(P2&0x1f)|0x80;//不改变P2其他端口电平的情况下改变138译码器输入，由于前移一位故channel*2。
+  24   2                      break;
+  25   2                      case 5:
+  26   2                      P2=(P2&0x1f)|0xa0;
+  27   2                      break;
+  28   2                      case 6:
+  29   2                      P2=(P2&0x1f)|0xc0;
+  30   2                      break;
+  31   2                      case 7:
+  32   2                      P2=(P2&0x1f)|0xe0;
+  33   2                      break;
+  34   2              }
+  35   1      }
+  36          
+  37          //按位点亮数码管
+  38          void DisplaySMG_Bit(uchar value,uchar pos)
+  39          {       
+  40   1              selectHC573(6);
+  41   1              P0=0X01<<pos;//channel选择为6时选择数码管位置
+  42   1              selectHC573(7);
+  43   1              P0=dig_code[value];//channel选择为7时选择数码管显示内容
+  44   1      }
+  45          
+  46          //获取温度
+  47          void tempget()
+  48          {
+  49   1              uchar low,high;
+  50   1              init_ds18b20();
+  51   1              Write_DS18B20(0XCC);
+  52   1              Write_DS18B20(0X44);
+  53   1      
+  54   1              init_ds18b20();
+C51 COMPILER V9.01   MAIN                                                                  01/19/2020 16:49:53 PAGE 2   
+
+  55   1              Write_DS18B20(0XCC);
+  56   1              Write_DS18B20(0Xbe);
+  57   1      /*
+  58   1      DS18B20操作步骤(P11)：
+  59   1      1-初始化
+  60   1      2-跳过ROM
+  61   1      3-转换温度(0x44)/开始读取温度Scratchpad(0xbe)
+  62   1      */
+  63   1      
+  64   1              low=Read_DS18B20();
+  65   1              high=Read_DS18B20();
+  66   1      
+  67   1              temp=high<<4;
+  68   1              temp|=(low>>4);//将DS18B20数据转换为十进制并截取整数部分
+  69   1      } 
+  70          
+  71          //动态显示温度
+  72          void Display_Dynmaic_temp()
+  73          {
+  74   1              tempget();
+  75   1              DisplaySMG_Bit(temp%100/10,5);
+  76   1              Delay(500);
+  77   1              P0=0XFF;
+  78   1              DisplaySMG_Bit(temp%10,6);
+  79   1              Delay(500);
+  80   1              P0=0XFF;
+  81   1              //显示温度整数部分
+  82   1              selectHC573(6);
+  83   1              P0=0X01<<7;
+  84   1              selectHC573(7);
+  85   1              P0=0XC6;//显示C代表摄氏度
+  86   1      }
+  87                                                                                    
+  88          //DS1302初始化
+  89          
+  90          void ds1302_init()
+  91          {
+  92   1              uchar add=0x80;//写数据地址
+  93   1              uchar i;
+  94   1              Write_Ds1302_Byte(0x8e,0x00); //关闭写保护
+  95   1              for(i=0;i<7;i++)
+  96   1              {
+  97   2                      Write_Ds1302_Byte(add,time[i]);
+  98   2                      add=add+2;
+  99   2              }
+ 100   1              Write_Ds1302_Byte(0x8e,0x80); //开启写保护
+ 101   1      }
+ 102          
+ 103          //读取DS1302时间，地址可见P9，WP位为写保护控制位
+ 104          void ds1302_read()
+ 105          {
+ 106   1              uchar i;
+ 107   1              uchar add=0x81;//读数据地址
+ 108   1              Write_Ds1302_Byte(0x8e,0x00);//关闭写保护
+ 109   1              for(i=0;i<7;i++)
+ 110   1              {
+ 111   2                      time[i]=Read_Ds1302_Byte(add);
+ 112   2                      add=add+2;
+ 113   2              }
+ 114   1              Write_Ds1302_Byte(0x8e,0x80);//开启写保护
+ 115   1      }
+ 116          
+C51 COMPILER V9.01   MAIN                                                                  01/19/2020 16:49:53 PAGE 3   
+
+ 117          //动态显示时间
+ 118          void Display_Dynmaic_time()
+ 119          {
+ 120   1              ds1302_read();
+ 121   1              DisplaySMG_Bit(time[1]/16,0); //BCD码取十位
+ 122   1              Delay(500);
+ 123   1              P0=0XFF;
+ 124   1              DisplaySMG_Bit(time[1]&0x0f,1);//BCD码取个位
+ 125   1              Delay(500);
+ 126   1              P0=0XFF; //以上是分钟的显示
+ 127   1              selectHC573(6);
+ 128   1              P0=0X01<<2;
+ 129   1              selectHC573(7);
+ 130   1              P0=~0X40;
+ 131   1              Delay(500);
+ 132   1              P0=0XFF; //以上是分隔符显示
+ 133   1              DisplaySMG_Bit(time[0]/16,3);
+ 134   1              Delay(500);
+ 135   1              P0=0XFF;
+ 136   1              DisplaySMG_Bit(time[0]&0x0f,4); //以上是秒的显示
+ 137   1      }
+ 138          
+ 139          int main()
+ 140          {
+ 141   1              selectHC573(5);
+ 142   1              P0=0X00;//初始化板上资源，关闭蜂鸣器与继电器
+ 143   1              ds1302_init();
+ 144   1              while(1)
+ 145   1              {       
+ 146   2                      Display_Dynmaic_temp();
+ 147   2                      Display_Dynmaic_time();
+ 148   2              }
+ 149   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    409    ----
+   CONSTANT SIZE    =     18    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      9       5
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

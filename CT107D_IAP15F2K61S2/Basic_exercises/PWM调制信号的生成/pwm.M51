@@ -1,0 +1,215 @@
+BL51 BANKED LINKER/LOCATER V6.22                                                        01/12/2020  13:22:42  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
+C:\KEIL\C51\BIN\BL51.EXE STARTUP.obj, pwm.obj TO pwm RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  STARTUP.obj (?C_STARTUP)
+  pwm.obj (PWM)
+  C:\KEIL\C51\LIB\C51S.LIB (?C_INIT)
+
+
+LINK MAP OF MODULE:  pwm (?C_STARTUP)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0005H     UNIT         ?DT?PWM
+            IDATA   000DH     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+                    0003H     0008H                  *** GAP ***
+            CODE    000BH     0003H     ABSOLUTE     
+            CODE    000EH     008CH     UNIT         ?C_C51STARTUP
+            CODE    009AH     004CH     UNIT         ?PR?SCANKEY?PWM
+            CODE    00E6H     0031H     UNIT         ?PR?SERVICE_TIMER0?PWM
+            CODE    0117H     0017H     UNIT         ?PR?SELECTHC573?PWM
+            CODE    012EH     000EH     UNIT         ?PR?INIT_TIMER0?PWM
+            CODE    013CH     000CH     UNIT         ?C_INITSEG
+            CODE    0148H     000BH     UNIT         ?PR?_DELAY?PWM
+            CODE    0153H     000BH     UNIT         ?PR?MAIN?PWM
+
+
+
+OVERLAY MAP OF MODULE:   pwm (?C_STARTUP)
+
+
+SEGMENT
+  +--> CALLED SEGMENT
+---------------------
+?C_C51STARTUP
+  +--> ?PR?MAIN?PWM
+  +--> ?C_INITSEG
+
+?PR?MAIN?PWM
+  +--> ?PR?SELECTHC573?PWM
+  +--> ?PR?INIT_TIMER0?PWM
+  +--> ?PR?SCANKEY?PWM
+
+?PR?SCANKEY?PWM
+  +--> ?PR?_DELAY?PWM
+
+
+BL51 BANKED LINKER/LOCATER V6.22                                                      01/12/2020  13:22:42  PAGE 2
+
+
+
+SYMBOL TABLE OF MODULE:  pwm (?C_STARTUP)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        ?C_STARTUP
+  C:000EH         SEGMENT       ?C_C51STARTUP
+  I:000DH         SEGMENT       ?STACK
+  C:0000H         PUBLIC        ?C_STARTUP
+  D:00E0H         SYMBOL        ACC
+  D:00F0H         SYMBOL        B
+  D:0083H         SYMBOL        DPH
+  D:0082H         SYMBOL        DPL
+  N:0000H         SYMBOL        IBPSTACK
+  N:0100H         SYMBOL        IBPSTACKTOP
+  N:0080H         SYMBOL        IDATALEN
+  C:0011H         SYMBOL        IDATALOOP
+  N:0000H         SYMBOL        PBPSTACK
+  N:0100H         SYMBOL        PBPSTACKTOP
+  N:0000H         SYMBOL        PDATALEN
+  N:0000H         SYMBOL        PDATASTART
+  N:0000H         SYMBOL        PPAGE
+  N:0000H         SYMBOL        PPAGEENABLE
+  D:00A0H         SYMBOL        PPAGE_SFR
+  D:0081H         SYMBOL        SP
+  C:000EH         SYMBOL        STARTUP1
+  N:0000H         SYMBOL        XBPSTACK
+  N:0000H         SYMBOL        XBPSTACKTOP
+  N:0000H         SYMBOL        XDATALEN
+  N:0000H         SYMBOL        XDATASTART
+  C:0000H         LINE#         126
+  C:000EH         LINE#         133
+  C:0010H         LINE#         134
+  C:0011H         LINE#         135
+  C:0012H         LINE#         136
+  C:0014H         LINE#         185
+  C:0017H         LINE#         196
+  -------         ENDMOD        ?C_STARTUP
+
+  -------         MODULE        PWM
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0080H         PUBLIC        P0
+  D:0090H         PUBLIC        P1
+  D:00A0H         PUBLIC        P2
+  D:00B0H         PUBLIC        P3
+  B:00A8H.7       PUBLIC        EA
+  B:00B0H.0       PUBLIC        S7
+  D:00A8H         PUBLIC        IE
+  C:0148H         PUBLIC        _delay
+  D:00B8H         PUBLIC        IP
+  C:0153H         PUBLIC        main
+  D:0008H         PUBLIC        mode
+  C:00E6H         PUBLIC        service_timer0
+  D:000AH         PUBLIC        count
+  D:0098H         PUBLIC        SCON
+  D:0089H         PUBLIC        TMOD
+BL51 BANKED LINKER/LOCATER V6.22                                                      01/12/2020  13:22:42  PAGE 3
+
+
+  D:0088H         PUBLIC        TCON
+  D:000CH         PUBLIC        stat
+  B:00A8H.1       PUBLIC        ET0
+  D:008CH         PUBLIC        TH0
+  D:008AH         PUBLIC        TL0
+  C:009AH         PUBLIC        Scankey
+  B:0088H.4       PUBLIC        TR0
+  D:00C8H         PUBLIC        T2CON
+  C:012EH         PUBLIC        init_timer0
+  C:0117H         PUBLIC        selecthc573
+  D:00D0H         PUBLIC        PSW
+  B:0080H.0       PUBLIC        L1
+  -------         PROC          _DELAY
+  D:0006H         SYMBOL        t
+  C:0148H         LINE#         7
+  C:0148H         LINE#         8
+  C:0148H         LINE#         9
+  C:0152H         LINE#         10
+  -------         ENDPROC       _DELAY
+  -------         PROC          SELECTHC573
+  C:0117H         LINE#         12
+  C:0117H         LINE#         13
+  C:0117H         LINE#         14
+  C:011FH         LINE#         15
+  C:0122H         LINE#         16
+  C:012AH         LINE#         17
+  C:012DH         LINE#         18
+  -------         ENDPROC       SELECTHC573
+  -------         PROC          INIT_TIMER0
+  C:012EH         LINE#         22
+  C:012EH         LINE#         23
+  C:012EH         LINE#         24
+  C:0131H         LINE#         25
+  C:0134H         LINE#         26
+  C:0137H         LINE#         27
+  C:0139H         LINE#         28
+  C:013BH         LINE#         29
+  -------         ENDPROC       INIT_TIMER0
+  -------         PROC          SERVICE_TIMER0
+  C:00E6H         LINE#         31
+  C:00EAH         LINE#         33
+  C:00EDH         LINE#         34
+  C:00F0H         LINE#         35
+  C:00F8H         LINE#         36
+  C:0100H         LINE#         37
+  C:0100H         LINE#         38
+  C:0102H         LINE#         39
+  C:0104H         LINE#         40
+  C:010CH         LINE#         41
+  C:010CH         LINE#         42
+  C:010EH         LINE#         43
+  C:0112H         LINE#         44
+  C:0112H         LINE#         45
+  -------         ENDPROC       SERVICE_TIMER0
+  -------         PROC          SCANKEY
+  C:009AH         LINE#         47
+  C:009AH         LINE#         48
+BL51 BANKED LINKER/LOCATER V6.22                                                      01/12/2020  13:22:42  PAGE 4
+
+
+  C:009AH         LINE#         49
+  C:009DH         LINE#         50
+  C:009DH         LINE#         51
+  C:00A4H         LINE#         52
+  C:00A7H         LINE#         53
+  C:00A7H         LINE#         54
+  C:00B6H         LINE#         55
+  C:00B6H         LINE#         56
+  C:00C5H         LINE#         57
+  C:00D0H         LINE#         58
+  C:00DBH         LINE#         59
+  C:00E2H         LINE#         60
+  C:00E2H         LINE#         61
+  C:00E5H         LINE#         62
+  C:00E5H         LINE#         64
+  C:00E5H         LINE#         65
+  -------         ENDPROC       SCANKEY
+  -------         PROC          MAIN
+  C:0153H         LINE#         67
+  C:0153H         LINE#         68
+  C:0153H         LINE#         69
+  C:0156H         LINE#         70
+  C:0159H         LINE#         71
+  C:0159H         LINE#         72
+  C:0159H         LINE#         73
+  C:015CH         LINE#         74
+  -------         ENDPROC       MAIN
+  -------         ENDMOD        PWM
+
+Program Size: data=14.0 xdata=0 code=342
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

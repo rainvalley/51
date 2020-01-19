@@ -1,0 +1,6 @@
+"STARTUP.obj",
+"main.obj",
+"onewire.obj",
+"ds1302.obj" 
+TO "demo" 
+RAMSIZE(256) 

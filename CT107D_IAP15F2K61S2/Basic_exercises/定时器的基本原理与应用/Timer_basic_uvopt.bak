@@ -194,33 +194,21 @@
       <PathWithFileName>.\Timer_basic.c</PathWithFileName>
       <FilenameWithoutPath>Timer_basic.c</FilenameWithoutPath>
     </File>
+    <File>
+      <GroupNumber>1</GroupNumber>
+      <FileNumber>0</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <Focus>0</Focus>
+      <ColumnNumber>41</ColumnNumber>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <TopLine>1</TopLine>
+      <CurrentLine>10</CurrentLine>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\定时器的进阶综合案例\Timer_senior.c</PathWithFileName>
+      <FilenameWithoutPath>Timer_senior.c</FilenameWithoutPath>
+    </File>
   </Group>
-
-  <AlienFiles>
-    <PathWithFilename>E:\51\CT107D_IAP15F2K61S2\Basic_exercises\定时器的进阶综合案例\Timer_senior.c</PathWithFilename>
-    <TopLine>1</TopLine>
-    <CurrentLine>9</CurrentLine>
-    <Constant>0</Constant>
-    <WindowPosition>
-      <length>0</length>
-      <flags>0</flags>
-      <showCmd>0</showCmd>
-      <MinPosition>
-        <xPos>0</xPos>
-        <yPos>0</yPos>
-      </MinPosition>
-      <MaxPosition>
-        <xPos>0</xPos>
-        <yPos>0</yPos>
-      </MaxPosition>
-      <NormalPosition>
-        <Top>0</Top>
-        <Left>0</Left>
-        <Right>0</Right>
-        <Bottom>0</Bottom>
-      </NormalPosition>
-    </WindowPosition>
-  </AlienFiles>
 
   <AlienFiles>
     <PathWithFilename>C:\KEIL\C51\INC\REG52.H</PathWithFilename>
@@ -1604,10 +1592,10 @@
           <CurrentLine>26</CurrentLine>
         </Doc>
         <Doc>
-          <Name>E:\51\CT107D_IAP15F2K61S2\Basic_exercises\定时器的进阶综合案例\Timer_senior.c</Name>
-          <ColumnNumber>108</ColumnNumber>
+          <Name>..\定时器的进阶综合案例\Timer_senior.c</Name>
+          <ColumnNumber>41</ColumnNumber>
           <TopLine>1</TopLine>
-          <CurrentLine>9</CurrentLine>
+          <CurrentLine>10</CurrentLine>
         </Doc>
       </Documents>
     </MDIGroup>
