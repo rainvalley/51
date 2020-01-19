@@ -1,6 +1,7 @@
 "STARTUP.obj",
 "main.obj",
 "onewire.obj",
-"ds1302.obj" 
+"ds1302.obj",
+"iic.obj" 
 TO "demo" 
 RAMSIZE(256) 
