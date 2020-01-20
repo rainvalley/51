@@ -3,12 +3,17 @@
 #include"ds1302.h"
 #include"data.h"
 #include"iic.h"
+#include"intrins.h"
 void Display_Dynamic();
 uchar code dig_code[10]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90};//数码管显示内容
 uchar time[7]={0x00,0x00,0x00,0x01,0x01,0x01,0x20};//DS1302初始化内容
 uint temp=0;
 int data_pcf8591=0;
 uint data_at24c02=0;
+uint distance=0;
+sbit TX=P1^0;
+sbit RX=P1^1;
+uint j;
 //延时函数
 void Delay(uint t)
 {
@@ -216,20 +221,78 @@ void Display_Dynmaic_at24c02()
 	
 }
 
+void Delay12us()		//@12.000MHz
+{
+	unsigned char i;
+
+	_nop_();
+	_nop_();
+	i = 33;
+	while (--i);
+}
+
+void send_wave()
+{
+	uchar i;
+	for(i=0;i<8;i++)
+	{
+		TX=1;
+		Delay12us();
+		TX=0;
+		Delay12us();
+	}
+}
+
+void measure_distance()
+{
+	uint time_sonic=0;
+	TMOD&=0X0F;
+	TL1=0X00;
+	TH1=0X00;
+
+	send_wave();
+	TR1=1;
+	while((RX==1)&&(TF1==0));
+	TR1=0;
+
+	if(TF1==0)
+	{
+		time_sonic=TH1;
+		time_sonic=(time_sonic<<8)|TL1;
+		distance=((time_sonic/10)*17)/100+3;
+	}
+	else
+	{
+		TF1=0;
+		distance=999;
+	}
+}
+
+void Display_Dynmaic_sonic()
+{
+	measure_distance();
+	for(j=0;j<100;j++)
+	{
+		DisplaySMG_Bit(distance/100,0);
+		Delay(500);
+		DisplaySMG_Bit(distance%100/10,1);
+		Delay(500);
+		DisplaySMG_Bit(distance%10,2);
+		Delay(500);
+	}
+	
+}
 int main()
 {
 	selectHC573(5);
 	P0=0X00;//初始化板上资源，关闭蜂鸣器与继电器
 	ds1302_init();
-
-	//write_at24c02(0X01,88);
-	//data_at24c02=read_at24c02(0x01);
-
 	while(1)
 	{	
 		Display_Dynmaic_temp();
 		//Display_Dynmaic_time();
 		//Display_Dynmaic_pcf8591();
-		Display_Dynmaic_at24c02();
+		//Display_Dynmaic_at24c02();
+		//Display_Dynmaic_sonic();
 	}
 }
