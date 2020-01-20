@@ -4,11 +4,11 @@
 #include"data.h"
 #include"iic.h"
 void Display_Dynamic();
-uchar code dig_code[]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90,0x88,0x80,0xc6,0xc0,0x86,0x8e,0xbf,0x7f};//数码管显示内容
+uchar code dig_code[10]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90};//数码管显示内容
 uchar time[7]={0x00,0x00,0x00,0x01,0x01,0x01,0x20};//DS1302初始化内容
 uint temp=0;
 int data_pcf8591=0;
-
+uint data_at24c02=0;
 //延时函数
 void Delay(uint t)
 {
@@ -137,19 +137,24 @@ void Display_Dynmaic_time()
 	DisplaySMG_Bit(time[0]&0x0f,4);	//以上是秒的显示
 }
 
+//从A/D通道3读取数据
 void Read_AIN3()
 {
 	IIC_Start();		//IIC总线起始信号							
 	IIC_SendByte(0x90); 	//PCF8591的写设备地址		
-	IIC_WaitAck();  	//等待从机应答		
-	IIC_SendByte(0x01); 	//写入PCF8591的控制字节		
+	IIC_WaitAck();  	//等待从机应答
+			
+	IIC_SendByte(0x03); 	//写入PCF8591的控制字节		
 	IIC_WaitAck();  	//等待从机应答						
 	IIC_Stop(); 		//IIC总线停止信号					
 	
-	IIC_Start();		//IIC总线起始信号									
-	IIC_SendByte(0x91); 	//PCF8591的读设备地址		
-	IIC_WaitAck(); 		//等待从机应答		
-	data_pcf8591 = IIC_RecByte();	//读取PCF8591通道3的数据 			
+
+
+	IIC_Start();											
+	IIC_SendByte(0x91); 		
+	IIC_WaitAck();
+	 				
+	data_pcf8591 = IIC_RecByte();			
 	IIC_SendAck(0); 		//产生非应答信号				
 	IIC_Stop(); 		//IIC总线停止信号					
 }
@@ -168,15 +173,63 @@ void Display_Dynmaic_pcf8591()
 	Delay(500);
 }
 
+void write_at24c02(uchar addr,uint data_at24c02)
+{
+	IIC_Start();
+	IIC_SendByte(0XA0);
+	IIC_WaitAck();
+	IIC_SendByte(addr);
+	IIC_WaitAck();
+	IIC_SendByte(data_at24c02);
+	IIC_WaitAck();
+	IIC_Stop();
+}
+
+uint read_at24c02(uchar addr)
+{
+	uchar tmp_at24c02;
+	IIC_Start();
+	IIC_SendByte(0XA0);
+	IIC_WaitAck();
+	IIC_SendByte(addr);
+	IIC_WaitAck();
+
+	IIC_Start();
+	IIC_SendByte(0XA1);
+	IIC_WaitAck();
+	tmp_at24c02=IIC_RecByte();
+	IIC_SendAck(0);
+	IIC_Stop();
+	return tmp_at24c02;
+}
+
+void Display_Dynmaic_at24c02()
+{	
+	write_at24c02(0X01,0x0f);
+	data_at24c02=read_at24c02(0x01);
+	DisplaySMG_Bit(data_at24c02/100,0);
+	Delay(500);
+	DisplaySMG_Bit(data_at24c02%100/10,1);
+	Delay(500);
+	DisplaySMG_Bit(data_at24c02%10,2);
+	Delay(500);
+	
+}
+
 int main()
 {
 	selectHC573(5);
 	P0=0X00;//初始化板上资源，关闭蜂鸣器与继电器
 	ds1302_init();
+
+	//write_at24c02(0X01,88);
+	//data_at24c02=read_at24c02(0x01);
+
 	while(1)
 	{	
 		Display_Dynmaic_temp();
 		//Display_Dynmaic_time();
-		Display_Dynmaic_pcf8591();
+		//Display_Dynmaic_pcf8591();
+		Display_Dynmaic_at24c02();
 	}
 }

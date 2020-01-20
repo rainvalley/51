@@ -1,4 +1,4 @@
-C51 COMPILER V9.01   MAIN                                                                  01/19/2020 21:18:34 PAGE 1   
+C51 COMPILER V9.01   MAIN                                                                  01/20/2020 15:09:27 PAGE 1   
 
 
 C51 COMPILER V9.01, COMPILATION OF MODULE MAIN
@@ -13,12 +13,11 @@ line level    source
    4          #include"data.h"
    5          #include"iic.h"
    6          void Display_Dynamic();
-   7          uchar code dig_code[]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90,0x88,0x80,0xc6,0xc0,0x86,0x8e,0xb
-             -f,0x7f};//数码管显示内容
+   7          uchar code dig_code[10]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90};//数码管显示内容
    8          uchar time[7]={0x00,0x00,0x00,0x01,0x01,0x01,0x20};//DS1302初始化内容
    9          uint temp=0;
   10          int data_pcf8591=0;
-  11          
+  11          uint data_at24c02=0;
   12          //延时函数
   13          void Delay(uint t)
   14          {
@@ -62,9 +61,9 @@ line level    source
   52   1              Write_DS18B20(0XCC);
   53   1              Write_DS18B20(0X44);
   54   1      
-C51 COMPILER V9.01   MAIN                                                                  01/19/2020 21:18:34 PAGE 2   
-
   55   1              init_ds18b20();
+C51 COMPILER V9.01   MAIN                                                                  01/20/2020 15:09:27 PAGE 2   
+
   56   1              Write_DS18B20(0XCC);
   57   1              Write_DS18B20(0Xbe);
   58   1      /*
@@ -126,9 +125,9 @@ line level    source
  114   2              }
  115   1              Write_Ds1302_Byte(0x8e,0x80);//开启写保护
  116   1      }
-C51 COMPILER V9.01   MAIN                                                                  01/19/2020 21:18:34 PAGE 3   
-
  117          
+C51 COMPILER V9.01   MAIN                                                                  01/20/2020 15:09:27 PAGE 3   
+
  118          //动态显示时间
  119          void Display_Dynmaic_time()
  120          {
@@ -151,59 +150,114 @@ line level    source
  137   1              DisplaySMG_Bit(time[0]&0x0f,4); //以上是秒的显示
  138   1      }
  139          
- 140          void Read_AIN3()
- 141          {
- 142   1              IIC_Start();            //IIC总线起始信号                                                       
- 143   1              IIC_SendByte(0x90);     //PCF8591的写设备地址           
- 144   1              IIC_WaitAck();          //等待从机应答          
- 145   1              IIC_SendByte(0x01);     //写入PCF8591的控制字节         
- 146   1              IIC_WaitAck();          //等待从机应答                                          
- 147   1              IIC_Stop();             //IIC总线停止信号                                       
- 148   1              
- 149   1              IIC_Start();            //IIC总线起始信号                                                                       
- 150   1              IIC_SendByte(0x91);     //PCF8591的读设备地址           
- 151   1              IIC_WaitAck();          //等待从机应答          
- 152   1              data_pcf8591 = IIC_RecByte();   //读取PCF8591通道3的数据                        
- 153   1              IIC_SendAck(0);                 //产生非应答信号                                
- 154   1              IIC_Stop();             //IIC总线停止信号                                       
- 155   1      }
- 156          
- 157          
- 158          void Display_Dynmaic_pcf8591()
- 159          {
- 160   1              Read_AIN3();
- 161   1              DisplaySMG_Bit(data_pcf8591/100,0);
- 162   1              Delay(500);
- 163   1              P0=0XFF;
- 164   1              DisplaySMG_Bit((data_pcf8591%100)/10,1);
- 165   1              Delay(500);
- 166   1              P0=0XFF;
- 167   1              DisplaySMG_Bit(data_pcf8591%10,2);
- 168   1              Delay(500);
- 169   1      }
- 170          
- 171          int main()
- 172          {
- 173   1              selectHC573(5);
- 174   1              P0=0X00;//初始化板上资源，关闭蜂鸣器与继电器
- 175   1              ds1302_init();
- 176   1              while(1)
- 177   1              {       
- 178   2                      Display_Dynmaic_temp();
-C51 COMPILER V9.01   MAIN                                                                  01/19/2020 21:18:34 PAGE 4   
+ 140          //从A/D通道3读取数据
+ 141          void Read_AIN3()
+ 142          {
+ 143   1              IIC_Start();            //IIC总线起始信号                                                       
+ 144   1              IIC_SendByte(0x90);     //PCF8591的写设备地址           
+ 145   1              IIC_WaitAck();          //等待从机应答
+ 146   1                              
+ 147   1              IIC_SendByte(0x03);     //写入PCF8591的控制字节         
+ 148   1              IIC_WaitAck();          //等待从机应答                                          
+ 149   1              IIC_Stop();             //IIC总线停止信号                                       
+ 150   1              
+ 151   1      
+ 152   1      
+ 153   1              IIC_Start();                                                                                    
+ 154   1              IIC_SendByte(0x91);             
+ 155   1              IIC_WaitAck();
+ 156   1                                              
+ 157   1              data_pcf8591 = IIC_RecByte();                   
+ 158   1              IIC_SendAck(0);                 //产生非应答信号                                
+ 159   1              IIC_Stop();             //IIC总线停止信号                                       
+ 160   1      }
+ 161          
+ 162          
+ 163          void Display_Dynmaic_pcf8591()
+ 164          {
+ 165   1              Read_AIN3();
+ 166   1              DisplaySMG_Bit(data_pcf8591/100,0);
+ 167   1              Delay(500);
+ 168   1              P0=0XFF;
+ 169   1              DisplaySMG_Bit((data_pcf8591%100)/10,1);
+ 170   1              Delay(500);
+ 171   1              P0=0XFF;
+ 172   1              DisplaySMG_Bit(data_pcf8591%10,2);
+ 173   1              Delay(500);
+ 174   1      }
+ 175          
+ 176          void write_at24c02(uchar addr,uint data_at24c02)
+ 177          {
+ 178   1              IIC_Start();
+ 179   1              IIC_SendByte(0XA0);
+C51 COMPILER V9.01   MAIN                                                                  01/20/2020 15:09:27 PAGE 4   
 
- 179   2                      //Display_Dynmaic_time();
- 180   2                      Display_Dynmaic_pcf8591();
- 181   2              }
- 182   1      }
+ 180   1              IIC_WaitAck();
+ 181   1              IIC_SendByte(addr);
+ 182   1              IIC_WaitAck();
+ 183   1              IIC_SendByte(data_at24c02);
+ 184   1              IIC_WaitAck();
+ 185   1              IIC_Stop();
+ 186   1      }
+ 187          
+ 188          uint read_at24c02(uchar addr)
+ 189          {
+ 190   1              uchar tmp_at24c02;
+ 191   1              IIC_Start();
+ 192   1              IIC_SendByte(0XA0);
+ 193   1              IIC_WaitAck();
+ 194   1              IIC_SendByte(addr);
+ 195   1              IIC_WaitAck();
+ 196   1      
+ 197   1              IIC_Start();
+ 198   1              IIC_SendByte(0XA1);
+ 199   1              IIC_WaitAck();
+ 200   1              tmp_at24c02=IIC_RecByte();
+ 201   1              IIC_SendAck(0);
+ 202   1              IIC_Stop();
+ 203   1              return tmp_at24c02;
+ 204   1      }
+ 205          
+ 206          void Display_Dynmaic_at24c02()
+ 207          {       
+ 208   1              write_at24c02(0X01,0x0f);
+ 209   1              data_at24c02=read_at24c02(0x01);
+ 210   1              DisplaySMG_Bit(data_at24c02/100,0);
+ 211   1              Delay(500);
+ 212   1              DisplaySMG_Bit(data_at24c02%100/10,1);
+ 213   1              Delay(500);
+ 214   1              DisplaySMG_Bit(data_at24c02%10,2);
+ 215   1              Delay(500);
+ 216   1              
+ 217   1      }
+ 218          
+ 219          int main()
+ 220          {
+ 221   1              selectHC573(5);
+ 222   1              P0=0X00;//初始化板上资源，关闭蜂鸣器与继电器
+ 223   1              ds1302_init();
+ 224   1      
+ 225   1              //write_at24c02(0X01,88);
+ 226   1              //data_at24c02=read_at24c02(0x01);
+ 227   1      
+ 228   1              while(1)
+ 229   1              {       
+ 230   2                      Display_Dynmaic_temp();
+ 231   2                      //Display_Dynmaic_time();
+ 232   2                      //Display_Dynmaic_pcf8591();
+ 233   2                      Display_Dynmaic_at24c02();
+ 234   2              }
+ 235   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    536    ----
-   CONSTANT SIZE    =     18    ----
+   CODE SIZE        =    704    ----
+   CONSTANT SIZE    =     10    ----
    XDATA SIZE       =   ----    ----
+C51 COMPILER V9.01   MAIN                                                                  01/20/2020 15:09:27 PAGE 5   
+
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =     11       5
+   DATA SIZE        =     13      10
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.
