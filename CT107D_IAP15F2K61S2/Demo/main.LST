@@ -1,4 +1,4 @@
-C51 COMPILER V9.01   MAIN                                                                  01/20/2020 16:52:18 PAGE 1   
+C51 COMPILER V9.01   MAIN                                                                  01/21/2020 15:47:51 PAGE 1   
 
 
 C51 COMPILER V9.01, COMPILATION OF MODULE MAIN
@@ -23,306 +23,360 @@ line level    source
   14          sbit TX=P1^0;
   15          sbit RX=P1^1;
   16          uint j;
-  17          //延时函数
-  18          void Delay(uint t)
-  19          {
-  20   1              while(t--);
-  21   1      }
-  22          
-  23          //选择138译码器输出端
-  24          void selectHC573(uchar channel)
-  25          {
-  26   1              switch(channel)
-  27   1              {
-  28   2                      case 4:
-  29   2                      P2=(P2&0x1f)|0x80;//不改变P2其他端口电平的情况下改变138译码器输入，由于前移一位故channel*2。
-  30   2                      break;
-  31   2                      case 5:
-  32   2                      P2=(P2&0x1f)|0xa0;
+  17          uint count_times=0;
+  18          uint count_time=0;
+  19          uint frequency=0;
+  20          //延时函数
+  21          void Delay(uint t)
+  22          {
+  23   1              while(t--);
+  24   1      }
+  25          
+  26          //选择138译码器输出端
+  27          void selectHC573(uchar channel)
+  28          {
+  29   1              switch(channel)
+  30   1              {
+  31   2                      case 4:
+  32   2                      P2=(P2&0x1f)|0x80;//不改变P2其他端口电平的情况下改变138译码器输入，由于前移一位故channel*2。
   33   2                      break;
-  34   2                      case 6:
-  35   2                      P2=(P2&0x1f)|0xc0;
+  34   2                      case 5:
+  35   2                      P2=(P2&0x1f)|0xa0;
   36   2                      break;
-  37   2                      case 7:
-  38   2                      P2=(P2&0x1f)|0xe0;
+  37   2                      case 6:
+  38   2                      P2=(P2&0x1f)|0xc0;
   39   2                      break;
-  40   2              }
-  41   1      }
-  42          
-  43          //按位点亮数码管
-  44          void DisplaySMG_Bit(uchar value,uchar pos)
-  45          {       
-  46   1              selectHC573(6);
-  47   1              P0=0X01<<pos;//channel选择为6时选择数码管位置
-  48   1              selectHC573(7);
-  49   1              P0=dig_code[value];//channel选择为7时选择数码管显示内容
-  50   1      }
-  51          
-  52          //获取温度
-  53          void tempget()
-  54          {
-  55   1              uchar low,high;
-C51 COMPILER V9.01   MAIN                                                                  01/20/2020 16:52:18 PAGE 2   
+  40   2                      case 7:
+  41   2                      P2=(P2&0x1f)|0xe0;
+  42   2                      break;
+  43   2              }
+  44   1      }
+  45          
+  46          //按位点亮数码管
+  47          void DisplaySMG_Bit(uchar value,uchar pos)
+  48          {       
+  49   1              selectHC573(6);
+  50   1              P0=0X01<<pos;//channel选择为6时选择数码管位置
+  51   1              selectHC573(7);
+  52   1              P0=dig_code[value];//channel选择为7时选择数码管显示内容
+  53   1      }
+  54          
+  55          //获取温度
+C51 COMPILER V9.01   MAIN                                                                  01/21/2020 15:47:51 PAGE 2   
 
-  56   1              init_ds18b20();
-  57   1              Write_DS18B20(0XCC);
-  58   1              Write_DS18B20(0X44);
-  59   1      
-  60   1              init_ds18b20();
-  61   1              Write_DS18B20(0XCC);
-  62   1              Write_DS18B20(0Xbe);
-  63   1      /*
-  64   1      DS18B20操作步骤(P11)：
-  65   1      1-初始化
-  66   1      2-跳过ROM
-  67   1      3-转换温度(0x44)/开始读取温度Scratchpad(0xbe)
-  68   1      */
-  69   1      
-  70   1              low=Read_DS18B20();
-  71   1              high=Read_DS18B20();
+  56          void tempget()
+  57          {
+  58   1              uchar low,high;
+  59   1              init_ds18b20();
+  60   1              Write_DS18B20(0XCC);
+  61   1              Write_DS18B20(0X44);
+  62   1      
+  63   1              init_ds18b20();
+  64   1              Write_DS18B20(0XCC);
+  65   1              Write_DS18B20(0Xbe);
+  66   1      /*
+  67   1      DS18B20操作步骤(P11)：
+  68   1      1-初始化
+  69   1      2-跳过ROM
+  70   1      3-转换温度(0x44)/开始读取温度Scratchpad(0xbe)
+  71   1      */
   72   1      
-  73   1              temp=high<<4;
-  74   1              temp|=(low>>4);//将DS18B20数据转换为十进制并截取整数部分
-  75   1      } 
-  76          
-  77          //动态显示温度
-  78          void Display_Dynmaic_temp()
-  79          {
-  80   1              tempget();
-  81   1              DisplaySMG_Bit(temp%100/10,5);
-  82   1              Delay(500);
-  83   1              P0=0XFF;
-  84   1              DisplaySMG_Bit(temp%10,6);
+  73   1              low=Read_DS18B20();
+  74   1              high=Read_DS18B20();
+  75   1      
+  76   1              temp=high<<4;
+  77   1              temp|=(low>>4);//将DS18B20数据转换为十进制并截取整数部分
+  78   1      } 
+  79          
+  80          //动态显示温度
+  81          void Display_Dynmaic_temp()
+  82          {
+  83   1              tempget();
+  84   1              DisplaySMG_Bit(temp%100/10,5);
   85   1              Delay(500);
   86   1              P0=0XFF;
-  87   1              //显示温度整数部分
-  88   1              selectHC573(6);
-  89   1              P0=0X01<<7;
-  90   1              selectHC573(7);
-  91   1              P0=0XC6;//显示C代表摄氏度
-  92   1      }
-  93                                                                                    
-  94          //DS1302初始化
-  95          
-  96          void ds1302_init()
-  97          {
-  98   1              uchar add=0x80;//写数据地址
-  99   1              uchar i;
- 100   1              Write_Ds1302_Byte(0x8e,0x00); //关闭写保护
- 101   1              for(i=0;i<7;i++)
- 102   1              {
- 103   2                      Write_Ds1302_Byte(add,time[i]);
- 104   2                      add=add+2;
- 105   2              }
- 106   1              Write_Ds1302_Byte(0x8e,0x80); //开启写保护
- 107   1      }
- 108          
- 109          //读取DS1302时间，地址可见P9，WP位为写保护控制位
- 110          void ds1302_read()
- 111          {
- 112   1              uchar i;
- 113   1              uchar add=0x81;//读数据地址
- 114   1              Write_Ds1302_Byte(0x8e,0x00);//关闭写保护
- 115   1              for(i=0;i<7;i++)
- 116   1              {
- 117   2                      time[i]=Read_Ds1302_Byte(add);
-C51 COMPILER V9.01   MAIN                                                                  01/20/2020 16:52:18 PAGE 3   
+  87   1              DisplaySMG_Bit(temp%10,6);
+  88   1              Delay(500);
+  89   1              P0=0XFF;
+  90   1              //显示温度整数部分
+  91   1              selectHC573(6);
+  92   1              P0=0X01<<7;
+  93   1              selectHC573(7);
+  94   1              P0=0XC6;//显示C代表摄氏度
+  95   1      }
+  96                                                                                    
+  97          //DS1302初始化
+  98          
+  99          void ds1302_init()
+ 100          {
+ 101   1              uchar add=0x80;//写数据地址
+ 102   1              uchar i;
+ 103   1              Write_Ds1302_Byte(0x8e,0x00); //关闭写保护
+ 104   1              for(i=0;i<7;i++)
+ 105   1              {
+ 106   2                      Write_Ds1302_Byte(add,time[i]);
+ 107   2                      add=add+2;
+ 108   2              }
+ 109   1              Write_Ds1302_Byte(0x8e,0x80); //开启写保护
+ 110   1      }
+ 111          
+ 112          //读取DS1302时间，地址可见P9，WP位为写保护控制位
+ 113          void ds1302_read()
+ 114          {
+ 115   1              uchar i;
+ 116   1              uchar add=0x81;//读数据地址
+ 117   1              Write_Ds1302_Byte(0x8e,0x00);//关闭写保护
+C51 COMPILER V9.01   MAIN                                                                  01/21/2020 15:47:51 PAGE 3   
 
- 118   2                      add=add+2;
- 119   2              }
- 120   1              Write_Ds1302_Byte(0x8e,0x80);//开启写保护
- 121   1      }
- 122          
- 123          //动态显示时间
- 124          void Display_Dynmaic_time()
- 125          {
- 126   1              ds1302_read();
- 127   1              DisplaySMG_Bit(time[1]/16,0); //BCD码取十位
- 128   1              Delay(500);
- 129   1              P0=0XFF;
- 130   1              DisplaySMG_Bit(time[1]&0x0f,1);//BCD码取个位
+ 118   1              for(i=0;i<7;i++)
+ 119   1              {
+ 120   2                      time[i]=Read_Ds1302_Byte(add);
+ 121   2                      add=add+2;
+ 122   2              }
+ 123   1              Write_Ds1302_Byte(0x8e,0x80);//开启写保护
+ 124   1      }
+ 125          
+ 126          //动态显示时间
+ 127          void Display_Dynmaic_time()
+ 128          {
+ 129   1              ds1302_read();
+ 130   1              DisplaySMG_Bit(time[1]/16,0); //BCD码取十位
  131   1              Delay(500);
- 132   1              P0=0XFF; //以上是分钟的显示
- 133   1              selectHC573(6);
- 134   1              P0=0X01<<2;
- 135   1              selectHC573(7);
- 136   1              P0=~0X40;
- 137   1              Delay(500);
- 138   1              P0=0XFF; //以上是分隔符显示
- 139   1              DisplaySMG_Bit(time[0]/16,3);
+ 132   1              P0=0XFF;
+ 133   1              DisplaySMG_Bit(time[1]&0x0f,1);//BCD码取个位
+ 134   1              Delay(500);
+ 135   1              P0=0XFF; //以上是分钟的显示
+ 136   1              selectHC573(6);
+ 137   1              P0=0X01<<2;
+ 138   1              selectHC573(7);
+ 139   1              P0=~0X40;
  140   1              Delay(500);
- 141   1              P0=0XFF;
- 142   1              DisplaySMG_Bit(time[0]&0x0f,4); //以上是秒的显示
- 143   1      }
- 144          
- 145          //从A/D通道3读取数据
- 146          void Read_AIN3()
- 147          {
- 148   1              IIC_Start();            //IIC总线起始信号                                                       
- 149   1              IIC_SendByte(0x90);     //PCF8591的写设备地址           
- 150   1              IIC_WaitAck();          //等待从机应答
- 151   1                              
- 152   1              IIC_SendByte(0x03);     //写入PCF8591的控制字节         
- 153   1              IIC_WaitAck();          //等待从机应答                                          
- 154   1              IIC_Stop();             //IIC总线停止信号                                       
- 155   1              
- 156   1      
- 157   1      
- 158   1              IIC_Start();                                                                                    
- 159   1              IIC_SendByte(0x91);             
- 160   1              IIC_WaitAck();
- 161   1                                              
- 162   1              data_pcf8591 = IIC_RecByte();                   
- 163   1              IIC_SendAck(0);                 //产生非应答信号                                
- 164   1              IIC_Stop();             //IIC总线停止信号                                       
- 165   1      }
- 166          
- 167          
- 168          void Display_Dynmaic_pcf8591()
- 169          {
- 170   1              Read_AIN3();
- 171   1              DisplaySMG_Bit(data_pcf8591/100,0);
- 172   1              Delay(500);
- 173   1              P0=0XFF;
- 174   1              DisplaySMG_Bit((data_pcf8591%100)/10,1);
+ 141   1              P0=0XFF; //以上是分隔符显示
+ 142   1              DisplaySMG_Bit(time[0]/16,3);
+ 143   1              Delay(500);
+ 144   1              P0=0XFF;
+ 145   1              DisplaySMG_Bit(time[0]&0x0f,4); //以上是秒的显示
+ 146   1      }
+ 147          
+ 148          //从A/D通道3读取数据
+ 149          void Read_AIN3()
+ 150          {
+ 151   1              IIC_Start();            //IIC总线起始信号                                                       
+ 152   1              IIC_SendByte(0x90);     //PCF8591的写设备地址           
+ 153   1              IIC_WaitAck();          //等待从机应答
+ 154   1                              
+ 155   1              IIC_SendByte(0x03);     //写入PCF8591的控制字节         
+ 156   1              IIC_WaitAck();          //等待从机应答                                          
+ 157   1              IIC_Stop();             //IIC总线停止信号                                       
+ 158   1              
+ 159   1      
+ 160   1      
+ 161   1              IIC_Start();                                                                                    
+ 162   1              IIC_SendByte(0x91);             
+ 163   1              IIC_WaitAck();
+ 164   1                                              
+ 165   1              data_pcf8591 = IIC_RecByte();                   
+ 166   1              IIC_SendAck(0);                 //产生非应答信号                                
+ 167   1              IIC_Stop();             //IIC总线停止信号                                       
+ 168   1      }
+ 169          
+ 170          
+ 171          void Display_Dynmaic_pcf8591()
+ 172          {
+ 173   1              Read_AIN3();
+ 174   1              DisplaySMG_Bit(data_pcf8591/100,0);
  175   1              Delay(500);
  176   1              P0=0XFF;
- 177   1              DisplaySMG_Bit(data_pcf8591%10,2);
+ 177   1              DisplaySMG_Bit((data_pcf8591%100)/10,1);
  178   1              Delay(500);
- 179   1      }
-C51 COMPILER V9.01   MAIN                                                                  01/20/2020 16:52:18 PAGE 4   
+ 179   1              P0=0XFF;
+C51 COMPILER V9.01   MAIN                                                                  01/21/2020 15:47:51 PAGE 4   
 
- 180          
- 181          void write_at24c02(uchar addr,uint data_at24c02)
- 182          {
- 183   1              IIC_Start();
- 184   1              IIC_SendByte(0XA0);
- 185   1              IIC_WaitAck();
- 186   1              IIC_SendByte(addr);
- 187   1              IIC_WaitAck();
- 188   1              IIC_SendByte(data_at24c02);
- 189   1              IIC_WaitAck();
- 190   1              IIC_Stop();
- 191   1      }
- 192          
- 193          uint read_at24c02(uchar addr)
- 194          {
- 195   1              uchar tmp_at24c02;
- 196   1              IIC_Start();
- 197   1              IIC_SendByte(0XA0);
- 198   1              IIC_WaitAck();
- 199   1              IIC_SendByte(addr);
- 200   1              IIC_WaitAck();
- 201   1      
- 202   1              IIC_Start();
- 203   1              IIC_SendByte(0XA1);
- 204   1              IIC_WaitAck();
- 205   1              tmp_at24c02=IIC_RecByte();
- 206   1              IIC_SendAck(0);
- 207   1              IIC_Stop();
- 208   1              return tmp_at24c02;
- 209   1      }
- 210          
- 211          void Display_Dynmaic_at24c02()
- 212          {       
- 213   1              write_at24c02(0X01,0x0f);
- 214   1              data_at24c02=read_at24c02(0x01);
- 215   1              DisplaySMG_Bit(data_at24c02/100,0);
- 216   1              Delay(500);
- 217   1              DisplaySMG_Bit(data_at24c02%100/10,1);
- 218   1              Delay(500);
- 219   1              DisplaySMG_Bit(data_at24c02%10,2);
- 220   1              Delay(500);
- 221   1              
- 222   1      }
- 223          
- 224          void Delay12us()                //@12.000MHz
- 225          {
- 226   1              unsigned char i;
- 227   1      
- 228   1              _nop_();
- 229   1              _nop_();
- 230   1              i = 33;
- 231   1              while (--i);
- 232   1      }
- 233          
- 234          void send_wave()
- 235          {
- 236   1              uchar i;
- 237   1              for(i=0;i<8;i++)
- 238   1              {
- 239   2                      TX=1;
- 240   2                      Delay12us();
- 241   2                      TX=0;
-C51 COMPILER V9.01   MAIN                                                                  01/20/2020 16:52:18 PAGE 5   
+ 180   1              DisplaySMG_Bit(data_pcf8591%10,2);
+ 181   1              Delay(500);
+ 182   1      }
+ 183          
+ 184          void write_at24c02(uchar addr,uint data_at24c02)
+ 185          {
+ 186   1              IIC_Start();
+ 187   1              IIC_SendByte(0XA0);
+ 188   1              IIC_WaitAck();
+ 189   1              IIC_SendByte(addr);
+ 190   1              IIC_WaitAck();
+ 191   1              IIC_SendByte(data_at24c02);
+ 192   1              IIC_WaitAck();
+ 193   1              IIC_Stop();
+ 194   1      }
+ 195          
+ 196          uint read_at24c02(uchar addr)
+ 197          {
+ 198   1              uchar tmp_at24c02;
+ 199   1              IIC_Start();
+ 200   1              IIC_SendByte(0XA0);
+ 201   1              IIC_WaitAck();
+ 202   1              IIC_SendByte(addr);
+ 203   1              IIC_WaitAck();
+ 204   1      
+ 205   1              IIC_Start();
+ 206   1              IIC_SendByte(0XA1);
+ 207   1              IIC_WaitAck();
+ 208   1              tmp_at24c02=IIC_RecByte();
+ 209   1              IIC_SendAck(0);
+ 210   1              IIC_Stop();
+ 211   1              return tmp_at24c02;
+ 212   1      }
+ 213          
+ 214          void Display_Dynmaic_at24c02()
+ 215          {       
+ 216   1              write_at24c02(0X01,0x0f);
+ 217   1              data_at24c02=read_at24c02(0x01);
+ 218   1              DisplaySMG_Bit(data_at24c02/100,0);
+ 219   1              Delay(500);
+ 220   1              DisplaySMG_Bit(data_at24c02%100/10,1);
+ 221   1              Delay(500);
+ 222   1              DisplaySMG_Bit(data_at24c02%10,2);
+ 223   1              Delay(500);
+ 224   1              
+ 225   1      }
+ 226          
+ 227          void Delay12us()                //@12.000MHz
+ 228          {
+ 229   1              unsigned char i;
+ 230   1      
+ 231   1              _nop_();
+ 232   1              _nop_();
+ 233   1              i = 33;
+ 234   1              while (--i);
+ 235   1      }
+ 236          
+ 237          void send_wave()
+ 238          {
+ 239   1              uchar i;
+ 240   1              for(i=0;i<8;i++)
+ 241   1              {
+C51 COMPILER V9.01   MAIN                                                                  01/21/2020 15:47:51 PAGE 5   
 
- 242   2                      Delay12us();
- 243   2              }
- 244   1      }
- 245          
- 246          void measure_distance()
- 247          {
- 248   1              uint time_sonic=0;
- 249   1              TMOD&=0X0F;
- 250   1              TL1=0X00;
- 251   1              TH1=0X00;
- 252   1      
- 253   1              send_wave();
- 254   1              TR1=1;
- 255   1              while((RX==1)&&(TF1==0));
- 256   1              TR1=0;
- 257   1      
- 258   1              if(TF1==0)
- 259   1              {
- 260   2                      time_sonic=TH1;
- 261   2                      time_sonic=(time_sonic<<8)|TL1;
- 262   2                      distance=((time_sonic/10)*17)/100+3;
- 263   2              }
- 264   1              else
- 265   1              {
- 266   2                      TF1=0;
- 267   2                      distance=999;
- 268   2              }
- 269   1      }
- 270          
- 271          void Display_Dynmaic_sonic()
- 272          {
- 273   1              measure_distance();
- 274   1              for(j=0;j<100;j++)
- 275   1              {
- 276   2                      DisplaySMG_Bit(distance/100,0);
- 277   2                      Delay(500);
- 278   2                      DisplaySMG_Bit(distance%100/10,1);
- 279   2                      Delay(500);
- 280   2                      DisplaySMG_Bit(distance%10,2);
- 281   2                      Delay(500);
- 282   2              }
- 283   1              
- 284   1      }
- 285          int main()
- 286          {
- 287   1              selectHC573(5);
- 288   1              P0=0X00;//初始化板上资源，关闭蜂鸣器与继电器
- 289   1              ds1302_init();
- 290   1              while(1)
- 291   1              {       
- 292   2                      Display_Dynmaic_temp();
- 293   2                      //Display_Dynmaic_time();
- 294   2                      //Display_Dynmaic_pcf8591();
- 295   2                      //Display_Dynmaic_at24c02();
- 296   2                      //Display_Dynmaic_sonic();
- 297   2              }
- 298   1      }
+ 242   2                      TX=1;
+ 243   2                      Delay12us();
+ 244   2                      TX=0;
+ 245   2                      Delay12us();
+ 246   2              }
+ 247   1      }
+ 248          
+ 249          void measure_distance()
+ 250          {
+ 251   1              uint time_sonic=0;
+ 252   1              TMOD&=0X0F;
+ 253   1              TL1=0X00;
+ 254   1              TH1=0X00;
+ 255   1      
+ 256   1              send_wave();
+ 257   1              TR1=1;
+ 258   1              while((RX==1)&&(TF1==0));
+ 259   1              TR1=0;
+ 260   1      
+ 261   1              if(TF1==0)
+ 262   1              {
+ 263   2                      time_sonic=TH1;
+ 264   2                      time_sonic=(time_sonic<<8)|TL1;
+ 265   2                      distance=((time_sonic/10)*17)/100+3;
+ 266   2              }
+ 267   1              else
+ 268   1              {
+ 269   2                      TF1=0;
+ 270   2                      distance=999;
+ 271   2              }
+ 272   1      }
+ 273          
+ 274          void Display_Dynmaic_sonic()
+ 275          {
+ 276   1              measure_distance();
+ 277   1              for(j=0;j<100;j++)
+ 278   1              {
+ 279   2                      DisplaySMG_Bit(distance/100,0);
+ 280   2                      Delay(500);
+ 281   2                      DisplaySMG_Bit(distance%100/10,1);
+ 282   2                      Delay(500);
+ 283   2                      DisplaySMG_Bit(distance%10,2);
+ 284   2                      Delay(500);
+ 285   2              }
+ 286   1              
+ 287   1      }
+ 288          
+ 289          void init_timer()
+ 290          {
+ 291   1              TH0=0XFF;
+ 292   1              TL0=0XFF;
+ 293   1              TH1=(65536-50000)/256;
+ 294   1              TL1=(65536-50000)%256;
+ 295   1      
+ 296   1              TMOD=0X16;
+ 297   1      
+ 298   1              ET1=1;
+ 299   1              ET0=1;
+ 300   1              EA=1;
+ 301   1              TR0=1;
+ 302   1              TR1=1;
+ 303   1      }
+C51 COMPILER V9.01   MAIN                                                                  01/21/2020 15:47:51 PAGE 6   
+
+ 304          
+ 305          void t0_service() interrupt 1
+ 306          {
+ 307   1              count_times++;
+ 308   1      }
+ 309          
+ 310          void t1_service() interrupt 3
+ 311          {
+ 312   1              TH1=(65536-50000)/256;
+ 313   1              TL1=(65536-50000)%256;
+ 314   1              count_time++;
+ 315   1              if(count_time==20)
+ 316   1              {                  
+ 317   2                      frequency=count_times;
+ 318   2                      count_times=0;
+ 319   2                      count_time=0;
+ 320   2              }
+ 321   1      }
+ 322          
+ 323          void Display_Dynmaic_ne555()
+ 324          {
+ 325   1              DisplaySMG_Bit(frequency/10000,3);
+ 326   1              Delay(500);
+ 327   1              DisplaySMG_Bit(frequency/1000%10,4);
+ 328   1              Delay(500);
+ 329   1              DisplaySMG_Bit(frequency/100%10,5);
+ 330   1              Delay(500);
+ 331   1              DisplaySMG_Bit(frequency/10%10,6);
+ 332   1              Delay(500);
+ 333   1              DisplaySMG_Bit(frequency%10,7);
+ 334   1              Delay(500);
+ 335   1      }
+ 336          
+ 337          int main()
+ 338          {
+ 339   1              selectHC573(5);
+ 340   1              P0=0X00;//初始化板上资源，关闭蜂鸣器与继电器
+ 341   1              ds1302_init();
+ 342   1              init_timer();
+ 343   1              while(1)
+ 344   1              {       
+ 345   2                      //Display_Dynmaic_temp();
+ 346   2                      //Display_Dynmaic_time();
+ 347   2                      //Display_Dynmaic_pcf8591();
+ 348   2                      //Display_Dynmaic_at24c02();
+ 349   2                      //Display_Dynmaic_sonic();
+ 350   2                      Display_Dynmaic_ne555();
+ 351   2              }
+ 352   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    870    ----
+   CODE SIZE        =   1067    ----
    CONSTANT SIZE    =     10    ----
-C51 COMPILER V9.01   MAIN                                                                  01/20/2020 16:52:18 PAGE 6   
-
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =     17      10
+   DATA SIZE        =     23      10
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.

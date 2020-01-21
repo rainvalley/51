@@ -14,6 +14,9 @@ uint distance=0;
 sbit TX=P1^0;
 sbit RX=P1^1;
 uint j;
+uint count_times=0;
+uint count_time=0;
+uint frequency=0;
 //延时函数
 void Delay(uint t)
 {
@@ -282,17 +285,68 @@ void Display_Dynmaic_sonic()
 	}
 	
 }
+
+void init_timer()
+{
+	TH0=0XFF;
+	TL0=0XFF;
+	TH1=(65536-50000)/256;
+	TL1=(65536-50000)%256;
+
+	TMOD=0X16;
+
+	ET1=1;
+	ET0=1;
+	EA=1;
+	TR0=1;
+	TR1=1;
+}
+
+void t0_service() interrupt 1
+{
+	count_times++;
+}
+
+void t1_service() interrupt 3
+{
+	TH1=(65536-50000)/256;
+	TL1=(65536-50000)%256;
+	count_time++;
+	if(count_time==20)
+	{		   
+		frequency=count_times;
+		count_times=0;
+		count_time=0;
+	}
+}
+
+void Display_Dynmaic_ne555()
+{
+	DisplaySMG_Bit(frequency/10000,3);
+	Delay(500);
+	DisplaySMG_Bit(frequency/1000%10,4);
+	Delay(500);
+	DisplaySMG_Bit(frequency/100%10,5);
+	Delay(500);
+	DisplaySMG_Bit(frequency/10%10,6);
+	Delay(500);
+	DisplaySMG_Bit(frequency%10,7);
+	Delay(500);
+}
+
 int main()
 {
 	selectHC573(5);
 	P0=0X00;//初始化板上资源，关闭蜂鸣器与继电器
 	ds1302_init();
+	init_timer();
 	while(1)
 	{	
-		Display_Dynmaic_temp();
+		//Display_Dynmaic_temp();
 		//Display_Dynmaic_time();
 		//Display_Dynmaic_pcf8591();
 		//Display_Dynmaic_at24c02();
 		//Display_Dynmaic_sonic();
+		Display_Dynmaic_ne555();
 	}
 }
