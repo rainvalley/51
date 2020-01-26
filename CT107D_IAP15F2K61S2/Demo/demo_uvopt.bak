@@ -174,10 +174,10 @@
       <FileType>1</FileType>
       <tvExp>1</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>26</ColumnNumber>
+      <ColumnNumber>18</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>192</TopLine>
-      <CurrentLine>208</CurrentLine>
+      <TopLine>239</TopLine>
+      <CurrentLine>239</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\main.c</PathWithFileName>
       <FilenameWithoutPath>main.c</FilenameWithoutPath>
@@ -274,8 +274,8 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>0</TopLine>
-      <CurrentLine>0</CurrentLine>
+      <TopLine>1</TopLine>
+      <CurrentLine>1</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\data.h</PathWithFileName>
       <FilenameWithoutPath>data.h</FilenameWithoutPath>
@@ -335,9 +335,9 @@
   </AlienFiles>
 
   <WinLayout>
-    <sActiveDebugView></sActiveDebugView>
-    <iActiveDebugViewLocation>0</iActiveDebugViewLocation>
-    <sActiveBuildView></sActiveBuildView>
+    <sActiveDebugView>Default</sActiveDebugView>
+    <iActiveDebugViewLocation>1</iActiveDebugViewLocation>
+    <sActiveBuildView>Build</sActiveBuildView>
     <iActiveBuildViewLocation>0</iActiveBuildViewLocation>
     <View>
       <ViewName>Default</ViewName>
@@ -1691,9 +1691,9 @@
         </Doc>
         <Doc>
           <Name>.\main.c</Name>
-          <ColumnNumber>26</ColumnNumber>
-          <TopLine>192</TopLine>
-          <CurrentLine>208</CurrentLine>
+          <ColumnNumber>18</ColumnNumber>
+          <TopLine>239</TopLine>
+          <CurrentLine>239</CurrentLine>
         </Doc>
         <Doc>
           <Name>.\iic.c</Name>

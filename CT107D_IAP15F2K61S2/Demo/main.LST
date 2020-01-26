@@ -1,4 +1,4 @@
-C51 COMPILER V9.01   MAIN                                                                  01/21/2020 15:47:51 PAGE 1   
+C51 COMPILER V9.01   MAIN                                                                  01/24/2020 19:32:42 PAGE 1   
 
 
 C51 COMPILER V9.01, COMPILATION OF MODULE MAIN
@@ -62,7 +62,7 @@ line level    source
   53   1      }
   54          
   55          //获取温度
-C51 COMPILER V9.01   MAIN                                                                  01/21/2020 15:47:51 PAGE 2   
+C51 COMPILER V9.01   MAIN                                                                  01/24/2020 19:32:42 PAGE 2   
 
   56          void tempget()
   57          {
@@ -126,7 +126,7 @@ line level    source
  115   1              uchar i;
  116   1              uchar add=0x81;//读数据地址
  117   1              Write_Ds1302_Byte(0x8e,0x00);//关闭写保护
-C51 COMPILER V9.01   MAIN                                                                  01/21/2020 15:47:51 PAGE 3   
+C51 COMPILER V9.01   MAIN                                                                  01/24/2020 19:32:42 PAGE 3   
 
  118   1              for(i=0;i<7;i++)
  119   1              {
@@ -190,7 +190,7 @@ line level    source
  177   1              DisplaySMG_Bit((data_pcf8591%100)/10,1);
  178   1              Delay(500);
  179   1              P0=0XFF;
-C51 COMPILER V9.01   MAIN                                                                  01/21/2020 15:47:51 PAGE 4   
+C51 COMPILER V9.01   MAIN                                                                  01/24/2020 19:32:42 PAGE 4   
 
  180   1              DisplaySMG_Bit(data_pcf8591%10,2);
  181   1              Delay(500);
@@ -254,7 +254,7 @@ line level    source
  239   1              uchar i;
  240   1              for(i=0;i<8;i++)
  241   1              {
-C51 COMPILER V9.01   MAIN                                                                  01/21/2020 15:47:51 PAGE 5   
+C51 COMPILER V9.01   MAIN                                                                  01/24/2020 19:32:42 PAGE 5   
 
  242   2                      TX=1;
  243   2                      Delay12us();
@@ -318,7 +318,7 @@ line level    source
  301   1              TR0=1;
  302   1              TR1=1;
  303   1      }
-C51 COMPILER V9.01   MAIN                                                                  01/21/2020 15:47:51 PAGE 6   
+C51 COMPILER V9.01   MAIN                                                                  01/24/2020 19:32:42 PAGE 6   
 
  304          
  305          void t0_service() interrupt 1
@@ -361,12 +361,12 @@ line level    source
  342   1              init_timer();
  343   1              while(1)
  344   1              {       
- 345   2                      //Display_Dynmaic_temp();
+ 345   2                      Display_Dynmaic_temp();
  346   2                      //Display_Dynmaic_time();
  347   2                      //Display_Dynmaic_pcf8591();
  348   2                      //Display_Dynmaic_at24c02();
  349   2                      //Display_Dynmaic_sonic();
- 350   2                      Display_Dynmaic_ne555();
+ 350   2                      //Display_Dynmaic_ne555();
  351   2              }
  352   1      }
 

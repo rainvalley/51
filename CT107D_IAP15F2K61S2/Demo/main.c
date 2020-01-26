@@ -342,11 +342,11 @@ int main()
 	init_timer();
 	while(1)
 	{	
-		//Display_Dynmaic_temp();
+		Display_Dynmaic_temp();
 		//Display_Dynmaic_time();
 		//Display_Dynmaic_pcf8591();
 		//Display_Dynmaic_at24c02();
 		//Display_Dynmaic_sonic();
-		Display_Dynmaic_ne555();
+		//Display_Dynmaic_ne555();
 	}
 }
