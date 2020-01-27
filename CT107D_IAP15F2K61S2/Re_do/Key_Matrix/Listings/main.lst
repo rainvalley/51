@@ -1,0 +1,211 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              01/26/2020 15:28:42 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include<reg52.h>
+   2          typedef unsigned char uchar;
+   3          typedef unsigned int uint;
+   4          sfr P4=0xc0;
+   5          sbit R1=P3^0;
+   6          sbit R2=P3^1;
+   7          sbit R3=P3^2;
+   8          sbit R4=P3^3;
+   9          sbit C4=P3^4;
+  10          sbit C3=P3^5;
+  11          sbit C2=P4^2;
+  12          sbit C1=P4^4;
+  13          uchar code dig_code[]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90,0x88,0x80,0xc6,0xc0,0x86,0x8e,0xb
+             -f,0x7f};
+  14          
+  15          void select(uchar channel)
+  16          {
+  17   1        switch(channel)
+  18   1        {
+  19   2          case 4: P2=(P2&0X1F)|0x80;break;
+  20   2          case 5: P2=(P2&0X1F)|0XA0;break;
+  21   2          case 6: P2=(P2&0X1F)|0XC0;break;
+  22   2          case 7: P2=(P2&0X1F)|0XE0;break;
+  23   2        }
+  24   1      }
+  25          void init()
+  26          {
+  27   1        select(4);
+  28   1        P0=0XFF;
+  29   1        select(5);
+  30   1        P0=0X00;
+  31   1      }
+  32          void delay(uint t)
+  33          {
+  34   1        while(t--);
+  35   1      }
+  36          
+  37          void display(uchar num)
+  38          {
+  39   1        select(6);
+  40   1        P0=0X01;
+  41   1        select(7);
+  42   1        P0=dig_code[num];
+  43   1      }
+  44          
+  45          void key_matrix()
+  46          {
+  47   1        R1=0;
+  48   1        R2=R3=R4=1;
+  49   1        C1=C2=C3=C4=1;
+  50   1        if(C1==0)
+  51   1        {
+  52   2          delay(500);
+  53   2          while(C1==0);
+C51 COMPILER V9.60.0.0   MAIN                                                              01/26/2020 15:28:42 PAGE 2   
+
+  54   2          display(0);
+  55   2        }
+  56   1        
+  57   1        if(C2==0)
+  58   1        {
+  59   2          delay(500);
+  60   2          while(C2==0);
+  61   2          display(1);
+  62   2        }
+  63   1        
+  64   1        if(C3==0)
+  65   1        {
+  66   2          delay(500);
+  67   2          while(C3==0);
+  68   2          display(2);
+  69   2        }
+  70   1        
+  71   1        if(C4==0)
+  72   1        {
+  73   2          delay(500);
+  74   2          while(C4==0);
+  75   2          display(3);
+  76   2        }
+  77   1        //
+  78   1        R2=0;
+  79   1        R1=R3=R4=1;
+  80   1        C1=C2=C3=C4=1;
+  81   1        if(C1==0)
+  82   1        {
+  83   2          delay(500);
+  84   2          while(C1==0);
+  85   2          display(4);
+  86   2        }
+  87   1        
+  88   1        if(C2==0)
+  89   1        {
+  90   2          delay(500);
+  91   2          while(C2==0);
+  92   2          display(5);
+  93   2        }
+  94   1        
+  95   1        if(C3==0)
+  96   1        {
+  97   2          delay(500);
+  98   2          while(C3==0);
+  99   2          display(6);
+ 100   2        }
+ 101   1        
+ 102   1        if(C4==0)
+ 103   1        {
+ 104   2          delay(500);
+ 105   2          while(C4==0);
+ 106   2          display(7);
+ 107   2        }
+ 108   1        //
+ 109   1        R3=0;
+ 110   1        R2=R1=R4=1;
+ 111   1        C1=C2=C3=C4=1;
+ 112   1        if(C1==0)
+ 113   1        {
+ 114   2          delay(500);
+ 115   2          while(C1==0);
+C51 COMPILER V9.60.0.0   MAIN                                                              01/26/2020 15:28:42 PAGE 3   
+
+ 116   2          display(8);
+ 117   2        }
+ 118   1        
+ 119   1        if(C2==0)
+ 120   1        {
+ 121   2          delay(500);
+ 122   2          while(C2==0);
+ 123   2          display(9);
+ 124   2        }
+ 125   1        
+ 126   1        if(C3==0)
+ 127   1        {
+ 128   2          delay(500);
+ 129   2          while(C3==0);
+ 130   2          display(10);
+ 131   2        }
+ 132   1        
+ 133   1        if(C4==0)
+ 134   1        {
+ 135   2          delay(500);
+ 136   2          while(C4==0);
+ 137   2          display(11);
+ 138   2        }
+ 139   1        //
+ 140   1        R4=0;
+ 141   1        R2=R3=R1=1;
+ 142   1        C1=C2=C3=C4=1;
+ 143   1        if(C1==0)
+ 144   1        {
+ 145   2          delay(500);
+ 146   2          while(C1==0);
+ 147   2          display(12);
+ 148   2        }
+ 149   1        
+ 150   1        if(C2==0)
+ 151   1        {
+ 152   2          delay(500);
+ 153   2          while(C2==0);
+ 154   2          display(13);
+ 155   2        }
+ 156   1        
+ 157   1        if(C3==0)
+ 158   1        {
+ 159   2          delay(500);
+ 160   2          while(C3==0);
+ 161   2          display(14);
+ 162   2        }
+ 163   1        
+ 164   1        if(C4==0)
+ 165   1        {
+ 166   2          delay(500);
+ 167   2          while(C4==0);
+ 168   2          display(15);
+ 169   2        }
+ 170   1      }
+ 171          
+ 172          
+ 173          void main()
+ 174          {
+ 175   1        init();
+ 176   1        while(1)
+ 177   1        {
+C51 COMPILER V9.60.0.0   MAIN                                                              01/26/2020 15:28:42 PAGE 4   
+
+ 178   2          key_matrix();
+ 179   2        }
+ 180   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    401    ----
+   CONSTANT SIZE    =     18    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

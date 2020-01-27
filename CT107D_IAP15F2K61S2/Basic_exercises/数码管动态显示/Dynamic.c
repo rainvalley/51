@@ -8,7 +8,7 @@ uchar i=1;
 void Delay(uint t)
 {
 	while(t--);
-}//普通延迟函数
+}
 
 void Delay0(uint t)
 {
@@ -16,7 +16,7 @@ void Delay0(uint t)
 	{
 		 Display_Dynamic();
 	}
-}//特殊延迟函数，延迟时显示数据。
+}
 
 void selectHC573(uchar channel)
 {

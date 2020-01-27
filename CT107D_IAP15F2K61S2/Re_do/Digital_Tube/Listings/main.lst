@@ -1,0 +1,75 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              01/27/2020 13:33:53 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include<reg52.h>
+   2          typedef unsigned int uint;
+   3          typedef unsigned char uchar;
+   4          uchar code dig_code[]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90,0x88,0x80,0xc6,0xc0,0x86,0x8e,0xb
+             -f,0x7f};
+   5          
+   6          void select(uchar channel)
+   7          {
+   8   1        switch(channel)
+   9   1        {
+  10   2          case 4: P2=(P2&0X1F)|0X80;break;
+  11   2          case 5: P2=(P2&0X1F)|0XA0;break;
+  12   2          case 6: P2=(P2&0X1F)|0XC0;break;
+  13   2          case 7: P2=(P2&0X1F)|0XE0;break;
+  14   2        }
+  15   1      }
+  16          void init()
+  17          {
+  18   1        select(5);
+  19   1        P0=0X00;
+  20   1      }
+  21          
+  22          void delay_tube(uint t)
+  23          {
+  24   1        while(t--);
+  25   1      }
+  26          
+  27          void display(uchar channel,uchar value)
+  28          {
+  29   1          select(6);
+  30   1          P0=0X01<<channel;
+  31   1          select(7);
+  32   1          P0=dig_code[value];
+  33   1      }
+  34          
+  35          
+  36          void main()
+  37          {
+  38   1        init();
+  39   1        while(1)
+  40   1        {
+  41   2          display(0,0);
+  42   2          delay_tube(200);
+  43   2          P0=0X00;
+  44   2          display(1,1);
+  45   2          delay_tube(200);
+  46   2          P0=0X00;
+  47   2        }
+  48   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    136    ----
+   CONSTANT SIZE    =     18    ----
+C51 COMPILER V9.60.0.0   MAIN                                                              01/27/2020 13:33:53 PAGE 2   
+
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
