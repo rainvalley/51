@@ -18,7 +18,7 @@ void Init_uart()
 void Send(uchar bytes)
 {
 	SBUF=bytes;
-	while(TI=0);
+	while(TI==0);
 	TI=0;
 }
 

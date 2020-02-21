@@ -39,13 +39,13 @@ void selectHC573(uchar channel)
 		break;
 		case 7:
 		P2=(P2&0x1f)|0xe0;
-		break;
 	}
 }
 
 //按位点亮数码管
 void DisplaySMG_Bit(uchar value,uchar pos)
 {	
+	P0=0XFF;
 	selectHC573(6);
 	P0=0X01<<pos;//channel选择为6时选择数码管位置
 	selectHC573(7);
@@ -163,7 +163,7 @@ void Read_AIN3()
 	IIC_WaitAck();
 	 				
 	data_pcf8591 = IIC_RecByte();			
-	IIC_SendAck(0); 		//产生非应答信号				
+	IIC_SendAck(1); 		//产生非应答信号				
 	IIC_Stop(); 		//IIC总线停止信号					
 }
 
@@ -173,10 +173,8 @@ void Display_Dynmaic_pcf8591()
 	Read_AIN3();
    	DisplaySMG_Bit(data_pcf8591/100,0);
 	Delay(500);
-	P0=0XFF;
 	DisplaySMG_Bit((data_pcf8591%100)/10,1);
 	Delay(500);
-	P0=0XFF;
 	DisplaySMG_Bit(data_pcf8591%10,2);
 	Delay(500);
 }
@@ -206,7 +204,7 @@ uint read_at24c02(uchar addr)
 	IIC_SendByte(0XA1);
 	IIC_WaitAck();
 	tmp_at24c02=IIC_RecByte();
-	IIC_SendAck(0);
+	IIC_SendAck(1);
 	IIC_Stop();
 	return tmp_at24c02;
 }
@@ -338,13 +336,14 @@ int main()
 {
 	selectHC573(5);
 	P0=0X00;//初始化板上资源，关闭蜂鸣器与继电器
+	selectHC573(7);
 	ds1302_init();
 	init_timer();
 	while(1)
 	{	
-		Display_Dynmaic_temp();
+		//Display_Dynmaic_temp();
 		//Display_Dynmaic_time();
-		//Display_Dynmaic_pcf8591();
+		Display_Dynmaic_pcf8591();
 		//Display_Dynmaic_at24c02();
 		//Display_Dynmaic_sonic();
 		//Display_Dynmaic_ne555();

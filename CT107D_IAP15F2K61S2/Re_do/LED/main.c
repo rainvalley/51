@@ -4,6 +4,7 @@ typedef unsigned char uchar;
 sbit HC138_A=P2^5;
 sbit HC138_B=P2^6;
 sbit HC138_C=P2^7;
+uint count=0;
 void Init()
 {
 	HC138_C=1;
@@ -50,5 +51,6 @@ void main()
 	while(1)
 	{
 		ledrunning();
+		count++;
 	}
 }

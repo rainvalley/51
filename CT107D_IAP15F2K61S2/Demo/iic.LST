@@ -1,9 +1,9 @@
-C51 COMPILER V9.01   IIC                                                                   01/20/2020 16:24:31 PAGE 1   
+C51 COMPILER V9.60.0.0   IIC                                                               02/21/2020 13:41:08 PAGE 1   
 
 
-C51 COMPILER V9.01, COMPILATION OF MODULE IIC
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE IIC
 OBJECT MODULE PLACED IN iic.OBJ
-COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE iic.c BROWSE DEBUG OBJECTEXTEND
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE iic.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND
 
 line level    source
 
@@ -62,7 +62,7 @@ line level    source
   53   1          IIC_Delay(DELAY_TIME);
   54   1          SCL = 0; 
   55   1          SDA = 1;
-C51 COMPILER V9.01   IIC                                                                   01/20/2020 16:24:31 PAGE 2   
+C51 COMPILER V9.60.0.0   IIC                                                               02/21/2020 13:41:08 PAGE 2   
 
   56   1          IIC_Delay(DELAY_TIME);
   57   1      }
@@ -117,7 +117,7 @@ line level    source
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    152    ----
+   CODE SIZE        =    170    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
