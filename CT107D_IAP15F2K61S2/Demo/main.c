@@ -56,6 +56,7 @@ void DisplaySMG_Bit(uchar value,uchar pos)
 void tempget()
 {
 	uchar low,high;
+	EA=0;
 	init_ds18b20();
 	Write_DS18B20(0XCC);
 	Write_DS18B20(0X44);
@@ -75,6 +76,7 @@ DS18B20操作步骤(P11)：
 
 	temp=high<<4;
 	temp|=(low>>4);//将DS18B20数据转换为十进制并截取整数部分
+	EA=1;
 } 
 
 //动态显示温度
@@ -130,7 +132,7 @@ void Display_Dynmaic_time()
 	DisplaySMG_Bit(time[1]/16,0); //BCD码取十位
 	Delay(500);
 	P0=0XFF;
-	DisplaySMG_Bit(time[1]&0x0f,1);//BCD码取个位
+	DisplaySMG_Bit(time[1]%16,1);//BCD码取个位
 	Delay(500);
 	P0=0XFF; //以上是分钟的显示
 	selectHC573(6);
@@ -142,7 +144,7 @@ void Display_Dynmaic_time()
 	DisplaySMG_Bit(time[0]/16,3);
 	Delay(500);
 	P0=0XFF;
-	DisplaySMG_Bit(time[0]&0x0f,4);	//以上是秒的显示
+	DisplaySMG_Bit(time[0]%16,4);	//以上是秒的显示
 }
 
 //从A/D通道3读取数据
@@ -152,7 +154,7 @@ void Read_AIN3()
 	IIC_SendByte(0x90); 	//PCF8591的写设备地址		
 	IIC_WaitAck();  	//等待从机应答
 			
-	IIC_SendByte(0x03); 	//写入PCF8591的控制字节		
+	IIC_SendByte(0x01); 	//写入PCF8591的控制字节		
 	IIC_WaitAck();  	//等待从机应答						
 	IIC_Stop(); 		//IIC总线停止信号					
 	
@@ -341,9 +343,9 @@ int main()
 	init_timer();
 	while(1)
 	{	
-		//Display_Dynmaic_temp();
+		Display_Dynmaic_temp();
 		//Display_Dynmaic_time();
-		Display_Dynmaic_pcf8591();
+		//Display_Dynmaic_pcf8591();
 		//Display_Dynmaic_at24c02();
 		//Display_Dynmaic_sonic();
 		//Display_Dynmaic_ne555();

@@ -1,0 +1,57 @@
+C51 COMPILER V9.59.0.0   HC_SR04                                                           01/08/2020 14:58:56 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE HC_SR04
+OBJECT MODULE PLACED IN .\obj\HC-SR04.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE HC-SR04\HC-SR04.c OPTIMIZE(8,SPEED) BROWSE INCDIR(.\ADC;.\Compare;.\Flas
+                    -hRom;.\GPIO;.\Public;.\PWM;.\SPI;.\Timer;.\TouchKey;.\UART;.\USB;.\Type_C;.\Infrared;.\OLED;.\HC-SR04;.\MNPWM) DEBUG OBJ
+                    -ECTEXTEND PRINT(.\HC-SR04.lst) TABS(2) OBJECT(.\obj\HC-SR04.obj)
+
+line level    source
+
+   1          #include "HC-SR04.h"
+   2          #include ".\Public\CH549.H"
+   3          #include ".\Public\DEBUG.H"
+   4          
+   5          sbit TRIG = P4^5  ; //³¬Éù²¨Òý½Å
+   6          sbit ECHO = P4^4 ;  //³¬Éù²¨Òý½Å
+   7          
+   8          UINT16 distance_time = 0;
+   9          UINT16 distance = 0;
+  10          
+  11          void SCAN_DIS() //³¬Éù²¨²â¾àº¯Êý
+  12          {
+  13   1         distance_time=0;
+  14   1         TRIG=1;
+  15   1         mDelayuS(20);
+  16   1         TRIG=0;  
+  17   1        while(!ECHO);
+  18   1        TR1=1;          //¿ªÆô¼ÆÊý
+  19   1        while(ECHO);
+  20   1        TR1=0;        //¹Ø±Õ¼ÆÊý
+  21   1        distance_time = TH1*256+TL1;
+  22   1        TH1=0;
+  23   1        TL1=0;
+  24   1        distance = distance_time/10;
+  25   1      }
+  26          
+  27          
+  28          
+  29          
+  30          
+  31          
+  32          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     60    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      4    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,6 @@
+".\obj\DEBUG.obj",
+".\obj\Main.obj",
+".\obj\Timer.obj",
+".\obj\PWM.obj" 
+TO ".\obj\CH549EXAM" 
+PRINT(".\CH549EXAM.m51") RAMSIZE(256) 

@@ -1,0 +1,138 @@
+C51 COMPILER V9.59.0.0   INFRARED                                                          01/08/2020 14:58:57 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE INFRARED
+OBJECT MODULE PLACED IN .\obj\infrared.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE Infrared\infrared.c OPTIMIZE(8,SPEED) BROWSE INCDIR(.\ADC;.\Compare;.\Fl
+                    -ashRom;.\GPIO;.\Public;.\PWM;.\SPI;.\Timer;.\TouchKey;.\UART;.\USB;.\Type_C;.\Infrared;.\OLED;.\HC-SR04;.\MNPWM) DEBUG O
+                    -BJECTEXTEND PRINT(.\infrared.lst) TABS(2) OBJECT(.\obj\infrared.obj)
+
+line level    source
+
+   1          #include "infrared.h"
+   2          #include ".\Public\CH549.H"
+   3          #include ".\Public\DEBUG.H"
+   4          
+   5          /*********************************************
+   6          ** 函数功能 ：红外通信
+   7          ** 输    入 ： 
+   8          ** 输    出 ： 无
+   9          ** 返    回 ： 无
+  10          ** 备    注 ： 有公式，带入即可
+  11          *********************************************/
+  12          UINT8 INF_CNT_f=0;//标志位1--处理完成0--正在处理
+  13          UINT8 IF_DC_KEY=0;//按键值1--17
+  14          
+  15          void Int1Init()
+  16          {
+  17   1           //设置INT1
+  18   1        IT1=1;//跳变沿出发方式（下降沿）
+  19   1        EX1=1;//打开INT1的中断允许。  
+  20   1        EA=1;//打开总中断
+  21   1      
+  22   1      }
+  23          
+  24          void Infrared_Communication() interrupt INT_NO_INT1
+  25          {
+  26   1         
+  27   1        UINT16 rx_tuff;
+  28   1        UINT16 err;//防止程序卡死
+  29   1        UINT8 i=0,j=0,k=0;
+  30   1        UINT8 addr[4]={0};
+  31   1        
+  32   1        for(i=0;i<200;i++)//起始码前面的9ms低电平
+  33   1        {
+  34   2          mDelayuS(15);
+  35   2          if(Pin_Decode==1)//若出现高电平则有误
+  36   2          {
+  37   3            return;//跳出函数
+  38   3          }
+  39   2        }
+  40   1        err=5000;
+  41   1        while(  (Pin_Decode==0) && (err>1) )//等待起始码后半部分的4.5ms高电平的到来
+  42   1        {
+  43   2          err--;mDelayuS(10);
+  44   2        }
+  45   1        for(i=0;i<100;i++)
+  46   1        {
+  47   2          mDelayuS(10);
+  48   2          if(Pin_Decode==0)//若出现低电平则起始码有误，跳出解码
+  49   2          {
+  50   3            return;//跳出函数
+  51   3          }
+  52   2        }
+  53   1       
+C51 COMPILER V9.59.0.0   INFRARED                                                          01/08/2020 14:58:57 PAGE 2   
+
+  54   1        //准备好接收32位遥控数据
+  55   1        for(i=0;i<4;i++)
+  56   1        {
+  57   2          for(j=0;j<8;j++)
+  58   2          {
+  59   3            err=5000;
+  60   3            while( (Pin_Decode==1) && (err>1) )//等待地址码的第一位开始脉冲的到来  0.56ms  0
+  61   3            {
+  62   4              err--;mDelayuS(10);
+  63   4            }
+  64   3            err=2000;
+  65   3            while( (Pin_Decode==0) && (err>1) )//等待地址码的第一位高电平的到来
+  66   3            {
+  67   4              err--;mDelayuS(10);
+  68   4            }
+  69   3            while( Pin_Decode  )//计算高电平的时间长度
+  70   3            {
+  71   4               mDelayuS(100);
+  72   4              if((k++)>=30)
+  73   4              {
+  74   5                return;
+  75   5              }
+  76   4            } 
+  77   3            addr[i]=addr[i]>>1;
+  78   3            if(k>8)
+  79   3              addr[i]=addr[i]|0x80;
+  80   3            k=0;
+  81   3          }
+  82   2        }
+  83   1        rx_tuff=~(addr[2]);
+  84   1        switch(rx_tuff)
+  85   1        {
+  86   2        case 65466:IF_DC_KEY=1;break;
+  87   2        case 65465:IF_DC_KEY=2;break;
+  88   2        case 65464:IF_DC_KEY=3;break;
+  89   2        case 65467:IF_DC_KEY=4;break;
+  90   2        case 65471:IF_DC_KEY=5;break;
+  91   2        case 65468:IF_DC_KEY=6;break;
+  92   2        case 65528:IF_DC_KEY=7;break;
+  93   2        case 65514:IF_DC_KEY=8;break;
+  94   2        case 65526:IF_DC_KEY=9;break;
+  95   2        case 65510:IF_DC_KEY=0;break;
+  96   2        case 65513:IF_DC_KEY=11;break;//*
+  97   2        case 65522:IF_DC_KEY=12;break;//#
+  98   2        case 65511:IF_DC_KEY=13;break;//上
+  99   2        case 65507:IF_DC_KEY=15;break;//OK
+ 100   2        case 65527:IF_DC_KEY=14;break;//左
+ 101   2        case 65445:IF_DC_KEY=16;;break;//右
+ 102   2        case 65453:IF_DC_KEY=17;break;//下
+ 103   2        default :IF_DC_KEY=100;break;// 11 错误反馈值
+ 104   2        }
+ 105   1        
+ 106   1        INF_CNT_f=1;
+ 107   1          
+ 108   1        
+ 109   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    547    ----
+   CONSTANT SIZE    =      4    ----
+   XDATA SIZE       =   ----    ----
+C51 COMPILER V9.59.0.0   INFRARED                                                          01/08/2020 14:58:57 PAGE 3   
+
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      2       9
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

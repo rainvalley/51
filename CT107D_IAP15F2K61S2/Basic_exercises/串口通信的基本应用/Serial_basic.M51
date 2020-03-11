@@ -1,8 +1,8 @@
-BL51 BANKED LINKER/LOCATER V6.22                                                        12/15/2019  19:40:06  PAGE 1
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                    02/25/2020  19:56:01  PAGE 1
 
 
-BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
-C:\KEIL\C51\BIN\BL51.EXE STARTUP.obj, Serial_basic.obj TO Serial_basic RAMSIZE (256)
+BL51 BANKED LINKER/LOCATER V6.22.2.0, INVOKED BY:
+C:\KEIL_V5\C51\BIN\BL51.EXE STARTUP.obj, Serial_basic.obj TO Serial_basic RAMSIZE (256)
 
 
 MEMORY MODEL: SMALL
@@ -30,9 +30,11 @@ LINK MAP OF MODULE:  Serial_basic (?C_STARTUP)
                     0022H     0001H                  *** GAP ***
             CODE    0023H     0003H     ABSOLUTE     
             CODE    0026H     0016H     UNIT         ?PR?INIT_UART?SERIAL_BASIC
-            CODE    003CH     000FH     UNIT         ?PR?MAIN?SERIAL_BASIC
-            CODE    004BH     000CH     UNIT         ?C_C51STARTUP
-            CODE    0057H     0008H     UNIT         ?PR?_SEND?SERIAL_BASIC
+            CODE    003CH     0016H     UNIT         ?PR?MAIN?SERIAL_BASIC
+            CODE    0052H     0014H     UNIT         ?PR?_DELAY?SERIAL_BASIC
+            CODE    0066H     000CH     UNIT         ?C_C51STARTUP
+            CODE    0072H     000CH     UNIT         ?PR?DELAY1MS?SERIAL_BASIC
+            CODE    007EH     0008H     UNIT         ?PR?_SEND?SERIAL_BASIC
 
 
 
@@ -47,25 +49,29 @@ SEGMENT
 
 ?PR?MAIN?SERIAL_BASIC
   +--> ?PR?INIT_UART?SERIAL_BASIC
+  +--> ?PR?_DELAY?SERIAL_BASIC
   +--> ?PR?_SEND?SERIAL_BASIC
+
+?PR?_DELAY?SERIAL_BASIC
+  +--> ?PR?DELAY1MS?SERIAL_BASIC
 
 *** NEW ROOT ***************************************************
 
 ?PR?UART_SER?SERIAL_BASIC
   +--> ?PR?_SEND?SERIAL_BASIC
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  02/25/2020  19:56:01  PAGE 2
+
+
 
 
 
 SYMBOL TABLE OF MODULE:  Serial_basic (?C_STARTUP)
 
   VALUE           TYPE          NAME
-BL51 BANKED LINKER/LOCATER V6.22                                                      12/15/2019  19:40:06  PAGE 2
-
-
   ----------------------------------
 
   -------         MODULE        ?C_STARTUP
-  C:004BH         SEGMENT       ?C_C51STARTUP
+  C:0066H         SEGMENT       ?C_C51STARTUP
   I:0009H         SEGMENT       ?STACK
   C:0000H         PUBLIC        ?C_STARTUP
   D:00E0H         SYMBOL        ACC
@@ -75,7 +81,7 @@ SYMBOL TABLE OF MODULE:  Serial_basic (?C_STARTUP)
   N:0000H         SYMBOL        IBPSTACK
   N:0100H         SYMBOL        IBPSTACKTOP
   N:0080H         SYMBOL        IDATALEN
-  C:004EH         SYMBOL        IDATALOOP
+  C:0069H         SYMBOL        IDATALOOP
   N:0000H         SYMBOL        PBPSTACK
   N:0100H         SYMBOL        PBPSTACKTOP
   N:0000H         SYMBOL        PDATALEN
@@ -84,33 +90,38 @@ SYMBOL TABLE OF MODULE:  Serial_basic (?C_STARTUP)
   N:0000H         SYMBOL        PPAGEENABLE
   D:00A0H         SYMBOL        PPAGE_SFR
   D:0081H         SYMBOL        SP
-  C:004BH         SYMBOL        STARTUP1
+  C:0066H         SYMBOL        STARTUP1
   N:0000H         SYMBOL        XBPSTACK
   N:0000H         SYMBOL        XBPSTACKTOP
   N:0000H         SYMBOL        XDATALEN
   N:0000H         SYMBOL        XDATASTART
   C:0000H         LINE#         126
-  C:004BH         LINE#         133
-  C:004DH         LINE#         134
-  C:004EH         LINE#         135
-  C:004FH         LINE#         136
-  C:0051H         LINE#         185
-  C:0054H         LINE#         196
+  C:0066H         LINE#         133
+  C:0068H         LINE#         134
+  C:0069H         LINE#         135
+  C:006AH         LINE#         136
+  C:006CH         LINE#         185
+  C:006FH         LINE#         196
   -------         ENDMOD        ?C_STARTUP
 
   -------         MODULE        SERIAL_BASIC
   C:0000H         SYMBOL        _ICE_DUMMY_
   D:0090H         PUBLIC        P1
   D:00B0H         PUBLIC        P3
+  C:0072H         PUBLIC        Delay1ms
   B:00A8H.7       PUBLIC        EA
-  C:0057H         PUBLIC        _Send
+  C:007EH         PUBLIC        _Send
   D:00A8H         PUBLIC        IE
+  C:0052H         PUBLIC        _delay
   B:00A8H.4       PUBLIC        ES
   D:00B8H         PUBLIC        IP
   B:0098H.0       PUBLIC        RI
   B:0098H.1       PUBLIC        TI
   C:003CH         PUBLIC        main
   D:0099H         PUBLIC        SBUF
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  02/25/2020  19:56:01  PAGE 3
+
+
   D:0098H         PUBLIC        SCON
   C:0026H         PUBLIC        Init_uart
   D:0089H         PUBLIC        TMOD
@@ -119,54 +130,82 @@ SYMBOL TABLE OF MODULE:  Serial_basic (?C_STARTUP)
   D:008DH         PUBLIC        TH1
   D:008BH         PUBLIC        TL1
   B:0088H.6       PUBLIC        TR1
-BL51 BANKED LINKER/LOCATER V6.22                                                      12/15/2019  19:40:06  PAGE 3
-
-
   D:00C8H         PUBLIC        T2CON
   C:0003H         PUBLIC        uart_ser
   D:0008H         PUBLIC        temprecv
   D:00D0H         PUBLIC        PSW
   -------         PROC          INIT_UART
-  C:0026H         LINE#         6
   C:0026H         LINE#         7
   C:0026H         LINE#         8
-  C:0029H         LINE#         9
-  C:002CH         LINE#         10
-  C:002FH         LINE#         11
-  C:0032H         LINE#         12
-  C:0034H         LINE#         13
-  C:0037H         LINE#         14
-  C:0039H         LINE#         15
-  C:003BH         LINE#         16
+  C:0026H         LINE#         9
+  C:0029H         LINE#         10
+  C:002CH         LINE#         11
+  C:002FH         LINE#         12
+  C:0032H         LINE#         13
+  C:0034H         LINE#         14
+  C:0037H         LINE#         15
+  C:0039H         LINE#         16
+  C:003BH         LINE#         17
   -------         ENDPROC       INIT_UART
+  -------         PROC          DELAY1MS
+  -------         DO            
+  D:0007H         SYMBOL        i
+  D:0006H         SYMBOL        j
+  -------         ENDDO         
+  C:0072H         LINE#         19
+  C:0072H         LINE#         20
+  C:0072H         LINE#         23
+  C:0073H         LINE#         24
+  C:0074H         LINE#         25
+  C:0075H         LINE#         26
+  C:0077H         LINE#         27
+  C:0079H         LINE#         29
+  C:0079H         LINE#         30
+  C:007BH         LINE#         31
+  C:007DH         LINE#         32
+  -------         ENDPROC       DELAY1MS
+  -------         PROC          _DELAY
+  D:0004H         SYMBOL        t
+  C:0052H         LINE#         34
+  C:0056H         LINE#         35
+  C:0056H         LINE#         36
+  C:0060H         LINE#         37
+  C:0060H         LINE#         38
+  C:0063H         LINE#         39
+  C:0065H         LINE#         40
+  -------         ENDPROC       _DELAY
   -------         PROC          _SEND
   D:0007H         SYMBOL        bytes
-  C:0057H         LINE#         18
-  C:0057H         LINE#         19
-  C:0057H         LINE#         20
-  C:0059H         LINE#         21
-  C:005CH         LINE#         22
-  C:005EH         LINE#         23
+  C:007EH         LINE#         44
+  C:007EH         LINE#         45
+  C:007EH         LINE#         46
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  02/25/2020  19:56:01  PAGE 4
+
+
+  C:0080H         LINE#         47
+  C:0083H         LINE#         48
+  C:0085H         LINE#         49
   -------         ENDPROC       _SEND
   -------         PROC          UART_SER
-  C:0003H         LINE#         25
-  C:000CH         LINE#         27
-  C:000FH         LINE#         28
-  C:000FH         LINE#         29
-  C:0011H         LINE#         30
-  C:0014H         LINE#         31
-  C:001BH         LINE#         32
-  C:001BH         LINE#         33
+  C:0003H         LINE#         51
+  C:000CH         LINE#         53
+  C:000FH         LINE#         54
+  C:000FH         LINE#         55
+  C:0011H         LINE#         56
+  C:0014H         LINE#         57
+  C:001BH         LINE#         58
+  C:001BH         LINE#         59
   -------         ENDPROC       UART_SER
   -------         PROC          MAIN
-  C:003CH         LINE#         35
-  C:003CH         LINE#         36
-  C:003CH         LINE#         37
-  C:003FH         LINE#         38
-  C:0044H         LINE#         39
-  C:0049H         LINE#         40
+  C:003CH         LINE#         61
+  C:003CH         LINE#         62
+  C:003CH         LINE#         63
+  C:003FH         LINE#         64
+  C:0046H         LINE#         65
+  C:004BH         LINE#         66
+  C:0050H         LINE#         67
   -------         ENDPROC       MAIN
   -------         ENDMOD        SERIAL_BASIC
 
-Program Size: data=10.0 xdata=0 code=94
+Program Size: data=10.0 xdata=0 code=133
 LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

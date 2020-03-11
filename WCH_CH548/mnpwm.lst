@@ -1,0 +1,125 @@
+C51 COMPILER V9.59.0.0   MNPWM                                                             01/08/2020 15:16:26 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MNPWM
+OBJECT MODULE PLACED IN .\obj\mnpwm.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE MNPWM\mnpwm.c OPTIMIZE(8,SPEED) BROWSE INCDIR(.\ADC;.\Compare;.\FlashRom
+                    -;.\GPIO;.\Public;.\PWM;.\SPI;.\Timer;.\TouchKey;.\UART;.\USB;.\Type_C;.\Infrared;.\OLED;.\HC-SR04;.\MNPWM) DEBUG OBJECTE
+                    -XTEND PRINT(.\mnpwm.lst) TABS(2) OBJECT(.\obj\mnpwm.obj)
+
+line level    source
+
+   1          #include "mnpwm.h"
+   2          #include ".\Public\CH549.H"
+   3          #include ".\Public\DEBUG.H"
+   4          
+   5          /*前进*/
+   6          void Forward(int a)
+   7          {
+   8   1         motor_left_1 = 0;
+   9   1         motor_left_2 = 1;
+  10   1         motor_right_1 = 0;
+  11   1         motor_right_2 = 1;
+  12   1         mDelaymS(a);
+  13   1         motor_left_1 = 0;
+  14   1         motor_left_2 = 0;
+  15   1         motor_right_1 = 0;
+  16   1         motor_right_2 = 0;
+  17   1         mDelaymS(100-a);
+  18   1      }
+  19          /*后退*/
+  20          void Back(int a)
+  21          {
+  22   1         motor_left_1 = 1;
+  23   1         motor_left_2 = 0;
+  24   1         motor_right_1 = 1;
+  25   1         motor_right_2 = 0;
+  26   1         mDelaymS(a);
+  27   1         motor_left_1 = 0;
+  28   1         motor_left_2 = 0;
+  29   1         motor_right_1 = 0;
+  30   1         motor_right_2 = 0;
+  31   1         mDelaymS(100-a);
+  32   1      }
+  33          /*停车*/
+  34          void Stop(void)
+  35          {
+  36   1         motor_left_1 = 0;
+  37   1         motor_left_2 = 0;
+  38   1         motor_right_1 = 0;
+  39   1         motor_right_2 = 0;
+  40   1      }
+  41          /*左转（左轮停，右轮转）*/
+  42          void Left1(int a)
+  43          {
+  44   1         motor_left_1 = 0;
+  45   1         motor_left_2 = 0;
+  46   1         motor_right_1 = 0;
+  47   1         motor_right_2 = 1;
+  48   1         mDelaymS(a);
+  49   1         motor_left_1 = 0;
+  50   1         motor_left_2 = 0;
+  51   1         motor_right_1 = 0;
+  52   1         motor_right_2 = 0;
+  53   1         mDelaymS(100-a);
+C51 COMPILER V9.59.0.0   MNPWM                                                             01/08/2020 15:16:26 PAGE 2   
+
+  54   1      }
+  55          
+  56          /*左转（左轮反转，左轮正转）*/
+  57          void Left2(int a)
+  58          {
+  59   1         motor_left_1 = 1;
+  60   1         motor_left_2 = 0;
+  61   1         motor_right_1 = 0;
+  62   1         motor_right_2 = 1;
+  63   1         mDelaymS(a);
+  64   1         motor_left_1 = 0;
+  65   1         motor_left_2 = 0;
+  66   1         motor_right_1 = 0;
+  67   1         motor_right_2 = 0;
+  68   1         mDelaymS(100-a);
+  69   1      }
+  70          /*右转（右轮停，左轮转）*/
+  71          void Right1(int a)
+  72          {
+  73   1         motor_left_1 = 0;
+  74   1         motor_left_2 = 1;
+  75   1         motor_right_1 = 0;
+  76   1         motor_right_2 = 0;
+  77   1         mDelaymS(a);
+  78   1         motor_left_1 = 0;
+  79   1         motor_left_2 = 0;
+  80   1         motor_right_1 = 0;
+  81   1         motor_right_2 = 0;
+  82   1         mDelaymS(100-a);
+  83   1      }
+  84          /*右转（右轮反转，左轮正转）*/
+  85          void Right2(int a)
+  86          {
+  87   1         motor_left_1 = 0;
+  88   1         motor_left_2 = 1;
+  89   1         motor_right_1 = 1;
+  90   1         motor_right_2 = 0;
+  91   1         mDelaymS(a);
+  92   1         motor_left_1 = 0;
+  93   1         motor_left_2 = 0;
+  94   1         motor_right_1 = 0;
+  95   1         motor_right_2 = 0;
+  96   1         mDelaymS(100-a);
+  97   1      }
+  98          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    225    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      12
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

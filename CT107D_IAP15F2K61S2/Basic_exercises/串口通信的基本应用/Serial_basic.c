@@ -1,4 +1,5 @@
 #include<reg52.h>
+#include<intrins.h>
 sfr AUXR=0x8e;
 typedef unsigned int uint;
 typedef unsigned char uchar;
@@ -14,6 +15,31 @@ void Init_uart()
 	ES=1;
 	EA=1;
 }
+
+void Delay1ms()		//@11.0592MHz
+{
+	unsigned char i, j;
+
+	_nop_();
+	_nop_();
+	_nop_();
+	i = 11;
+	j = 190;
+	do
+	{
+		while (--j);
+	} while (--i);
+}
+
+void delay(uint t)
+{
+	while(t--)
+	{
+		Delay1ms();
+	}
+}
+
+
 
 void Send(uchar bytes)
 {
@@ -35,6 +61,7 @@ void uart_ser() interrupt 4
 int main()
 {
 	Init_uart();
+	delay(250);
 	Send(0xff);
 	Send(0x00);	
 	while(1);

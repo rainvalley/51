@@ -1,0 +1,98 @@
+C51 COMPILER V9.60.0.0   ONEWIRE                                                           02/25/2020 12:59:04 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE ONEWIRE
+OBJECT MODULE PLACED IN .\Objects\onewire.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE onewire.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\o
+                    -newire.lst) OBJECT(.\Objects\onewire.obj)
+
+line level    source
+
+   1          /*
+   2            程序说明: 单总线驱动程序
+   3            软件环境: Keil uVision 4.10 
+   4            硬件环境: CT107单片机综合实训平台(外部晶振12MHz) STC89C52RC单片机
+   5            日    期: 2011-8-9
+   6          */
+   7          #include "reg52.h"
+   8          
+   9          sbit DQ = P1^4;  //单总线接口
+  10          
+  11          //单总线延时函数
+  12          void Delay_OneWire(unsigned int t)  //STC89C52RC
+  13          {
+  14   1              while(t--)
+  15   1              {
+  16   2                      for(int i=0;i<=8;i++)
+*** ERROR C141 IN LINE 16 OF onewire.c: syntax error near 'int', expected 'sizeof'
+*** ERROR C202 IN LINE 16 OF onewire.c: 'i': undefined identifier
+*** ERROR C202 IN LINE 16 OF onewire.c: 'i': undefined identifier
+*** ERROR C202 IN LINE 16 OF onewire.c: 'i': undefined identifier
+*** ERROR C141 IN LINE 16 OF onewire.c: syntax error near ')', expected ';'
+  17   2                      {
+  18   3                              
+  19   3                      }
+  20   2              }
+  21   1      }
+  22          
+  23          //通过单总线向DS18B20写一个字节
+  24          void Write_DS18B20(unsigned char dat)
+  25          {
+  26   1              unsigned char i;
+  27   1              for(i=0;i<8;i++)
+  28   1              {
+  29   2                      DQ = 0;
+  30   2                      DQ = dat&0x01;
+  31   2                      Delay_OneWire(5);
+  32   2                      DQ = 1;
+  33   2                      dat >>= 1;
+  34   2              }
+  35   1              Delay_OneWire(5);
+  36   1      }
+  37          
+  38          //从DS18B20读取一个字节
+  39          unsigned char Read_DS18B20(void)
+  40          {
+  41   1              unsigned char i;
+  42   1              unsigned char dat;
+  43   1        
+  44   1              for(i=0;i<8;i++)
+  45   1              {
+  46   2                      DQ = 0;
+  47   2                      dat >>= 1;
+  48   2                      DQ = 1;
+  49   2                      if(DQ)
+C51 COMPILER V9.60.0.0   ONEWIRE                                                           02/25/2020 12:59:04 PAGE 2   
+
+  50   2                      {
+  51   3                              dat |= 0x80;
+  52   3                      }           
+  53   2                      Delay_OneWire(5);
+  54   2              }
+  55   1              return dat;
+  56   1      }
+  57          
+  58          //DS18B20设备初始化
+  59          bit init_ds18b20(void)
+  60          {
+  61   1              bit initflag = 0;
+  62   1              
+  63   1              DQ = 1;
+  64   1              Delay_OneWire(12);
+  65   1              DQ = 0;
+  66   1              Delay_OneWire(80);
+  67   1              DQ = 1;
+  68   1              Delay_OneWire(10); 
+  69   1          initflag = DQ;     
+  70   1              Delay_OneWire(5);
+  71   1        
+  72   1              return initflag;
+  73   1      }
+  74          
+  75          
+  76          
+  77          
+  78          
+  79          
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  5 ERROR(S)

@@ -1,0 +1,257 @@
+C51 COMPILER V9.60.0.0   TIMER                                                             03/07/2020 22:23:23 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE TIMER
+OBJECT MODULE PLACED IN .\obj\Timer.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE Timer\Timer.C OPTIMIZE(8,SPEED) BROWSE INCDIR(.\ADC;.\Compare;.\FlashRom
+                    -;.\GPIO;.\Public;.\PWM;.\SPI;.\Timer;.\TouchKey;.\UART;.\USB;.\Type_C;.\Infrared;.\OLED;.\HC-SR04;.\MNPWM) DEBUG OBJECTE
+                    -XTEND PRINT(.\Timer.lst) OBJECT(.\obj\Timer.obj)
+
+line level    source
+
+   1          /********************************** (C) COPYRIGHT *******************************
+   2          * File Name          : Timer.C
+   3          * Author             : WCH
+   4          * Version            : V1.0
+   5          * Date               : 2018/08/21
+   6          * Description        : CH549 Time ³õÊ¼»¯¡¢¶¨Ê±Æ÷¡¢¼ÆÊýÆ÷¸³Öµ¡¢T2²¶×½¹¦ÄÜ¿ªÆôº¯ÊýµÈ
+   7                                 ¶¨Ê±Æ÷ÖÐ¶Ïº¯Êý
+   8          *******************************************************************************/
+   9          #include ".\Timer\Timer.H"
+  10          
+  11          sbit DJ = P2^4;
+  12          int DJ_PWM=5;
+  13          int time_LED=0;
+  14          unsigned int echo=0;
+  15          #ifdef  T2_CAP
+  16          UINT16 Cap2[2] = {0};
+  17          UINT16 Cap1[2] = {0};
+  18          UINT16 Cap0[2] = {0};
+  19          #endif
+  20          /*******************************************************************************
+  21          * Function Name  : mTimer_x_ModInit(UINT8 x ,UINT8 mode)
+  22          * Description    : CH549¶¨Ê±¼ÆÊýÆ÷xÄ£Ê½ÉèÖÃ
+  23          * Input          : UINT8 mode,TimerÄ£Ê½Ñ¡Ôñ
+  24                             0£ºÄ£Ê½0£¬13Î»¶¨Ê±Æ÷£¬TLnµÄ¸ß3Î»ÎÞÐ§
+  25                             1£ºÄ£Ê½1£¬16Î»¶¨Ê±Æ÷
+  26                             2£ºÄ£Ê½2£¬8Î»×Ô¶¯ÖØ×°¶¨Ê±Æ÷
+  27                             3£ºÄ£Ê½3£¬Á½¸ö8Î»¶¨Ê±Æ÷  Timer0
+  28                             3£ºÄ£Ê½3£¬Timer1Í£Ö¹
+  29          * Output         : None
+  30          * Return         : ³É¹¦  SUCCESS
+  31                             Ê§°Ü  FAIL
+  32          *******************************************************************************/
+  33          UINT8 mTimer_x_ModInit(UINT8 x ,UINT8 mode)
+  34          {
+  35   1          if(x == 0)
+  36   1          {
+  37   2              TMOD = TMOD & 0xf0 | mode;
+  38   2          }
+  39   1          else if(x == 1)
+  40   1          {
+  41   2              TMOD = TMOD & 0x0f | (mode<<4);
+  42   2          }
+  43   1          else if(x == 2)
+  44   1          {
+  45   2              RCLK = 0;    //16Î»×Ô¶¯ÖØÔØ¶¨Ê±Æ÷
+  46   2              TCLK = 0;
+  47   2              CP_RL2 = 0;
+  48   2          }
+  49   1          else
+  50   1          {
+  51   2              return FAIL;
+  52   2          }
+  53   1          return SUCCESS;
+C51 COMPILER V9.60.0.0   TIMER                                                             03/07/2020 22:23:23 PAGE 2   
+
+  54   1      }
+  55          /*******************************************************************************
+  56          * Function Name  : mTimer_x_SetData(UINT8 x,UINT16 dat)
+  57          * Description    : CH549Timer0 TH0ºÍTL0¸³Öµ
+  58          * Input          : UINT16 dat;¶¨Ê±Æ÷¸³Öµ
+  59          * Output         : None
+  60          * Return         : None
+  61          *******************************************************************************/
+  62          void mTimer_x_SetData(UINT8 x,UINT16 dat)
+  63          {
+  64   1          UINT16 tmp;
+  65   1          tmp = 65536 - dat;
+  66   1          if(x == 0)
+  67   1          {
+  68   2              TL0 = tmp & 0xff;
+  69   2              TH0 = (tmp>>8) & 0xff;
+  70   2          }
+  71   1          else if(x == 1)
+  72   1          {
+  73   2              TL1 = tmp & 0xff;
+  74   2              TH1 = (tmp>>8) & 0xff;
+  75   2          }
+  76   1          else if(x == 2)
+  77   1          {
+  78   2              RCAP2L = TL2 = tmp & 0xff;                                               //16Î»×Ô¶¯ÖØÔØ¶¨Ê±Æ÷
+  79   2              RCAP2H = TH2 = (tmp>>8) & 0xff;
+  80   2          }
+  81   1      }
+  82          /*******************************************************************************
+  83          * Function Name  : CAP2Init(UINT8 mode)
+  84          * Description    : CH549¶¨Ê±¼ÆÊýÆ÷2 T2EXÒý½Å²¶×½¹¦ÄÜ³õÊ¼»¯£¨CAP2 P11£©
+  85                             UINT8 mode,±ßÑØ²¶×½Ä£Ê½Ñ¡Ôñ
+  86                             0:T2ex´ÓÏÂ½µÑØµ½ÏÂÒ»¸öÏÂ½µÑØ
+  87                             1:T2exÈÎÒâ±ßÑØÖ®¼ä
+  88                             3:T2ex´ÓÉÏÉýÑØµ½ÏÂÒ»¸öÉÏÉýÑØ
+  89          * Input          : None
+  90          * Output         : None
+  91          * Return         : None
+  92          *******************************************************************************/
+  93          void CAP2Init(UINT8 mode)
+  94          {
+  95   1          RCLK = 0;
+  96   1          TCLK = 0;
+  97   1          C_T2  = 0;
+  98   1          EXEN2 = 1;
+  99   1          CP_RL2 = 1;                                                                //Æô¶¯T2exµÄ²¶×½¹¦ÄÜ
+ 100   1          T2MOD |= mode << 2;                                                        //±ßÑØ²¶×½Ä£Ê½Ñ¡Ôñ
+ 101   1      }
+ 102          /*******************************************************************************
+ 103          * Function Name  : CAP1Init(UINT8 mode)
+ 104          * Description    : CH549¶¨Ê±¼ÆÊýÆ÷2 T2Òý½Å²¶×½¹¦ÄÜ³õÊ¼»¯T2(CAP1 P10)
+ 105                             UINT8 mode,±ßÑØ²¶×½Ä£Ê½Ñ¡Ôñ
+ 106                             0:T2ex´ÓÏÂ½µÑØµ½ÏÂÒ»¸öÏÂ½µÑØ
+ 107                             1:T2exÈÎÒâ±ßÑØÖ®¼ä
+ 108                             3:T2ex´ÓÉÏÉýÑØµ½ÏÂÒ»¸öÉÏÉýÑØ
+ 109          * Input          : None
+ 110          * Output         : None
+ 111          * Return         : None
+ 112          *******************************************************************************/
+ 113          void CAP1Init(UINT8 mode)
+ 114          {
+ 115   1          RCLK = 0;
+C51 COMPILER V9.60.0.0   TIMER                                                             03/07/2020 22:23:23 PAGE 3   
+
+ 116   1          TCLK = 0;
+ 117   1          CP_RL2 = 1;
+ 118   1          C_T2 = 0;
+ 119   1          T2MOD = T2MOD & ~T2OE | (mode << 2) | bT2_CAP1_EN;                         //Ê¹ÄÜT2Òý½Å²¶×½¹¦ÄÜ,±ßÑØ²¶
+             -×½Ä£Ê½Ñ¡Ôñ
+ 120   1      }
+ 121          /*******************************************************************************
+ 122          * Function Name  : CAP0Init(UINT8 mode)
+ 123          * Description    : CH549¶¨Ê±¼ÆÊýÆ÷2 CAP0Òý½Å²¶×½¹¦ÄÜ³õÊ¼»¯(CAP0 P36)
+ 124                             UINT8 mode,±ßÑØ²¶×½Ä£Ê½Ñ¡Ôñ
+ 125                             0:T2ex´ÓÏÂ½µÑØµ½ÏÂÒ»¸öÏÂ½µÑØ
+ 126                             1:T2exÈÎÒâ±ßÑØÖ®¼ä
+ 127                             3:T2ex´ÓÉÏÉýÑØµ½ÏÂÒ»¸öÉÏÉýÑØ
+ 128          * Input          : None
+ 129          * Output         : None
+ 130          * Return         : None
+ 131          *******************************************************************************/
+ 132          void CAP0Init(UINT8 mode)
+ 133          {
+ 134   1          RCLK = 0;
+ 135   1          TCLK = 0;
+ 136   1          CP_RL2 = 1;
+ 137   1          C_T2 = 0;
+ 138   1          T2MOD |= mode << 2;                                                        //±ßÑØ²¶×½Ä£Ê½Ñ¡Ôñ
+ 139   1          T2CON2 = bT2_CAP0_EN;
+ 140   1      }
+ 141          #ifdef T0_INT
+ 142          /*******************************************************************************
+ 143          * Function Name  : mTimer0Interrupt()
+ 144          * Description    : CH549¶¨Ê±¼ÆÊýÆ÷0¶¨Ê±¼ÆÊýÆ÷ÖÐ¶Ï´¦Àíº¯Êý 1msÖÐ¶Ï
+ 145          *******************************************************************************/
+ 146          /*void mTimer0Interrupt( void ) interrupt INT_NO_TMR0 using 1                    //timer0ÖÐ¶Ï·þÎñ³ÌÐò,Ê¹ÓÃ
+             -¼Ä´æÆ÷×é1
+ 147          {
+ 148              mTimer_x_SetData(0,2);      //Ä£Ê½1 ÐèÖØÐÂ¸øTH0ºÍTL0¸³Öµ
+ 149                  if(time_LED<DJ_PWM)
+ 150                                  {
+ 151                                          DJ=1;                   
+ 152                                  }else                     
+ 153                                  {                         
+ 154                                          DJ=0;
+ 155                                  }
+ 156                  //´óÔ¼1ms
+ 157                          
+ 158          }*/
+ 159          #endif
+ 160          #ifdef T1_INT
+              /*******************************************************************************
+              * Function Name  : mTimer1Interrupt()
+              * Description    : CH549¶¨Ê±¼ÆÊýÆ÷1¶¨Ê±¼ÆÊýÆ÷ÖÐ¶Ï´¦Àíº¯Êý 100usÖÐ¶Ï
+              *******************************************************************************/
+              void mTimer1Interrupt( void ) interrupt INT_NO_TMR1 using 2                //timer1ÖÐ¶Ï·þÎñ³ÌÐò,Ê¹ÓÃ¼Ä´æÆ÷
+             -×é2
+              {
+                  //·½Ê½2Ê±£¬Timer1×Ô¶¯ÖØ×°
+                  static UINT16 tmr1 = 0;
+                  tmr1++;
+                  if(tmr1 == 2000)                                                       //100us*2000 = 200ms
+                  {
+                      tmr1 = 0;
+                      SCK = ~SCK;
+                  }
+C51 COMPILER V9.60.0.0   TIMER                                                             03/07/2020 22:23:23 PAGE 4   
+
+              }
+              #endif
+ 177          /*******************************************************************************
+ 178          * Function Name  : mTimer2Interrupt()
+ 179          * Description    : CH549¶¨Ê±¼ÆÊýÆ÷0¶¨Ê±¼ÆÊýÆ÷ÖÐ¶Ï´¦Àíº¯Êý
+ 180          *******************************************************************************/
+ 181          void mTimer2Interrupt( void ) interrupt INT_NO_TMR2 using 3                //timer2ÖÐ¶Ï·þÎñ³ÌÐò,Ê¹ÓÃ¼Ä´æÆ÷
+             -×é3
+ 182          {
+ 183   1      #ifdef  T2_INT
+                  static UINT8 tmr2 = 0;
+                  if(TF2)
+                  {
+                      TF2 = 0;                                                             //Çå¿Õ¶¨Ê±Æ÷2Òç³öÖÐ¶Ï,ÐèÊÖ¶¯Ç
+             -ë
+                      tmr2++;
+                      if(tmr2 == 100)                                                      //200msÊ±¼äµ½
+                      {
+                          tmr2 = 0;
+                          SCK = ~SCK;                                                      //P17µçÆ½Ö¸Ê¾¼à¿Ø
+                      }
+                  }
+              #endif
+ 196   1      
+ 197   1      #ifdef  T2_CAP
+ 198   1          if(EXF2)                                                                //T2exµçÆ½±ä»¯ÖÐ¶ÏÖÐ¶Ï±êÖ¾
+ 199   1          {
+ 200   2              Cap2[0] = RCAP2;                                                    //T2EX
+ 201   2              printf("CAP2 %04x\n",Cap2[0]-Cap2[1]);
+ 202   2              Cap2[1] = Cap2[0];
+ 203   2              EXF2 = 0;                                                           //Çå¿ÕT2ex²¶×½ÖÐ¶Ï±êÖ¾
+ 204   2          }
+ 205   1          if(CAP1F)                                                               //T2µçÆ½²¶×½ÖÐ¶Ï±êÖ¾
+ 206   1          {
+ 207   2              Cap1[0] = T2CAP1;                                                    //T2;
+ 208   2              printf("CAP1 %04x\n",Cap1[0]-Cap1[1]);
+ 209   2              Cap1[1] = Cap1[0];
+ 210   2              CAP1F = 0;                                                          //Çå¿ÕT2²¶×½ÖÐ¶Ï±êÖ¾
+ 211   2          }
+ 212   1          if(T2CON2&bT2_CAP0F)
+ 213   1          {
+ 214   2              Cap0[0] = T2CAP0;
+ 215   2              printf("CAP0 %04x\n",Cap0[0]-Cap0[1]);
+ 216   2              Cap0[1] = Cap0[0];
+ 217   2              T2CON2 &= ~bT2_CAP0F;
+ 218   2          }
+ 219   1      #endif
+ 220   1      
+ 221   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    310    ----
+   CONSTANT SIZE    =     33    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     18    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

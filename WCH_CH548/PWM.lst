@@ -1,0 +1,136 @@
+C51 COMPILER V9.60.0.0   PWM                                                               03/08/2020 14:31:24 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE PWM
+OBJECT MODULE PLACED IN .\obj\PWM.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE PWM\PWM.C OPTIMIZE(8,SPEED) BROWSE INCDIR(.\ADC;.\Compare;.\FlashRom;.\G
+                    -PIO;.\Public;.\PWM;.\SPI;.\Timer;.\TouchKey;.\UART;.\USB;.\Type_C;.\Infrared;.\OLED;.\HC-SR04;.\MNPWM) DEBUG OBJECTEXTEN
+                    -D PRINT(.\PWM.lst) OBJECT(.\obj\PWM.obj)
+
+line level    source
+
+   1          /********************************** (C) COPYRIGHT *******************************
+   2          * File Name          : PWM.C
+   3          * Author             : WCH
+   4          * Version            : V1.0
+   5          * Date               : 2018/08/29
+   6          * Description        : CH549 PWMÅäÖÃÓë¿ÉÑ¡µÄÖÐ¶Ï´¦Àí£¨PWM Ñ­»·ÖÜÆÚ½áÊøÖÐ¶Ï£©
+   7          *                      Òý½Å           ¹¦ÄÜ
+   8          *                      P25            PWM0
+   9          *                      P24            PWM1
+  10          *                      P23            PWM2
+  11          *                      P22            PWM3
+  12          *                      P21            PWM4
+  13          *                      P20            PWM5
+  14          *                      P26            PWM6
+  15          *                      P27            PWM7
+  16          *******************************************************************************/
+  17          #include ".\PWM\PWM.H"
+  18          #pragma  NOAREGS
+  19          /*******************************************************************************
+  20          * Function Name  : PWM_CFG_CHANNEL()
+  21          * Description    : PWMÍ¨µÀÊä³öÊ¹ÄÜ,°üº¬IO¶Ë¿ÚÅäÖÃ
+  22          * Input          : Channel£ºÍ¨µÀºÅ£¬Î»Óò±íÊ¾
+  23          *                  NewState£º0:¹Ø±ÕÍ¨µÀ  1:¿ªÆôÍ¨µÀ
+  24          * Output         : None
+  25          * Return         : None
+  26          *******************************************************************************/
+  27          void PWM_SEL_CHANNEL(UINT8 Channel,UINT8 NewState)
+  28          {
+  29   1          UINT8 i;
+  30   1          /* Í¨µÀÅäÖÃ */
+  31   1          if(NewState == Enable)                    //Êä³ö¿ªÆô
+  32   1          {
+  33   2              PWM_CTRL &= ~bPWM_CLR_ALL;
+  34   2              if(Channel&CH0)
+  35   2              {
+  36   3                  PWM_CTRL |= bPWM0_OUT_EN;
+  37   3              }
+  38   2              if(Channel&CH1)
+  39   2              {
+  40   3                  PWM_CTRL |= bPWM1_OUT_EN;
+  41   3              }
+  42   2              PWM_CTRL2 = (Channel>>2);
+  43   2              /* ¶ÔÓ¦µÄGPIO¿ÚÅäÖÃ³ÉÍÆÍìÄ£Ê½ */
+  44   2              for(i=0; i!=6; i++)
+  45   2              {
+  46   3                  if(Channel & (1<<i))
+  47   3                  {
+  48   4                      P2_MOD_OC &= ~(1<<(5-i));
+  49   4                      P2_DIR_PU |= (1<<(5-i));
+  50   4                  }
+  51   3              }
+  52   2              if(Channel&CH6)
+  53   2              {
+C51 COMPILER V9.60.0.0   PWM                                                               03/08/2020 14:31:24 PAGE 2   
+
+  54   3                  P2_MOD_OC &= ~CH6;
+  55   3                  P2_DIR_PU |= CH6;
+  56   3              }
+  57   2              if(Channel&CH7)
+  58   2              {
+  59   3                  P2_MOD_OC &= ~CH7;
+  60   3                  P2_DIR_PU |= CH7;
+  61   3              }
+  62   2          }
+  63   1          else                                      //Êä³ö¹Ø±Õ
+  64   1          {
+  65   2              if(Channel&CH0)
+  66   2              {
+  67   3                  PWM_CTRL &= ~bPWM0_OUT_EN;
+  68   3              }
+  69   2              if(Channel&CH1)
+  70   2              {
+  71   3                  PWM_CTRL &= ~bPWM1_OUT_EN;
+  72   3              }
+  73   2              PWM_CTRL2 &= ~(Channel>>2);
+  74   2          }
+  75   1      }
+  76          #ifdef PWM_INTERRUPT
+              /*******************************************************************************
+              * Function Name  : PWMInterruptEnable()
+              * Description    : PWMÖÐ¶ÏÊ¹ÄÜ
+              * Input          : None
+              * Output         : None
+              * Return         : None
+              *******************************************************************************/
+              void PWMInterruptEnable()
+              {
+                  PWM_CTRL |= bPWM_IF_END;                                                  //Çå³ýPWMÖÐ¶Ï
+                  IE_PWMX = 1;
+                  EA = 1;
+              }
+              /*******************************************************************************
+              * Function Name  : PWMInterrupt(void)
+              * Description    : PWMÖÐ¶Ï·þÎñ³ÌÐò FREQ_SYS/n/64»òFREQ_SYS/n/256 ½øÖÐ¶Ï
+              *******************************************************************************/
+              void PWMInterrupt( void ) interrupt INT_NO_PWMX using 1                       //PWM0~8ÖÐ¶Ï·þÎñ³ÌÐò,Ê¹ÓÃ¼Ä´
+             -æÆ÷×é1
+              {
+                  static UINT8 duty = 0;
+                  PWM_CTRL |= bPWM_IF_END;                                                  //Çå³ýPWMÖÐ¶Ï
+              
+                  /* ¿ÉÑ¡µÄ,ÖØÐÂÅäÖÃÕ¼¿Õ±È */
+                  SetPWM0Dat(duty);
+                  SetPWM1Dat(duty);
+                  SetPWM2Dat(duty);
+                  duty++;
+              
+              }
+              #endif
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    137    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+C51 COMPILER V9.60.0.0   PWM                                                               03/08/2020 14:31:24 PAGE 3   
+
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

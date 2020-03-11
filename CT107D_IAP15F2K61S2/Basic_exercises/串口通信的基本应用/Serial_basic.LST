@@ -1,58 +1,86 @@
-C51 COMPILER V9.01   SERIAL_BASIC                                                          12/15/2019 19:40:06 PAGE 1   
+C51 COMPILER V9.60.0.0   SERIAL_BASIC                                                      02/25/2020 19:56:01 PAGE 1   
 
 
-C51 COMPILER V9.01, COMPILATION OF MODULE SERIAL_BASIC
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE SERIAL_BASIC
 OBJECT MODULE PLACED IN Serial_basic.OBJ
-COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Serial_basic.c BROWSE DEBUG OBJECTEXTEND
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE Serial_basic.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND
 
 line level    source
 
    1          #include<reg52.h>
-   2          sfr AUXR=0x8e;
-   3          typedef unsigned int uint;
-   4          typedef unsigned char uchar;
-   5          uchar temprecv;
-   6          void Init_uart()
-   7          {
-   8   1              TMOD=0X20;
-   9   1              TH1=0XFD;
-  10   1              TL1=0XFD;
-  11   1              AUXR=0X00;
-  12   1              TR1=1;
-  13   1              SCON=0X50;
-  14   1              ES=1;
-  15   1              EA=1;
-  16   1      }
-  17          
-  18          void Send(uchar bytes)
-  19          {
-  20   1              SBUF=bytes;
-  21   1              while(TI=0);
-*** WARNING C276 IN LINE 21 OF SERIAL_BASIC.C: constant in condition expression
-  22   1              TI=0;
-  23   1      }
-  24          
-  25          void uart_ser() interrupt 4
-  26          {
-  27   1              if(RI==1)
-  28   1              {
-  29   2                      RI=0;
-  30   2                      temprecv=SBUF;
-  31   2                      Send(temprecv+1);
-  32   2              }
-  33   1      }
-  34          
-  35          int main()
-  36          {
-  37   1              Init_uart();
-  38   1              Send(0xff);
-  39   1              Send(0x00);     
-  40   1              while(1);
-  41   1      }
+   2          #include<intrins.h>
+   3          sfr AUXR=0x8e;
+   4          typedef unsigned int uint;
+   5          typedef unsigned char uchar;
+   6          uchar temprecv;
+   7          void Init_uart()
+   8          {
+   9   1              TMOD=0X20;
+  10   1              TH1=0XFD;
+  11   1              TL1=0XFD;
+  12   1              AUXR=0X00;
+  13   1              TR1=1;
+  14   1              SCON=0X50;
+  15   1              ES=1;
+  16   1              EA=1;
+  17   1      }
+  18          
+  19          void Delay1ms()         //@11.0592MHz
+  20          {
+  21   1              unsigned char i, j;
+  22   1      
+  23   1              _nop_();
+  24   1              _nop_();
+  25   1              _nop_();
+  26   1              i = 11;
+  27   1              j = 190;
+  28   1              do
+  29   1              {
+  30   2                      while (--j);
+  31   2              } while (--i);
+  32   1      }
+  33          
+  34          void delay(uint t)
+  35          {
+  36   1              while(t--)
+  37   1              {
+  38   2                      Delay1ms();
+  39   2              }
+  40   1      }
+  41          
+  42          
+  43          
+  44          void Send(uchar bytes)
+  45          {
+  46   1              SBUF=bytes;
+  47   1              while(TI==0);
+  48   1              TI=0;
+  49   1      }
+  50          
+  51          void uart_ser() interrupt 4
+  52          {
+  53   1              if(RI==1)
+  54   1              {
+  55   2                      RI=0;
+C51 COMPILER V9.60.0.0   SERIAL_BASIC                                                      02/25/2020 19:56:01 PAGE 2   
+
+  56   2                      temprecv=SBUF;
+  57   2                      Send(temprecv+1);
+  58   2              }
+  59   1      }
+  60          
+  61          int main()
+  62          {
+  63   1              Init_uart();
+  64   1              delay(250);
+  65   1              Send(0xff);
+  66   1              Send(0x00);     
+  67   1              while(1);
+  68   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =     76    ----
+   CODE SIZE        =    115    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
@@ -62,4 +90,4 @@ MODULE INFORMATION:   STATIC OVERLAYABLE
 END OF MODULE INFORMATION.
 
 
-C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
