@@ -1,0 +1,188 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              07/25/2020 20:29:05 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          /*
+   2          DAC:PCF8591 Over IIC
+   3          CT107D_IAP15F2K61S2
+   4          IRC Freq:12MHz
+   5          */
+   6          #include<stc15f2k60s2.h>
+   7          #include"iic.h"
+   8          #include <intrins.h>
+   9          #define len 60
+  10          typedef unsigned int uint;
+  11          typedef unsigned char uchar;
+  12          
+  13          sbit S4=P3^3;
+  14          sbit S5=P3^2;
+  15          uchar sin_tab[len]={
+  16            128,141,154,167,180,191,203,213,223,231,238,244,249,253,255,255,255,253,249,245,238,231,223,213,203,192,1
+             -80,167,154,141,128,114,101,88,76,64,53,42,33,24,17,11,6,2,0,0,0,2,6,10,16,24,32,41,52,63,75,87,100,114
+  17          };
+  18          uchar sin_status=1; //按键对应的波类型
+  19          float sin_range=1; //按键对应的波幅度
+  20          float freq; //波频率
+  21          float range; //波幅度
+  22          uchar flag=0;
+  23            
+  24          void init_sys()
+  25          {
+  26   1        P2=(P2&0x1F)|0xA0;  //选择到Y5端口
+  27   1        P0=0x00;  //配置蜂鸣器
+  28   1        P2=(P2&0x1F)|0x80;
+  29   1        P0=0xff;  //配置LED灯熄灭
+  30   1      }
+  31          
+  32          void Timer0Init()   //65毫秒@11.0592MHz
+  33          {
+  34   1        float time=1000.0/freq*1000; //转换为定时累加单元的对应参数
+  35   1        AUXR &= 0x7F;   //定时器时钟12T模式
+  36   1        TMOD &= 0xF0;   //设置定时器模式
+  37   1        TL0 = ((65535-(int)time)/len)%256;    //设置定时初值
+  38   1        TH0 = ((65535-(int)time)/len)/256;    //设置定时初值
+  39   1        TF0 = 0;    //清除TF0标志
+  40   1        TR0 = 1;    //定时器0开始计时
+  41   1      }
+  42          
+  43          void Delay100us()   //@11.0592MHz
+  44          {
+  45   1        unsigned char i, j;
+  46   1      
+  47   1        _nop_();
+  48   1        _nop_();
+  49   1        i = 2;
+  50   1        j = 15;
+  51   1        do
+  52   1        {
+  53   2          while (--j);
+C51 COMPILER V9.60.0.0   MAIN                                                              07/25/2020 20:29:05 PAGE 2   
+
+  54   2        } while (--i);
+  55   1      }
+  56          
+  57          void DAC_Write(uchar DAT)
+  58          {
+  59   1          IIC_Start();                  //I2C总线起始地址
+  60   1          IIC_SendByte(0x90);       //发送PCF8591地址加读写方向位0（写）
+  61   1          IIC_WaitAck();
+  62   1        
+  63   1          IIC_SendByte(0x40);     //发送控制字节DAC输出使能 
+  64   1          IIC_WaitAck();              //检测是否发送成功(应答)
+  65   1        
+  66   1          IIC_SendByte(DAT);           //发送数字量交由PCF8591转为模拟量AOUT脚输出
+  67   1          IIC_WaitAck();
+  68   1        
+  69   1          IIC_Stop();                   //I2C停止信号
+  70   1      }
+  71          
+  72          void make_sin() //正弦波参数配置，包括频率与幅度
+  73          {
+  74   1        int i=0;
+  75   1        for(i;i<len;i++)
+  76   1        {
+  77   2          sin_tab[i]=range*sin_tab[i];
+  78   2          sin_tab[i]=(uchar)sin_tab[i]; //强制类型转换，共PCF8591读取
+  79   2        }
+  80   1        Timer0Init();
+  81   1      }
+  82          
+  83          void ser_timer()interrupt 1 //中断服务函数内DAC输出正弦波
+  84          {
+  85   1        if(flag==len+1)
+  86   1        {
+  87   2          flag=0;
+  88   2        }
+  89   1        DAC_Write(sin_tab[flag]);
+  90   1        flag++;
+  91   1      }
+  92          
+  93          void Scan_Keys()  //键盘扫描，循环配置波类型与幅度（S4修改波类型，S5修改幅度）
+  94          {
+  95   1        if(S4==0)
+  96   1        {
+  97   2          Delay100us();
+  98   2          if(S4==0)
+  99   2          {
+ 100   3            if(sin_status==7)
+ 101   3            {
+ 102   4              sin_status=1;
+ 103   4            }
+ 104   3            sin_status++;
+ 105   3          }
+ 106   2        } 
+ 107   1        
+ 108   1        if(S5==0)
+ 109   1        {
+ 110   2          Delay100us();
+ 111   2          if(S5==0)
+ 112   2          {
+ 113   3            if(sin_range==1)
+ 114   3            {
+ 115   4              sin_range=0.1;
+C51 COMPILER V9.60.0.0   MAIN                                                              07/25/2020 20:29:05 PAGE 3   
+
+ 116   4            }
+ 117   3            sin_range=sin_range+0.1;
+ 118   3          }
+ 119   2        }
+ 120   1      }
+ 121          
+ 122          void set_para() //根据按键配置波参数
+ 123          {
+ 124   1        Scan_Keys();
+ 125   1        switch(sin_status){
+ 126   2          case 1:
+ 127   2            freq=261.6;
+ 128   2            break;
+ 129   2          case 2:
+ 130   2            freq=293.6;
+ 131   2            break;
+ 132   2          case 3:
+ 133   2            freq=329.6;
+ 134   2            break;
+ 135   2          case 4:
+ 136   2            freq=349.2;
+ 137   2            break;
+ 138   2          case 5:
+ 139   2            freq=392;
+ 140   2            break;
+ 141   2          case 6:
+ 142   2            freq=440;
+ 143   2            break;
+ 144   2          case 7:
+ 145   2            freq=493.8;
+ 146   2            break;
+ 147   2        }
+ 148   1        range=sin_range;
+ 149   1      }
+ 150          
+ 151          int main()
+ 152          {
+ 153   1        init_sys();
+ 154   1        while(1)
+ 155   1        {
+ 156   2          set_para();
+ 157   2          make_sin();
+ 158   2        }
+ 159   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    595    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     74       7
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

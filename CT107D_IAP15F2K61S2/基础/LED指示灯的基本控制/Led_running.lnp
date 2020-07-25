@@ -1,0 +1,4 @@
+"STARTUP.obj",
+"Led_running.obj" 
+TO "Led_running" 
+RAMSIZE(256) 
