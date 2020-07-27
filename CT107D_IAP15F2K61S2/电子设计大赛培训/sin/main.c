@@ -1,7 +1,10 @@
 /*
-DAC:PCF8591 Over IIC
+2020-07-24 22:30
+Analyzed by LogicAnalyzer
 CT107D_IAP15F2K61S2
 IRC Freq:12MHz
+DAC:PCF8591 Over IIC
+S4: Change freq;S5: Chang Range
 */
 #include<stc15f2k60s2.h>
 #include"iic.h"
@@ -12,32 +15,35 @@ typedef unsigned char uchar;
 
 sbit S4=P3^3;
 sbit S5=P3^2;
-uchar sin_tab[len]={
+uchar code sin_tab[len]={
 	128,141,154,167,180,191,203,213,223,231,238,244,249,253,255,255,255,253,249,245,238,231,223,213,203,192,180,167,154,141,128,114,101,88,76,64,53,42,33,24,17,11,6,2,0,0,0,2,6,10,16,24,32,41,52,63,75,87,100,114
 };
+uchar sin_tab_temp[len]={0};
 uchar sin_status=1; //按键对应的波类型
 float sin_range=1; //按键对应的波幅度
-float freq; //波频率
-float range; //波幅度
+float freq=261.6; //波频率
+float range=1.0; //波幅度
 uchar flag=0;
 	
 void init_sys()
 {
-	P2=(P2&0x1F)|0xA0;	//选择到Y5端口
-	P0=0x00;  //配置蜂鸣器
 	P2=(P2&0x1F)|0x80;
 	P0=0xff;	//配置LED灯熄灭
+	P2=(P2&0x1F)|0xA0;	//选择到Y5端口
+	P0=0x00;  //配置蜂鸣器
 }
 
-void Timer0Init()		//65毫秒@11.0592MHz
+void Timer0Init()		//@12MHz
 {
-	float time=1000.0/freq*1000; //转换为定时累加单元的对应参数
+	float time=1000000.0/(freq*len); //转换为定时累加单元的对应参数
 	AUXR &= 0x7F;		//定时器时钟12T模式
 	TMOD &= 0xF0;		//设置定时器模式
-	TL0 = ((65535-(int)time)/len)%256;		//设置定时初值
-	TH0 = ((65535-(int)time)/len)/256;		//设置定时初值
+	TL0 = (65535-(int)time)%256;		//设置定时初值
+	TH0 = (65535-(int)time)/256;		//设置定时初值
 	TF0 = 0;		//清除TF0标志
 	TR0 = 1;		//定时器0开始计时
+	ET0 = 1;
+	EA = 1;
 }
 
 void Delay100us()		//@11.0592MHz
@@ -72,22 +78,23 @@ void DAC_Write(uchar DAT)
 void make_sin()	//正弦波参数配置，包括频率与幅度
 {
 	int i=0;
+	float temp;
 	for(i;i<len;i++)
 	{
-		sin_tab[i]=range*sin_tab[i];
-		sin_tab[i]=(uchar)sin_tab[i];	//强制类型转换，共PCF8591读取
+		temp=range*sin_tab[i];
+		sin_tab_temp[i]=(unsigned char)temp;	//强制类型转换，共PCF8591读取
 	}
 	Timer0Init();
 }
 
 void ser_timer()interrupt 1 //中断服务函数内DAC输出正弦波
 {
-	if(flag==len+1)
+	DAC_Write(sin_tab_temp[flag]);
+	flag++;
+	if(flag==len)
 	{
 		flag=0;
 	}
-	DAC_Write(sin_tab[flag]);
-	flag++;
 }
 
 void Scan_Keys()	//键盘扫描，循环配置波类型与幅度（S4修改波类型，S5修改幅度）
@@ -102,6 +109,7 @@ void Scan_Keys()	//键盘扫描，循环配置波类型与幅度（S4修改波类型，S5修改幅度）
 				sin_status=1;
 			}
 			sin_status++;
+			while(S4==0);
 		}
 	}	
 	
@@ -115,6 +123,7 @@ void Scan_Keys()	//键盘扫描，循环配置波类型与幅度（S4修改波类型，S5修改幅度）
 				sin_range=0.1;
 			}
 			sin_range=sin_range+0.1;
+			while(S4==0);
 		}
 	}
 }

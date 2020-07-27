@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.0.0   IIC                                                               07/25/2020 15:01:52 PAGE 1   
+C51 COMPILER V9.60.0.0   IIC                                                               07/26/2020 17:41:09 PAGE 1   
 
 
 C51 COMPILER V9.60.0.0, COMPILATION OF MODULE IIC
@@ -62,7 +62,7 @@ line level    source
   52   1          SCL  = 1;
   53   1          IIC_Delay(DELAY_TIME);
   54   1          ackbit = SDA;
-C51 COMPILER V9.60.0.0   IIC                                                               07/25/2020 15:01:52 PAGE 2   
+C51 COMPILER V9.60.0.0   IIC                                                               07/26/2020 17:41:09 PAGE 2   
 
   55   1          SCL = 0;
   56   1          IIC_Delay(DELAY_TIME);
