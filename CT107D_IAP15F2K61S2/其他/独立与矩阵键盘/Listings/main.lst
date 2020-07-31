@@ -1,0 +1,156 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              07/31/2020 23:10:32 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include<stc15f2k60s2.h>
+   2          typedef unsigned int uint;
+   3          typedef unsigned char uchar;
+   4          uchar code dig_code[]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90,0x88,0x80,0xc6,0xc0,0x86,0x8e,0xb
+             -f,0x7f,0xff};
+   5          sbit S7 = P3^0;        
+   6          sbit S6 = P3^1;        
+   7          sbit S5 = P3^2;
+   8          sbit S4 = P3^3;
+   9          uchar KeySta[4];
+  10          uint count=0;
+  11          uchar flag=0;
+  12          void delay(uint t)
+  13          {
+  14   1        while(t--);
+  15   1      }
+  16          
+  17          void select(uchar channel)
+  18          {
+  19   1        switch(channel)
+  20   1        {
+  21   2          case 4: 
+  22   2            P2=(P2&0X1f)|0X80;//不改变P2其他IO口电平的情况下改变138译码器输入
+  23   2            break;
+  24   2          case 5: 
+  25   2            P2=(P2&0X1f)|0Xa0;
+  26   2            break;
+  27   2          case 6: 
+  28   2            P2=(P2&0X1f)|0Xc0;
+  29   2            break;
+  30   2          case 7: 
+  31   2            P2=(P2&0X1f)|0Xe0;
+  32   2            break;
+  33   2        }
+  34   1          
+  35   1      }
+  36          
+  37          void display(uchar pos,uchar dig)
+  38          {
+  39   1        delay(2000);
+  40   1        P0=0XFF;
+  41   1        select(6);
+  42   1        P0=0X01<<pos;
+  43   1        select(7);
+  44   1        P0=dig_code[dig];
+  45   1      }
+  46          
+  47          void InitSys()
+  48          {
+  49   1        select(5);
+  50   1        P0=0X00;
+  51   1        select(4);
+  52   1        P0=0XFF;
+  53   1      }
+C51 COMPILER V9.60.0.0   MAIN                                                              07/31/2020 23:10:32 PAGE 2   
+
+  54          
+  55          void Timer0Init(void)   //5毫秒@11.0592MHz
+  56          {
+  57   1        AUXR &= 0x7F;   //定时器时钟12T模式
+  58   1        TMOD &= 0xF0;   //设置定时器模式
+  59   1        TL0 = 0x00;   //设置定时初值
+  60   1        TH0 = 0xEE;   //设置定时初值设置定时初值
+  61   1        TF0 = 0;    //清除TF0标志
+  62   1        TR0 = 1;    //定时器0开始计时
+  63   1        ET0 = 1;
+  64   1        EA = 1;
+  65   1      }
+  66          
+  67          
+  68          void Scan_Key_4(void)
+  69          {
+  70   1        uint i;
+  71   1        static uchar keybuff[] = {0xff,0xff,0xff,0xff};
+  72   1        keybuff[0] = (keybuff[0]<<1)|S4;
+  73   1        keybuff[1] = (keybuff[1]<<1)|S5;
+  74   1        keybuff[2] = (keybuff[2]<<1)|S6;
+  75   1        keybuff[3] = (keybuff[3]<<1)|S7;
+  76   1        for(i = 0;i < 4;i ++)
+  77   1        {
+  78   2          if(keybuff[i] == 0xff)    //连续扫描8次都是1,16ms内都是弹起状态，按键已松开
+  79   2          {
+  80   3            KeySta[i] = 1;
+  81   3          }
+  82   2          else if(keybuff[i] == 0x00) //连续扫描8次都是0，16ms内都是按下状态，按键已按下
+  83   2          {
+  84   3            KeySta[i] = 0;
+  85   3          }
+  86   2        }
+  87   1      
+  88   1      }
+  89          
+  90          void Long_Press()
+  91          {
+  92   1        if(KeySta[2]==0)
+  93   1        {
+  94   2          count++;
+  95   2        }
+  96   1        else
+  97   1        {
+  98   2          count=0;
+  99   2        }
+ 100   1        if(count==200)
+ 101   1        {
+ 102   2          flag=~flag;
+ 103   2          count=0;
+ 104   2        }
+ 105   1      }
+ 106          
+ 107          void Ser_Timer0() interrupt 1
+ 108          {
+ 109   1        Scan_Key_4();
+ 110   1        Long_Press();
+ 111   1      }
+ 112          
+ 113          int main()
+ 114          {
+ 115   1        InitSys();
+C51 COMPILER V9.60.0.0   MAIN                                                              07/31/2020 23:10:32 PAGE 3   
+
+ 116   1        P3 = 0XFF;
+ 117   1        Timer0Init();
+ 118   1        while(1)
+ 119   1        {
+ 120   2          display(0,KeySta[0]);
+ 121   2          display(1,KeySta[1]);
+ 122   2          if(flag)
+ 123   2          {
+ 124   3            display(2,KeySta[2]);
+ 125   3          }
+ 126   2        }
+ 127   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    345    ----
+   CONSTANT SIZE    =     19    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     11    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

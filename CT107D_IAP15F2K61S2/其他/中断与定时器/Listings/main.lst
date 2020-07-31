@@ -1,0 +1,124 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              07/28/2020 10:01:30 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include<reg52.h>
+   2          unsigned int count_t = 0; //定时器计数
+   3          unsigned int count_f = 0; //频率计数
+   4          unsigned int dat_f = 0; //频率数值储存
+   5          
+   6          void Init_Sys() //初始化函数，涉及译码器，与非门与锁存器，可不参阅。
+   7          {
+   8   1        P2 = (P2&0X1F)|0XA0; //仅改变最低三位的值，而不影响其它位电平。
+   9   1        P0 = 0X00;
+  10   1        P2 = (P2&0X1F)|0X80;
+  11   1        P0 = 0XFF;
+  12   1      }
+  13          
+  14          void Init_Timer()
+  15          {
+  16   1        TMOD = 0x16; //定时器1，16位定时；定时器0，8位自动重装计数。
+  17   1        TL0 = 0xff;
+  18   1        TH0 = 0xff;
+  19   1        TH1 = (65535-50000)/256;
+  20   1        TL1 = (65535-50000)%256;
+  21   1        
+  22   1        ET0 = 1;
+  23   1        ET1 = 1;
+  24   1        EA = 1;
+  25   1        TR0 = 1;
+  26   1        TR1 = 1;
+  27   1      }
+  28          
+  29          void Ser_Timer0() interrupt 1
+  30          {
+  31   1        count_f++;
+  32   1      }
+  33          
+  34          void Ser_Timer1() interrupt 3
+  35          {
+  36   1        TH1 = (65535-50000)/256;
+  37   1        TL1 = (65535-50000)%256;
+  38   1        count_t++;
+  39   1        if(count_t == 20) //一秒内count_f的计数
+  40   1        {
+  41   2          dat_f = count_f;
+  42   2          count_f = 0;
+  43   2          count_t = 0;
+  44   2        }
+  45   1      }
+  46          
+  47          
+  48          /* 外部中断初始化与服务函数
+  49          void Init_INT0()
+  50          {
+  51            EX0 = 1; //允许外部中断0，详见前文中断结构。
+  52            IT0 = 1; //配置外部中断触发方式——下降沿
+  53            EA = 1; //允许总中断
+  54          }
+C51 COMPILER V9.60.0.0   MAIN                                                              07/28/2020 10:01:30 PAGE 2   
+
+  55          
+  56          void Init_INT1()
+  57          {
+  58            EX1 = 1;
+  59            IT1 = 1;
+  60            EA = 1;
+  61          }
+  62          
+  63          void Ser_INT0() interrupt 0
+  64          {
+  65            L1 = ~L1; //取反LED灯对应端口电平
+  66          }
+  67          
+  68          void Ser_INT1() interrupt 2
+  69          {
+  70            L2 = ~L2;
+  71          }
+  72          */
+  73          int main()
+  74          {
+  75   1        Init_Sys();
+  76   1      //  Init_INT0();
+  77   1      //  Init_INT1();
+  78   1        Init_Timer();
+  79   1        while(1)
+  80   1        {
+  81   2          if(dat_f>10)
+  82   2          {
+  83   3            P0 = 0XFE;
+  84   3          }
+  85   2          if(dat_f>100)
+  86   2          {
+  87   3            P0 = 0XFC;
+  88   3          }
+  89   2          if(dat_f>1000)
+  90   2          {
+  91   3            P0 = 0XF8;
+  92   3          }
+  93   2          if(dat_f>10000)
+  94   2          {
+  95   3            P0 = 0XF0;
+  96   3          }
+  97   2        }
+  98   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    165    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      6    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

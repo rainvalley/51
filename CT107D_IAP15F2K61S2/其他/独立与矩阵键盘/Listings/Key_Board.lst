@@ -1,0 +1,151 @@
+C51 COMPILER V9.60.0.0   KEY_BOARD                                                         07/31/2020 23:15:59 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE KEY_BOARD
+OBJECT MODULE PLACED IN .\Objects\Key_Board.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE Key_Board.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings
+                    -\Key_Board.lst) TABS(2) OBJECT(.\Objects\Key_Board.obj)
+
+line level    source
+
+   1          #include<stc15f2k60s2.h>
+   2          typedef unsigned int uint;
+   3          typedef unsigned char uchar;
+   4          uchar code dig_code[]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90,0x88,0x80,0xc6,0xc0,0x86,0x8e,0xb
+             -f,0x7f,0xff};
+   5          sbit KEY_IN_1 = P4^4;
+   6          sbit KEY_IN_2 = P4^2;
+   7          sbit KEY_IN_3 = P3^5;
+   8          sbit KEY_IN_4 = P3^4;
+   9          sbit KEY_OUT_1 = P3^0;
+  10          sbit KEY_OUT_2 = P3^1;
+  11          sbit KEY_OUT_3 = P3^2;
+  12          sbit KEY_OUT_4 = P3^3;
+  13          uchar KeySta[4][4]={{1,1,1,1},{1,1,1,1},{1,1,1,1},{1,1,1,1}};
+  14          void delay(uint t)
+  15          {
+  16   1        while(t--);
+  17   1      }
+  18          
+  19          void select(uchar channel)
+  20          {
+  21   1        switch(channel)
+  22   1        {
+  23   2          case 4: 
+  24   2            P2=(P2&0X1f)|0X80;//不改变P2其他IO口电平的情况下改变138译码器输入
+  25   2            break;
+  26   2          case 5: 
+  27   2            P2=(P2&0X1f)|0Xa0;
+  28   2            break;
+  29   2          case 6: 
+  30   2            P2=(P2&0X1f)|0Xc0;
+  31   2            break;
+  32   2          case 7: 
+  33   2            P2=(P2&0X1f)|0Xe0;
+  34   2            break;
+  35   2        }
+  36   1          
+  37   1      }
+  38          
+  39          void display(uchar pos,uchar dig)
+  40          {
+  41   1        select(6);
+  42   1        P0=0X01<<pos;
+  43   1        select(7);
+  44   1        P0=dig_code[dig];
+  45   1      }
+  46          
+  47          void InitSys()
+  48          {
+  49   1        select(5);
+  50   1        P0=0X00;
+  51   1        select(4);
+  52   1        P0=0XFF;
+  53   1      }
+C51 COMPILER V9.60.0.0   KEY_BOARD                                                         07/31/2020 23:15:59 PAGE 2   
+
+  54          
+  55          void Timer0Init(void)   //5毫秒@11.0592MHz
+  56          {
+  57   1        AUXR &= 0x7F;   //定时器时钟12T模式
+  58   1        TMOD &= 0xF0;   //设置定时器模式
+  59   1        TL0 = 0x00;   //设置定时初值
+  60   1        TH0 = 0xEE;   //设置定时初值设置定时初值
+  61   1        TF0 = 0;    //清除TF0标志
+  62   1        TR0 = 1;    //定时器0开始计时
+  63   1        ET0 = 1;
+  64   1        EA = 1;
+  65   1      }
+  66          
+  67          
+  68          void Scan_Key_16(void)
+  69          {
+  70   1        uchar i;
+  71   1        static uchar keyout = 0;    //矩阵按键扫描输出索引
+  72   1        static uchar keybuff[4][4] = {{0xff,0xff,0xff,0xff},{0xff,0xff,0xff,0xff},{0xff,0xff,0xff,0xff},{0xff,0xf
+             -f,0xff,0xff}};  //矩阵按键扫描缓存区
+  73   1        
+  74   1        keybuff[keyout][0] = (keybuff[keyout][0] << 1) | KEY_IN_1;    //将每一行的4个按键值移入缓存区
+  75   1        keybuff[keyout][1] = (keybuff[keyout][1] << 1) | KEY_IN_2;
+  76   1        keybuff[keyout][2] = (keybuff[keyout][2] << 1) | KEY_IN_3;
+  77   1        keybuff[keyout][3] = (keybuff[keyout][3] << 1) | KEY_IN_4;
+  78   1          
+  79   1        //消抖后更新按键状态
+  80   1        for(i = 0;i < 4;i ++)
+  81   1        {
+  82   2          if((keybuff[keyout][i] & 0x0f) == 0x00)
+  83   2            KeySta[keyout][i] = 0;    //连续4次扫描值都是0，即4×4s内都是按下状态，认为按键已平稳按下
+  84   2          else if((keybuff[keyout][i] & 0x0f) == 0x0f)
+  85   2            KeySta[keyout][i] = 1;    //连续4次扫描值都是1，即4×4s内都是松开状态，认为按键已稳定弹起
+  86   2        }
+  87   1        
+  88   1        //执行下一次的扫描输出
+  89   1        keyout ++;
+  90   1        keyout = keyout & 0x03;   //索引加到4就归零
+  91   1        switch(keyout)            //根据索引，释放当前输出引脚，拉低下次的输出引脚
+  92   1        {
+  93   2          case 0:KEY_OUT_4 = 1;KEY_OUT_1 = 0;break;
+  94   2          case 1:KEY_OUT_1 = 1;KEY_OUT_2 = 0;break;
+  95   2          case 2:KEY_OUT_2 = 1;KEY_OUT_3 = 0;break;
+  96   2          case 3:KEY_OUT_3 = 1;KEY_OUT_4 = 0;break;
+  97   2          default:break;
+  98   2        }
+  99   1      
+ 100   1      }
+ 101          
+ 102          void Ser_Timer0() interrupt 1
+ 103          {
+ 104   1        Scan_Key_16();
+ 105   1      }
+ 106          
+ 107          int main()
+ 108          {
+ 109   1        InitSys();
+ 110   1        P3 = 0XFF;
+ 111   1        Timer0Init();
+ 112   1        while(1)
+ 113   1        {
+ 114   2          display(0,KeySta[0][0]);
+C51 COMPILER V9.60.0.0   KEY_BOARD                                                         07/31/2020 23:15:59 PAGE 3   
+
+ 115   2          delay(2000);
+ 116   2          P0=0XFF;
+ 117   2          display(1,KeySta[1][1]);
+ 118   2          delay(2000);
+ 119   2          P0=0XFF;
+ 120   2        }
+ 121   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    428    ----
+   CONSTANT SIZE    =     19    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     33    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

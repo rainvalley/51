@@ -1,0 +1,122 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              07/31/2020 21:22:35 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include<stc15f2k60s2.h>
+   2          typedef unsigned char uchar;
+   3          typedef unsigned int uint;
+   4          uchar code dig_code[]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90,0x88,0x80,0xc6,0xc0,0x86,0x8e,0xb
+             -f,0x7f,0xff};
+   5          sbit S7 = P3^0;
+   6          uint count = 0;
+   7          void Show_Count(uint count);
+   8          
+   9          void Select(uchar channel)
+  10          {
+  11   1        switch(channel)
+  12   1        {
+  13   2          case 4: 
+  14   2            P2=(P2&0X1f)|0X80;//不改变P2其他IO口电平的情况下改变138译码器输入
+  15   2            break;
+  16   2          case 5: 
+  17   2            P2=(P2&0X1f)|0Xa0;
+  18   2            break;
+  19   2          case 6: 
+  20   2            P2=(P2&0X1f)|0Xc0;
+  21   2            break;
+  22   2          case 7: 
+  23   2            P2=(P2&0X1f)|0Xe0;
+  24   2            break;
+  25   2        }
+  26   1      }
+  27          
+  28          void Delay(uint t)
+  29          {
+  30   1        while(t--);
+  31   1      }
+  32          
+  33          void Init_Sys()
+  34          {
+  35   1        Select(5);
+  36   1        P0=0x00;
+  37   1        Select(4);
+  38   1        P0=0XFF;
+  39   1      }
+  40          
+  41          void Scan_Key()
+  42          {
+  43   1        if(S7==0)
+  44   1        {
+  45   2          count++;
+  46   2          while(S7==0)
+  47   2          {
+  48   3            Show_Count(count);
+  49   3          }
+  50   2        }
+  51   1      }
+  52          
+  53          void Timer0Init(void)   //50毫秒@11.0592MHz
+C51 COMPILER V9.60.0.0   MAIN                                                              07/31/2020 21:22:35 PAGE 2   
+
+  54          {
+  55   1        AUXR &= 0x7F;   //定时器时钟12T模式
+  56   1        TMOD &= 0xF0;   //设置定时器模式
+  57   1        TL0 = 0x00;   //设置定时初值
+  58   1        TH0 = 0x4C;   //设置定时初值
+  59   1        TF0 = 0;    //清除TF0标志
+  60   1        TR0 = 1;    //定时器0开始计时
+  61   1        ET0 = 1;
+  62   1        EA = 1;
+  63   1      }
+  64          
+  65          void Display(uchar pos,uchar dig)
+  66          {
+  67   1        Delay(200);
+  68   1        P0=0XFF;
+  69   1        Select(6);
+  70   1        P0=0X01<<pos;
+  71   1        Select(7);
+  72   1        P0=dig_code[dig];
+  73   1      }
+  74          
+  75          void Show_Count(uint count)
+  76          {
+  77   1        Display(7,count%10);
+  78   1        Display(6,count/10%10);
+  79   1        Display(5,count/100);
+  80   1      }
+  81          
+  82          void Ser_Timer0() interrupt 1
+  83          {
+  84   1        Scan_Key();
+  85   1      }
+  86          
+  87          void main()
+  88          {
+  89   1        Init_Sys();
+  90   1        Timer0Init();
+  91   1        while(1)
+  92   1        {
+  93   2          Show_Count(count);
+  94   2        }
+  95   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    299    ----
+   CONSTANT SIZE    =     19    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      2       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
