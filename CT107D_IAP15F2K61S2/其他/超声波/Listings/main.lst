@@ -1,0 +1,179 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              08/08/2020 10:12:52 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include<stc15f2k60s2.h>
+   2          #include<intrins.h>
+   3          typedef unsigned char uchar;
+   4          typedef unsigned int uint;
+   5          uchar code dig_code[]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90,0x86};
+   6          sbit TX=P1^0; //发送引脚
+   7          sbit RX=P1^1; //接收引脚
+   8          uint distance=0;
+   9          void delay(uint t)
+  10          {
+  11   1        while(t--);
+  12   1      }
+  13          
+  14          void delay12us()
+  15          {
+  16   1        unsigned char i;
+  17   1      
+  18   1        _nop_();
+  19   1        _nop_();
+  20   1        _nop_();
+  21   1        i = 33;
+  22   1        while (--i);
+  23   1      }
+  24          
+  25          
+  26          void select(uchar channel)
+  27          {
+  28   1        switch(channel)
+  29   1        {
+  30   2          case 4:
+  31   2            P2=(P2&0x1f)|0x80;
+  32   2            break;
+  33   2          case 5:
+  34   2            P2=(P2&0x1f)|0xa0;
+  35   2            break;
+  36   2          case 6:
+  37   2            P2=(P2&0x1f)|0xc0;
+  38   2            break;
+  39   2          case 7:
+  40   2            P2=(P2&0x1f)|0xe0;
+  41   2            break;
+  42   2          case 0:
+  43   2            P2=(P2&0x1f);
+  44   2            break;
+  45   2        }
+  46   1      }
+  47          
+  48          void init_sys()
+  49          {
+  50   1        select(4);
+  51   1        P0=0xff;
+  52   1        select(5);
+  53   1        P0=0x00;
+  54   1        select(0);
+C51 COMPILER V9.60.0.0   MAIN                                                              08/08/2020 10:12:52 PAGE 2   
+
+  55   1      }
+  56          
+  57          void display(uchar pos,uchar value)
+  58          {
+  59   1        delay(1000);
+  60   1        P0=0xff;
+  61   1        select(6);
+  62   1        P0=0x01<<pos;
+  63   1        select(7);
+  64   1        P0=dig_code[value];
+  65   1      }
+  66          
+  67          void send_wave()
+  68          {
+  69   1        uchar i;
+  70   1        for(i=0;i<8;i++) //发送8个40KHz的超声波
+  71   1        {
+  72   2          TX=1;
+  73   2          delay12us();
+  74   2          TX=0;
+  75   2          delay12us();
+  76   2        }
+  77   1      }
+  78          
+  79          void measure_distance()
+  80          {
+  81   1        uint time=0;
+  82   1        TMOD|=0x10;
+  83   1        TL1=0;
+  84   1        TH1=0;
+  85   1        TF1=0;
+  86   1        ET1=0;
+  87   1        
+  88   1        send_wave(); //开始发送并启动定时器统计接收的时间
+  89   1        TR1=1;
+  90   1        while((RX==1)&&(TF1==0)); //当未接收到反射且定时器未溢出时，死循环
+  91   1        TR1=0;
+  92   1        
+  93   1        if(TF1==0) //定时器未溢出，根据反射时间计算举例
+  94   1        {
+  95   2          time=(TH1<<8)|TL1;
+  96   2          distance=((time/10)*17)/100+3;
+  97   2        }
+  98   1        else //定时器溢出，超过最大量程
+  99   1        {
+ 100   2          TF1=0;
+ 101   2          distance=999;
+ 102   2        }
+ 103   1      }
+ 104          
+ 105          void display_distance()
+ 106          {
+ 107   1        if(distance==999)
+ 108   1        {
+ 109   2          display(0,10);
+ 110   2        }
+ 111   1        else
+ 112   1        {
+ 113   2          display(0,distance/100);
+ 114   2          display(1,distance%100/10);
+ 115   2          display(2,distance%10);
+ 116   2        }
+C51 COMPILER V9.60.0.0   MAIN                                                              08/08/2020 10:12:52 PAGE 3   
+
+ 117   1      }
+ 118          
+ 119          void init_timer0(void)    //50毫秒@11.0592MHz
+ 120          {
+ 121   1        AUXR &= 0x7F;   //定时器时钟12T模式
+ 122   1        TMOD &= 0xF0;   //设置定时器模式
+ 123   1        TL0 = 0x00;   //设置定时初值
+ 124   1        TH0 = 0x4C;   //设置定时初值
+ 125   1        TF0 = 0;    //清除TF0标志
+ 126   1        TR0 = 1;    //定时器0开始计时
+ 127   1        ET0 = 1;
+ 128   1        EA = 1;
+ 129   1      }
+ 130          
+ 131          void ser_timer0() interrupt 1
+ 132          {
+ 133   1        static uchar count=0;
+ 134   1        if(count==4)
+ 135   1        {
+ 136   2          count=0;
+ 137   2          measure_distance();
+ 138   2        }
+ 139   1        count++;
+ 140   1      } 
+ 141          
+ 142          
+ 143          int main()
+ 144          {
+ 145   1        init_sys();
+ 146   1        init_timer0();
+ 147   1        while(1)
+ 148   1        {
+ 149   2          display_distance();
+ 150   2        }
+ 151   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    407    ----
+   CONSTANT SIZE    =     11    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      3    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

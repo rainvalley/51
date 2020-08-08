@@ -1,0 +1,129 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              08/03/2020 17:43:18 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include<stc15f2k60s2.h>
+   2          typedef unsigned char uchar;
+   3          typedef unsigned int uint;
+   4          sbit step = P0^0;
+   5          
+   6          void select(uchar channel)
+   7          {
+   8   1        switch(channel)
+   9   1        {
+  10   2          case 4:
+  11   2            P2=(P2&0x1f)|0x80;
+  12   2            break;
+  13   2          case 5:
+  14   2            P2=(P2&0x1f)|0xa0;
+  15   2            break;
+  16   2          case 0:
+  17   2            P2=P2&0x1f;
+  18   2            break;
+  19   2        }
+  20   1      }
+  21          
+  22          void init_sys()
+  23          {
+  24   1        select(4);
+  25   1        P0=0xff;
+  26   1        select(5);
+  27   1        P0=0x00;
+  28   1      }
+  29          
+  30          void init_timer0(void)    //100us@11.0592MHz
+  31          {
+  32   1        AUXR &= 0x7F;   //定时器时钟12T模式
+  33   1        TMOD &= 0xF0;   //设置定时器模式
+  34   1        TL0 = 0xA4;   //设置定时初值
+  35   1        TH0 = 0xFF;   //设置定时初值
+  36   1        TF0 = 0;    //清除TF0标志
+  37   1        TR0 = 1;    //定时器0开始计时
+  38   1        ET0 = 1;
+  39   1        EA = 1;
+  40   1      }
+  41          
+  42          void ser_timer0() interrupt 1
+  43          {
+  44   1        static uint s_count=0;
+  45   1        static uint s_step=0;
+  46   1        s_count++;
+  47   1        if(s_count==100)
+  48   1        {
+  49   2          s_step++;
+  50   2        }
+  51   1        if(s_step==100)
+  52   1        {
+  53   2          s_step=0;
+  54   2        }
+C51 COMPILER V9.60.0.0   MAIN                                                              08/03/2020 17:43:18 PAGE 2   
+
+  55   1        if(s_count==s_step)
+  56   1        {
+  57   2          select(4);
+  58   2          P0=0xff;
+  59   2        }
+  60   1        if(s_count==100)
+  61   1        {
+  62   2          select(4);
+  63   2          P0=0x00;
+  64   2          s_count=0;
+  65   2        }
+  66   1      }
+  67          
+  68          void init_timer1(void)    //0.5毫秒@11.0592MHz
+  69          {
+  70   1        AUXR &= 0xBF;   //定时器时钟12T模式
+  71   1        TMOD &= 0x0F;   //设置定时器模式
+  72   1        TL1 = 0x33;   //设置定时初值
+  73   1        TH1 = 0xFE;   //设置定时初值
+  74   1        TF1 = 0;    //清除TF1标志
+  75   1        TR1 = 1;    //定时器1开始计时
+  76   1        ET1 = 1;
+  77   1        EA = 1;
+  78   1      }
+  79          
+  80          void ser_timer1() interrupt 3
+  81          {
+  82   1        static uchar s_sg=0;
+  83   1        s_sg++;
+  84   1        if(s_sg==4)
+  85   1        {
+  86   2          step=1;
+  87   2        }
+  88   1        if(s_sg==40)
+  89   1        {
+  90   2          step=0;
+  91   2          s_sg=0;
+  92   2        }
+  93   1      }
+  94          
+  95          int main()
+  96          {
+  97   1        init_sys();
+  98   1        //init_timer0();
+  99   1        init_timer1();
+ 100   1        P0M0=0x01;
+ 101   1        P0M1=0x00;
+ 102   1        while(1);
+ 103   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    237    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      5    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

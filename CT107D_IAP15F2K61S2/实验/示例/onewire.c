@@ -24,11 +24,11 @@ void Write_DS18B20(unsigned char dat)
 	unsigned char i;
 	for(i=0;i<8;i++)
 	{
-		DQ = 0;
-		DQ = dat&0x01;
-		Delay_OneWire(5);
-		DQ = 1;
-		dat >>= 1;
+		DQ = 0; //拉低总线10-15us
+		DQ = dat&0x01; //向总线写入数据
+		Delay_OneWire(5); //维持数据15-45us 
+		DQ = 1; //释放总线
+		dat >>= 1; //准备发送下一个数据位
 	}
 	Delay_OneWire(5);
 }
@@ -41,14 +41,14 @@ unsigned char Read_DS18B20(void)
   
 	for(i=0;i<8;i++)
 	{
-		DQ = 0;
+		DQ = 0; //拉低总线10-15us
 		dat >>= 1;
 		DQ = 1;
 		if(DQ)
 		{
 			dat |= 0x80;
 		}	    
-		Delay_OneWire(5);
+		Delay_OneWire(5); //读取总线电平后延迟45us
 	}
 	return dat;
 }
@@ -62,9 +62,9 @@ bit init_ds18b20(void)
   	Delay_OneWire(12);
   	DQ = 0;
   	Delay_OneWire(80);
-  	DQ = 1;
+  	DQ = 1; //拉低总线480us以上，然后释放
   	Delay_OneWire(10); 
-    initflag = DQ;     
+    initflag = DQ; //等待15-60us后，将DQ写入initflag，若为低则DS18B20成功应答
   	Delay_OneWire(5);
   
   	return initflag;

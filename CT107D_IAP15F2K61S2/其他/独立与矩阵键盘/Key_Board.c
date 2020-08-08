@@ -38,6 +38,8 @@ void select(uchar channel)
 
 void display(uchar pos,uchar dig)
 {
+	delay(2000);
+	P0=0XFF;
 	select(6);
 	P0=0X01<<pos;
 	select(7);
@@ -52,12 +54,12 @@ void InitSys()
 	P0=0XFF;
 }
 
-void Timer0Init(void)		//5毫秒@11.0592MHz
+void Timer0Init(void)		//1毫秒@11.0592MHz
 {
 	AUXR &= 0x7F;		//定时器时钟12T模式
 	TMOD &= 0xF0;		//设置定时器模式
-	TL0 = 0x00;		//设置定时初值
-	TH0 = 0xEE;		//设置定时初值设置定时初值
+	TL0 = 0x66;		//设置定时初值
+	TH0 = 0xFC;		//设置定时初值设置定时初值
 	TF0 = 0;		//清除TF0标志
 	TR0 = 1;		//定时器0开始计时
 	ET0 = 1;
@@ -68,7 +70,7 @@ void Timer0Init(void)		//5毫秒@11.0592MHz
 void Scan_Key_16(void)
 {
 	uchar i;
-	static uchar keyout = 0;		//矩阵按键扫描输出索引
+	static uchar keyout = 0;		//矩阵按键扫描输出行索引
 	static uchar keybuff[4][4] = {{0xff,0xff,0xff,0xff},{0xff,0xff,0xff,0xff},{0xff,0xff,0xff,0xff},{0xff,0xff,0xff,0xff}};	//矩阵按键扫描缓存区
 	
 	keybuff[keyout][0] = (keybuff[keyout][0] << 1) | KEY_IN_1;		//将每一行的4个按键值移入缓存区
@@ -80,9 +82,9 @@ void Scan_Key_16(void)
 	for(i = 0;i < 4;i ++)
 	{
 		if((keybuff[keyout][i] & 0x0f) == 0x00)
-			KeySta[keyout][i] = 0;		//连续4次扫描值都是0，即4×4s内都是按下状态，认为按键已平稳按下
+			KeySta[keyout][i] = 0;		//连续4次扫描值都是0，即4×4ms内都是按下状态，认为按键已平稳按下
 		else if((keybuff[keyout][i] & 0x0f) == 0x0f)
-			KeySta[keyout][i] = 1;		//连续4次扫描值都是1，即4×4s内都是松开状态，认为按键已稳定弹起
+			KeySta[keyout][i] = 1;		//连续4次扫描值都是1，即4×4ms内都是松开状态，认为按键已稳定弹起
 	}
 	
 	//执行下一次的扫描输出
@@ -112,10 +114,8 @@ int main()
 	while(1)
 	{
 		display(0,KeySta[0][0]);
-		delay(2000);
-		P0=0XFF;
 		display(1,KeySta[1][1]);
-		delay(2000);
-		P0=0XFF;
+		display(2,KeySta[2][2]);
+		display(3,KeySta[3][3]);
 	}
 }

@@ -1,0 +1,137 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              08/07/2020 17:14:07 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include<stc15f2k60s2.h>
+   2          #include"iic.h"
+   3          typedef unsigned char uchar;
+   4          typedef unsigned int uint;
+   5          uchar code dig_code[]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90};
+   6          void select(uchar channel)
+   7          {
+   8   1        switch(channel)
+   9   1        {
+  10   2          case 4:
+  11   2            P2=(P2&0x1F)|0x80;
+  12   2            break;
+  13   2          case 5:
+  14   2            P2=(P2&0x1F)|0xa0;
+  15   2            break;
+  16   2          case 6:
+  17   2            P2=(P2&0x1F)|0xc0;
+  18   2            break;
+  19   2          case 7:
+  20   2            P2=(P2&0x1F)|0xe0;
+  21   2            break;
+  22   2          default:
+  23   2            P2=(P2&0x1F);
+  24   2            break;
+  25   2        }
+  26   1      }
+  27          
+  28          void init_sys()
+  29          {
+  30   1        select(4);
+  31   1        P0=0xFF;
+  32   1        select(5);
+  33   1        P0=0x00;
+  34   1        select(0);
+  35   1      }
+  36          
+  37          void delay(uint t)
+  38          {
+  39   1        while(t--);
+  40   1      }
+  41          
+  42          void display(uchar pos,uchar num)
+  43          {
+  44   1        delay(1000);
+  45   1        P0=0xFF;
+  46   1        select(6);
+  47   1        P0=0x01<<pos;
+  48   1        select(7);
+  49   1        P0=dig_code[num];
+  50   1      }
+  51          
+  52          uchar ADC_AIN(uchar ain)
+  53          {
+  54   1        uchar volta;
+C51 COMPILER V9.60.0.0   MAIN                                                              08/07/2020 17:14:07 PAGE 2   
+
+  55   1        IIC_Start();
+  56   1        IIC_SendByte(0x90); //给PCF8591发送写控制字
+  57   1        IIC_WaitAck();
+  58   1        IIC_SendByte(ain+0x40); //给写入通道数，并允许模拟量输出
+  59   1        IIC_WaitAck();
+  60   1        IIC_Stop();
+  61   1        
+  62   1      //读写方向发生变化，重新开始通信
+  63   1        
+  64   1        IIC_Start();
+  65   1        IIC_SendByte(0x91); //给PCF8591发送读控制字
+  66   1        IIC_WaitAck();
+  67   1        volta=IIC_RecByte();
+  68   1        IIC_SendAck(1);
+  69   1        IIC_Stop();
+  70   1        
+  71   1        return volta;
+  72   1      }
+  73          
+  74          void DAC(float volta)
+  75          {
+  76   1        float dat = (volta/5.0)*255;
+  77   1        IIC_Start();
+  78   1        IIC_SendByte(0x90); //发送写控制字
+  79   1        IIC_WaitAck();
+  80   1        IIC_SendByte(0x40); //允许模拟量输出
+  81   1        IIC_WaitAck();
+  82   1        IIC_SendByte(dat); //发送需要转换的数字量
+  83   1        IIC_WaitAck();
+  84   1        IIC_Stop();
+  85   1      }
+  86          
+  87          void display_ADC()
+  88          {
+  89   1        uchar volta1,volta3;
+  90   1        volta1=ADC_AIN(1);
+  91   1        display(0,volta1/100);
+  92   1        display(1,(volta1%100)/10);
+  93   1        display(2,volta1%10);
+  94   1        volta3=ADC_AIN(3);
+  95   1        display(5,volta3/100);
+  96   1        display(6,(volta3%100)/10);
+  97   1        display(7,volta3%10);
+  98   1      }
+  99          
+ 100          void main()
+ 101          {
+ 102   1        
+ 103   1        init_sys();
+ 104   1        DAC(2.45);
+ 105   1        while(1)
+ 106   1        {
+ 107   2          display_ADC();
+ 108   2        }
+ 109   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    352    ----
+   CONSTANT SIZE    =     10    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+C51 COMPILER V9.60.0.0   MAIN                                                              08/07/2020 17:14:07 PAGE 3   
+
+   DATA SIZE        =   ----       6
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

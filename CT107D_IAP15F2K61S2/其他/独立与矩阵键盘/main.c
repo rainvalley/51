@@ -6,7 +6,7 @@ sbit S7 = P3^0;
 sbit S6 = P3^1;        
 sbit S5 = P3^2;
 sbit S4 = P3^3;
-uchar KeySta[4];
+uchar KeyStat[4];
 uint count=0;
 uchar flag=0;
 void delay(uint t)
@@ -77,19 +77,18 @@ void Scan_Key_4(void)
 	{
 		if(keybuff[i] == 0xff)		//连续扫描8次都是1,40ms内都是弹起状态，按键已松开
 		{
-			KeySta[i] = 1;
+			KeyStat[i] = 1;
 		}
 		else if(keybuff[i] == 0x00)	//连续扫描8次都是0，40ms内都是按下状态，按键已按下
 		{
-			KeySta[i] = 0;
+			KeyStat[i] = 0;
 		}
 	}
-
 }
 
 void Long_Press()
 {
-	if(KeySta[2]==0)
+	if(KeyStat[2]==0)
 	{
 		count++;
 	}
@@ -117,11 +116,11 @@ int main()
 	Timer0Init();
 	while(1)
 	{
-		display(0,KeySta[0]);
-		display(1,KeySta[1]);
+		display(0,KeyStat[0]);
+		display(1,KeyStat[1]);
 		if(flag)
 		{
-			display(2,KeySta[2]);
+			display(2,KeyStat[2]);
 		}
 	}
 }

@@ -6,7 +6,7 @@
 #include"intrins.h"
 void Display_Dynamic();
 uchar code dig_code[10]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90};//数码管显示内容
-uchar time[7]={0x00,0x00,0x00,0x01,0x01,0x01,0x20};//DS1302初始化内容
+uchar time[7]={0x50,0x59,0x23,0x01,0x01,0x01,0x20};//DS1302初始化内容
 uint temp=0;
 int data_pcf8591=0;
 uint data_at24c02=0;
@@ -343,8 +343,8 @@ int main()
 	init_timer();
 	while(1)
 	{	
-		Display_Dynmaic_temp();
-		//Display_Dynmaic_time();
+		//Display_Dynmaic_temp();
+		Display_Dynmaic_time();
 		//Display_Dynmaic_pcf8591();
 		//Display_Dynmaic_at24c02();
 		//Display_Dynmaic_sonic();
