@@ -4,15 +4,20 @@
 typedef unsigned char uchar;
 typedef unsigned int uint;
 uchar code dig_code[]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90,0xbf,0xff};
+//按键状态与，按键状态备份，默认流转时间
 uchar keystat[4]={1,1,1,1};
 uchar keybackup[4]={1,1,1,1};
 uchar time[4]={4,4,4,4};
-uchar volta=0,flag_800ms=0,mode=0,select_mode=1,pwm=25,stat=0,data_led=0;
+//变量依次为：800ms闪烁标志位，模式标志位，已选择的模式标志位，pwm占空比，LED运行的模式，LED运行时P0对应值，at24c02读写读写标志。
+uchar flag_800ms=0,mode=0,select_mode=1,pwm=25,stat=0,data_led=0,flag_write=0;
 sbit S4 = P3^3;
 sbit S5 = P3^2;
 sbit S6 = P3^1;
 sbit S7 = P3^0;
 void set_pwm();
+uchar read_at24c02(uchar address);
+void display_data();
+void led_run();
 void select(uchar channel)
 {
 	switch(channel)
@@ -42,6 +47,10 @@ void init_sys()
 	select(5);
 	P0=0x00;
 	select(0);
+	time[0]=read_at24c02(0x00);
+	time[1]=read_at24c02(0x01);
+	time[2]=read_at24c02(0x02);
+	time[3]=read_at24c02(0x03);
 }
 
 void delay(uint t)
@@ -51,12 +60,13 @@ void delay(uint t)
 
 void display(uchar pos,uchar num)
 {
-	delay(1500);
-	P0=0xff;
 	select(6);
 	P0=0x01<<pos;
 	select(7);
 	P0=dig_code[num];
+	delay(1500);
+	P0=0xff;
+	select(0);
 }
 
 uchar read_pcf8591(uchar ain)
@@ -158,15 +168,11 @@ void ser_timer0() interrupt 1
 		flag_800ms=~flag_800ms;
 		display_count=0;
 	}
-	if(update_count==100) //每50ms更新一次at24c02与pcf8591
+	if(update_count==100) //每100ms更新一次at24c02与pcf8591
 	{
-		volta=read_pcf8591(3);
-//		write_at24c02(0x00,time[0]);
-//		write_at24c02(0x01,time[1]);
-//		write_at24c02(0x02,time[2]);
-//		write_at24c02(0x03,time[3]);
+		flag_write=~flag_write;
 		update_count=0;
-		set_pwm(); //每10ms更新一次pwm占空比
+		set_pwm(); //每100ms更新一次pwm占空比
 	}
 }
 
@@ -212,7 +218,7 @@ void key_fun(uchar key)
 	if(key==1&&mode==2) //增加流转间隔
 	{
 		time[select_mode-1]++;
-		if(time[select_mode-1]==13)
+		if(time[select_mode-1]>=13)
 		{
 			time[select_mode-1]=4;
 		}
@@ -220,7 +226,7 @@ void key_fun(uchar key)
 	if(key==0&&mode==2) //减少流转间隔
 	{
 		time[select_mode-1]--;
-		if(time[select_mode-1]==3)
+		if(time[select_mode-1]<=3)
 		{
 			time[select_mode-1]=12;
 		}
@@ -438,6 +444,8 @@ void ser_timer1() interrupt 3
 {
 	static uint count=0,pwm_count=0;
 	static uchar temp_mode=1;
+	uchar temp=P0&0xff;
+	uchar channel=(P2&0xe0)>>5;
 	count++;
 	pwm_count++;
 	if(count==time[temp_mode-1]*1000)
@@ -463,27 +471,42 @@ void ser_timer1() interrupt 3
 		}
 		else if(stat==21)
 		{
-			temp_mode=4;
+			temp_mode=4;	
 		}
 	}
-	select(4);
-	P0=data_led;
-//	if(pwm_count<=pwm)
-//	{
-//		select(4);
-//		P0=data_led;
-//		select(0);
-//	}
-//	else if(pwm_count<100)
-//	{
-//		select(4);
-//		P0=0xff;
-//		select(0);
-//	}
-//	else if(pwm_count==100)
-//	{
-//		pwm_count=0;
-//	}
+	
+	if(pwm_count<=pwm)
+	{
+		P0=0xff;
+		select(4);
+		P0=data_led;
+		select(channel);
+		P0=temp;
+	}
+	else if(pwm_count<100)
+	{
+		P0=0xff;
+		select(4);
+		P0=0xff;
+		select(channel);
+		P0=temp;
+	}
+	else if(pwm_count==100)
+	{
+		pwm_count=0;
+	}
+
+}
+
+void write_data()
+{
+	if(flag_write)
+	{
+		write_at24c02(0x00,time[0]);
+		write_at24c02(0x01,time[1]);
+		write_at24c02(0x02,time[2]);
+		write_at24c02(0x03,time[3]);
+	}
 }
 
 int main()
@@ -495,5 +518,6 @@ int main()
 	{
 		key_press();
 		display_data();
+		write_data();
 	}
 }

@@ -1,0 +1,588 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              08/16/2020 22:40:34 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include<stc15f2k60s2.h>
+   2          #include"ds1302.h"
+   3          #include"onewire.h"
+   4          typedef unsigned char uchar;
+   5          typedef unsigned int uint;
+   6          uchar code dig_code[]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90,0xbf,0xff};
+   7          //十进制表示时间与闹钟
+   8          char time[]={58,59,23};
+   9          char alarm[]={0,0,0};
+  10          //变量定义：触发、长按、运行模式、时间选择位、闹钟选择位
+  11          uchar trg=0,cont=0,mode=0,time_selected=0,alarm_selected=0;
+  12          //标志变量：1s、200ms、闹钟标志位、时间读取位
+  13          uchar flag_1s=0,flag_200ms=0,flag_alarm=0,flag_time=1;
+  14          //温度
+  15          uint temp=0;
+  16          void get_temp();
+  17          void write_ds1302();
+  18          void modify_ds1302();
+  19          sbit S4=P3^3;
+  20          sbit L1=P0^0;
+  21          
+  22          void delay(uint t)
+  23          {
+  24   1        while(t--);
+  25   1      }
+  26          
+  27          void select(uchar channel)
+  28          {
+  29   1        switch(channel)
+  30   1        {
+  31   2          case 4:
+  32   2            P2=(P2&0x1f)|0x80;
+  33   2            break;
+  34   2          case 5:
+  35   2            P2=(P2&0x1f)|0xa0;
+  36   2            break;
+  37   2          case 6:
+  38   2            P2=(P2&0x1f)|0xc0;
+  39   2            break;
+  40   2          case 7:
+  41   2            P2=(P2&0x1f)|0xe0;
+  42   2            break;
+  43   2          default:
+  44   2            P2=(P2&0x1f);
+  45   2            break;
+  46   2        }
+  47   1      }
+  48          
+  49          void init_sys()
+  50          {
+  51   1        select(4);
+  52   1        P0=0xff;
+  53   1        select(5);
+  54   1        P0=0x00;
+C51 COMPILER V9.60.0.0   MAIN                                                              08/16/2020 22:40:34 PAGE 2   
+
+  55   1        select(0);
+  56   1        write_ds1302();
+  57   1      }
+  58          
+  59          void display(uchar pos,uchar num)
+  60          {
+  61   1        select(6);
+  62   1        P0=0x01<<pos;
+  63   1        select(7);
+  64   1        P0=dig_code[num];
+  65   1        delay(1500);
+  66   1        P0=0xff;
+  67   1        select(0);
+  68   1      }
+  69          
+  70          //十进制转BCD
+  71          uchar num_to_bcd(uchar num)
+  72          {
+  73   1        uchar a,b;
+  74   1        a=num/10;
+  75   1        b=num%10;
+  76   1        return (16*a+b);
+  77   1      }
+  78          
+  79          //BCD转十进制
+  80          uchar bcd_to_num(uchar bcd)
+  81          {
+  82   1        uchar a,b;
+  83   1        a=bcd/16;
+  84   1        b=bcd%16;
+  85   1        return (10*a+b);
+  86   1      }
+  87          
+  88          void scan_key()
+  89          {
+  90   1        uchar dat=P3^0xff;
+  91   1        trg=dat&(dat^cont);
+  92   1        cont=dat;
+  93   1      }
+  94          
+  95          void key_fun()
+  96          {
+  97   1        if(trg==0x01)
+  98   1        {
+  99   2          mode=0; //模式0，时间模式
+ 100   2          alarm_selected=0;
+ 101   2          time_selected++;
+ 102   2          if(time_selected>=4) //时间模式下的选择：0——显示、1——时、2——分、3——秒
+ 103   2          {
+ 104   3            time_selected=0;
+ 105   3          }
+ 106   2        }
+ 107   1        if(trg==0x02)
+ 108   1        {
+ 109   2          mode=1; //模式1，闹钟模式
+ 110   2          time_selected=0;
+ 111   2          alarm_selected++;
+ 112   2          if(alarm_selected>=4) //闹钟模式下的选择：0——显示、1——时、2——分、3——秒
+ 113   2          {
+ 114   3            alarm_selected=0;
+ 115   3          }
+ 116   2        }
+C51 COMPILER V9.60.0.0   MAIN                                                              08/16/2020 22:40:34 PAGE 3   
+
+ 117   1        if(trg==0x04)
+ 118   1        {
+ 119   2          if(mode==0&&time_selected==1) //时间模式下加秒
+ 120   2          {
+ 121   3            time[2]++;
+ 122   3            if(time[2]>=24)
+ 123   3            {
+ 124   4              time[2]=0;
+ 125   4            }
+ 126   3            modify_ds1302();
+ 127   3          }
+ 128   2          if(mode==0&&time_selected==2) //时间模式下加分
+ 129   2          {
+ 130   3            time[1]++;
+ 131   3            if(time[1]>=60)
+ 132   3            {
+ 133   4              time[1]=0;
+ 134   4            }
+ 135   3            modify_ds1302();
+ 136   3          }
+ 137   2          if(mode==0&&time_selected==3) //时间模式下加时
+ 138   2          {
+ 139   3            time[0]++;
+ 140   3            if(time[0]>=60)
+ 141   3            {
+ 142   4              time[0]=0;
+ 143   4            }
+ 144   3            modify_ds1302();
+ 145   3          }
+ 146   2        }
+ 147   1        if(trg==0x04)
+ 148   1        {
+ 149   2          if(mode==1&&alarm_selected==1) //闹钟模式下加秒
+ 150   2          {
+ 151   3            alarm[2]++;
+ 152   3            if(alarm[2]>=24)
+ 153   3            {
+ 154   4              alarm[2]=0;
+ 155   4            }
+ 156   3          }
+ 157   2          if(mode==1&&alarm_selected==2) //闹钟模式下加分
+ 158   2          {
+ 159   3            alarm[1]++;
+ 160   3            if(alarm[1]>=60)
+ 161   3            {
+ 162   4              alarm[1]=0;
+ 163   4            }
+ 164   3          }
+ 165   2          if(mode==1&&alarm_selected==3) //闹钟模式下加时
+ 166   2          {
+ 167   3            alarm[0]++;
+ 168   3            if(alarm[0]>=60)
+ 169   3            {
+ 170   4              alarm[0]=0;
+ 171   4            }
+ 172   3          }
+ 173   2        }
+ 174   1        if(trg==0x08)
+ 175   1        {
+ 176   2          if(mode==0&&time_selected==1)
+ 177   2          {
+ 178   3            time[2]--;
+C51 COMPILER V9.60.0.0   MAIN                                                              08/16/2020 22:40:34 PAGE 4   
+
+ 179   3            if(time[2]<=-1)
+ 180   3            {
+ 181   4              time[2]=23;
+ 182   4            }
+ 183   3            modify_ds1302();
+ 184   3          }
+ 185   2          if(mode==0&&time_selected==2)
+ 186   2          {
+ 187   3            time[1]--;
+ 188   3            if(time[1]<=-1)
+ 189   3            {
+ 190   4              time[1]=59;
+ 191   4            }
+ 192   3            modify_ds1302();
+ 193   3          }
+ 194   2          if(mode==0&&time_selected==3)
+ 195   2          {
+ 196   3            time[0]--;
+ 197   3            if(time[0]<=-1)
+ 198   3            {
+ 199   4              time[0]=59;
+ 200   4            }
+ 201   3            modify_ds1302();
+ 202   3          }
+ 203   2        }
+ 204   1        if(trg==0x08)
+ 205   1        {
+ 206   2          if(mode==1&&alarm_selected==1)
+ 207   2          {
+ 208   3            alarm[2]--;
+ 209   3            if(alarm[2]<=-1)
+ 210   3            {
+ 211   4              alarm[2]=23;
+ 212   4            }
+ 213   3          }
+ 214   2          if(mode==1&&alarm_selected==2)
+ 215   2          {
+ 216   3            alarm[1]--;
+ 217   3            if(alarm[1]<=-1)
+ 218   3            {
+ 219   4              alarm[1]=59;
+ 220   4            }
+ 221   3          }
+ 222   2          if(mode==1&&alarm_selected==3)
+ 223   2          {
+ 224   3            alarm[0]--;
+ 225   3            if(alarm[0]<=-1)
+ 226   3            {
+ 227   4              alarm[0]=59;
+ 228   4            }
+ 229   3          }
+ 230   2        }
+ 231   1        if(S4==0)
+ 232   1        {
+ 233   2          if(mode==0&&time_selected==0)
+ 234   2          {
+ 235   3            while(S4==0)
+ 236   3            {
+ 237   4              get_temp();
+ 238   4              display(6,temp/10);
+ 239   4              display(7,temp%10);
+ 240   4            }
+C51 COMPILER V9.60.0.0   MAIN                                                              08/16/2020 22:40:34 PAGE 5   
+
+ 241   3          }
+ 242   2        }
+ 243   1      }
+ 244          
+ 245          void display_time()
+ 246          {
+ 247   1        display(0,time[2]/10);
+ 248   1        display(1,time[2]%10);
+ 249   1        display(2,10);
+ 250   1        display(3,time[1]/10);
+ 251   1        display(4,time[1]%10);
+ 252   1        display(5,10);
+ 253   1        display(6,time[0]/10);
+ 254   1        display(7,time[0]%10);
+ 255   1      }
+ 256          
+ 257          void display_alarm()
+ 258          {
+ 259   1        display(0,alarm[2]/10);
+ 260   1        display(1,alarm[2]%10);
+ 261   1        display(2,10);
+ 262   1        display(3,alarm[1]/10);
+ 263   1        display(4,alarm[1]%10);
+ 264   1        display(5,10);
+ 265   1        display(6,alarm[0]/10);
+ 266   1        display(7,alarm[0]%10);
+ 267   1      }
+ 268          
+ 269          void display_data()
+ 270          {
+ 271   1        if(mode==0&&time_selected==0)
+ 272   1        {
+ 273   2          display(0,time[2]/10);
+ 274   2          display(1,time[2]%10);
+ 275   2          display(2,10);
+ 276   2          display(3,time[1]/10);
+ 277   2          display(4,time[1]%10);
+ 278   2          display(5,10);
+ 279   2          display(6,time[0]/10);
+ 280   2          display(7,time[0]%10);
+ 281   2        }
+ 282   1        if(mode==0&&time_selected==1)
+ 283   1        {
+ 284   2          if(flag_1s)
+ 285   2          {
+ 286   3            display_time();
+ 287   3          }
+ 288   2          else
+ 289   2          {
+ 290   3            display(0,11);
+ 291   3            display(1,11);
+ 292   3            display(2,10);
+ 293   3            display(3,time[1]/10);
+ 294   3            display(4,time[1]%10);
+ 295   3            display(5,10);
+ 296   3            display(6,time[0]/10);
+ 297   3            display(7,time[0]%10);
+ 298   3          }
+ 299   2        }
+ 300   1        if(mode==0&&time_selected==2)
+ 301   1        {
+ 302   2          if(flag_1s)
+C51 COMPILER V9.60.0.0   MAIN                                                              08/16/2020 22:40:34 PAGE 6   
+
+ 303   2          {
+ 304   3            display_time();
+ 305   3          }
+ 306   2          else
+ 307   2          {
+ 308   3            display(0,time[2]/10);
+ 309   3            display(1,time[2]%10);
+ 310   3            display(2,10);
+ 311   3            display(3,11);
+ 312   3            display(4,11);
+ 313   3            display(5,10);
+ 314   3            display(6,time[0]/10);
+ 315   3            display(7,time[0]%10);
+ 316   3          }
+ 317   2        }
+ 318   1        if(mode==0&&time_selected==3)
+ 319   1        {
+ 320   2          if(flag_1s)
+ 321   2          {
+ 322   3            display_time();
+ 323   3          }
+ 324   2          else
+ 325   2          {
+ 326   3            display(0,time[2]/10);
+ 327   3            display(1,time[2]%10);
+ 328   3            display(2,10);
+ 329   3            display(3,time[1]/10);
+ 330   3            display(4,time[1]%10);
+ 331   3            display(5,10);
+ 332   3            display(6,11);
+ 333   3            display(7,11);
+ 334   3          }
+ 335   2        }
+ 336   1        
+ 337   1        if(mode==1&&alarm_selected==0)
+ 338   1        {
+ 339   2          display_alarm();
+ 340   2        }
+ 341   1        if(mode==1&&alarm_selected==1)
+ 342   1        {
+ 343   2          if(flag_1s)
+ 344   2          {
+ 345   3            display_alarm();
+ 346   3          }
+ 347   2          else
+ 348   2          {
+ 349   3            display(0,11);
+ 350   3            display(1,11);
+ 351   3            display(2,10);
+ 352   3            display(3,alarm[1]/10);
+ 353   3            display(4,alarm[1]%10);
+ 354   3            display(5,10);
+ 355   3            display(6,alarm[0]/10);
+ 356   3            display(7,alarm[0]%10);
+ 357   3          }
+ 358   2        }
+ 359   1        if(mode==1&&alarm_selected==2)
+ 360   1        {
+ 361   2          if(flag_1s)
+ 362   2          {
+ 363   3            display_alarm();
+ 364   3          }
+C51 COMPILER V9.60.0.0   MAIN                                                              08/16/2020 22:40:34 PAGE 7   
+
+ 365   2          else
+ 366   2          {
+ 367   3            display(0,alarm[2]/10);
+ 368   3            display(1,alarm[2]%10);
+ 369   3            display(2,10);
+ 370   3            display(3,11);
+ 371   3            display(4,11);
+ 372   3            display(5,10);
+ 373   3            display(6,alarm[0]/10);
+ 374   3            display(7,alarm[0]%10);
+ 375   3          }
+ 376   2        }
+ 377   1        if(mode==1&&alarm_selected==3)
+ 378   1        {
+ 379   2          if(flag_1s)
+ 380   2          {
+ 381   3            display_alarm();
+ 382   3          }
+ 383   2          else
+ 384   2          {
+ 385   3            display(0,alarm[2]/10);
+ 386   3            display(1,alarm[2]%10);
+ 387   3            display(2,10);
+ 388   3            display(3,alarm[1]/10);
+ 389   3            display(4,alarm[1]%10);
+ 390   3            display(5,10);
+ 391   3            display(6,11);
+ 392   3            display(7,11);
+ 393   3          }
+ 394   2        }
+ 395   1      }
+ 396          
+ 397          void init_timer0(void)    //1毫秒@11.0592MHz
+ 398          {
+ 399   1        AUXR &= 0x7F;   //定时器时钟12T模式
+ 400   1        TMOD &= 0xF0;   //设置定时器模式
+ 401   1        TL0 = 0x66;   //设置定时初值
+ 402   1        TH0 = 0xFC;   //设置定时初值
+ 403   1        TF0 = 0;    //清除TF0标志
+ 404   1        TR0 = 1;    //定时器0开始计时
+ 405   1        ET0 = 1;
+ 406   1        EA = 1;
+ 407   1      }
+ 408          
+ 409          void ser_timer0() interrupt 1
+ 410          {
+ 411   1        static uint count_1s=0,count_50ms=0,count_200ms=0;
+ 412   1        count_1s++;
+ 413   1        count_50ms++;
+ 414   1        count_200ms++;
+ 415   1        if(count_200ms>=200)
+ 416   1        {
+ 417   2          count_200ms=0;
+ 418   2          flag_200ms=~flag_200ms;
+ 419   2        }
+ 420   1        if(count_1s>=1000)
+ 421   1        {
+ 422   2          count_1s=0;
+ 423   2          flag_1s=~flag_1s;
+ 424   2        }
+ 425   1        if(count_50ms>=50)
+ 426   1        {
+C51 COMPILER V9.60.0.0   MAIN                                                              08/16/2020 22:40:34 PAGE 8   
+
+ 427   2          count_50ms=0;
+ 428   2          scan_key();
+ 429   2          key_fun();
+ 430   2        }
+ 431   1        
+ 432   1      }
+ 433          
+ 434          void get_temp()
+ 435          {
+ 436   1        uchar LSB,MSB;
+ 437   1        EA=0;
+ 438   1        init_ds18b20();
+ 439   1        Write_DS18B20(0xcc);
+ 440   1        Write_DS18B20(0x44);
+ 441   1        init_ds18b20();
+ 442   1        Write_DS18B20(0xcc);
+ 443   1        Write_DS18B20(0xbe);
+ 444   1        LSB=Read_DS18B20();
+ 445   1        MSB=Read_DS18B20();
+ 446   1        init_ds18b20();
+ 447   1        temp=(MSB<<8)|LSB;
+ 448   1        temp=temp>>4;
+ 449   1        EA=1;
+ 450   1      }
+ 451          
+ 452          void write_ds1302()
+ 453          {
+ 454   1        uchar address=0x80;
+ 455   1        uchar i;
+ 456   1        Write_Ds1302(0x8e,0x00);
+ 457   1        for(i=0;i<3;i++)
+ 458   1        {
+ 459   2          Write_Ds1302(address,num_to_bcd(time[i]));
+ 460   2          address=address+2;
+ 461   2        }
+ 462   1        Write_Ds1302(0x8e,0x80);
+ 463   1      }
+ 464          
+ 465          void read_ds1302()
+ 466          {
+ 467   1        uchar address=0x81;
+ 468   1        uchar i;
+ 469   1        for(i=0;i<3;i++)
+ 470   1        {
+ 471   2          time[i]=bcd_to_num(Read_Ds1302(address));
+ 472   2          address=address+2;
+ 473   2        }
+ 474   1      }
+ 475          
+ 476          void modify_ds1302() //修改时间是停止读取
+ 477          {
+ 478   1        flag_time=0;
+ 479   1        write_ds1302();
+ 480   1        flag_time=1;
+ 481   1      }
+ 482          
+ 483          void check_alarm()
+ 484          {
+ 485   1        uchar i=0,count=0;
+ 486   1        for(i=0;i<3;i++)
+ 487   1        {
+ 488   2          if(time[i]==alarm[i])
+C51 COMPILER V9.60.0.0   MAIN                                                              08/16/2020 22:40:34 PAGE 9   
+
+ 489   2          {
+ 490   3            count++;
+ 491   3          }
+ 492   2        }
+ 493   1        if(count==3)
+ 494   1        {
+ 495   2          flag_alarm=1;
+ 496   2        }
+ 497   1      }
+ 498          
+ 499          void led_alarm()
+ 500          {
+ 501   1        static uchar count=0,flag_backup=1;
+ 502   1        if(flag_alarm)
+ 503   1        {
+ 504   2          if(flag_200ms)
+ 505   2          {
+ 506   3            select(4);
+ 507   3            L1=1; //不可简单取反，因为P0在数码管上被复用
+ 508   3            select(0);
+ 509   3          }
+ 510   2          else
+ 511   2          {
+ 512   3            select(4);
+ 513   3            L1=0;
+ 514   3            select(0);
+ 515   3          }
+ 516   2          if(flag_200ms!=flag_backup) //仅在变化时累加计数，避免多次循环计数
+ 517   2          {
+ 518   3            count++;
+ 519   3            flag_backup=flag_200ms;
+ 520   3          }
+ 521   2          if(count>=25||P3!=0xff) //如果25个闪烁或者有独立按键被按下
+ 522   2          {
+ 523   3            count=0;
+ 524   3            flag_alarm=0;
+ 525   3            select(4);
+ 526   3            P0=0xff;
+ 527   3            select(0);
+ 528   3          }
+ 529   2        }
+ 530   1      }
+ 531          
+ 532          int main()
+ 533          {
+ 534   1        init_sys();
+ 535   1        init_timer0();
+ 536   1        while(1)
+ 537   1        {
+ 538   2          check_alarm();
+ 539   2          led_alarm();
+ 540   2          if(flag_time)
+ 541   2          {
+ 542   3            read_ds1302();
+ 543   3          }
+ 544   2          display_data();
+ 545   2        }
+ 546   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1943    ----
+C51 COMPILER V9.60.0.0   MAIN                                                              08/16/2020 22:40:34 PAGE 10  
+
+   CONSTANT SIZE    =     12    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     25       6
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

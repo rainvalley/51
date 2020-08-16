@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.0.0   MAIN                                                              08/12/2020 12:19:29 PAGE 1   
+C51 COMPILER V9.60.0.0   MAIN                                                              08/15/2020 21:53:01 PAGE 1   
 
 
 C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
@@ -14,519 +14,544 @@ line level    source
    4          typedef unsigned char uchar;
    5          typedef unsigned int uint;
    6          uchar code dig_code[]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90,0xbf,0xff};
-   7          uchar keystat[4]={1,1,1,1};
-   8          uchar keybackup[4]={1,1,1,1};
-   9          uchar time[4]={4,4,4,4};
-  10          uchar volta=0,flag_800ms=0,mode=0,select_mode=1,pwm=25,stat=0,data_led=0;
-  11          sbit S4 = P3^3;
-  12          sbit S5 = P3^2;
-  13          sbit S6 = P3^1;
-  14          sbit S7 = P3^0;
-  15          void set_pwm();
-  16          void select(uchar channel)
-  17          {
-  18   1        switch(channel)
-  19   1        {
-  20   2          case 4:
-  21   2            P2=(P2&0x1f)|0x80;
-  22   2            break;
-  23   2          case 5:
-  24   2            P2=(P2&0x1f)|0xa0;
-  25   2            break;
-  26   2          case 6:
-  27   2            P2=(P2&0x1f)|0xc0;
-  28   2            break;
-  29   2          case 7:
-  30   2            P2=(P2&0x1f)|0xe0;
-  31   2            break;
-  32   2          default:
-  33   2            P2=(P2&0x1f);
-  34   2            break;
-  35   2        }
-  36   1      }
-  37          
-  38          void init_sys()
-  39          {
-  40   1        select(4);
-  41   1        P0=0xff;
-  42   1        select(5);
-  43   1        P0=0x00;
-  44   1        select(0);
-  45   1      }
-  46          
-  47          void delay(uint t)
-  48          {
-  49   1        while(t--);
-  50   1      }
-  51          
-  52          void display(uchar pos,uchar num)
-  53          {
-  54   1        delay(1500);
-C51 COMPILER V9.60.0.0   MAIN                                                              08/12/2020 12:19:29 PAGE 2   
+   7          //按键状态与，按键状态备份，默认流转时间
+   8          uchar keystat[4]={1,1,1,1};
+   9          uchar keybackup[4]={1,1,1,1};
+  10          uchar time[4]={4,4,4,4};
+  11          //变量依次为：800ms闪烁标志位，模式标志位，已选择的模式标志位，pwm占空比，LED运行的模式，LED运行时P0对应值
+             -，at24c02读写读写标志。
+  12          uchar flag_800ms=0,mode=0,select_mode=1,pwm=25,stat=0,data_led=0,flag_write=0;
+  13          sbit S4 = P3^3;
+  14          sbit S5 = P3^2;
+  15          sbit S6 = P3^1;
+  16          sbit S7 = P3^0;
+  17          void set_pwm();
+  18          uchar read_at24c02(uchar address);
+  19          void display_data();
+  20          void led_run();
+  21          void select(uchar channel)
+  22          {
+  23   1        switch(channel)
+  24   1        {
+  25   2          case 4:
+  26   2            P2=(P2&0x1f)|0x80;
+  27   2            break;
+  28   2          case 5:
+  29   2            P2=(P2&0x1f)|0xa0;
+  30   2            break;
+  31   2          case 6:
+  32   2            P2=(P2&0x1f)|0xc0;
+  33   2            break;
+  34   2          case 7:
+  35   2            P2=(P2&0x1f)|0xe0;
+  36   2            break;
+  37   2          default:
+  38   2            P2=(P2&0x1f);
+  39   2            break;
+  40   2        }
+  41   1      }
+  42          
+  43          void init_sys()
+  44          {
+  45   1        select(4);
+  46   1        P0=0xff;
+  47   1        select(5);
+  48   1        P0=0x00;
+  49   1        select(0);
+  50   1        time[0]=read_at24c02(0x00);
+  51   1        time[1]=read_at24c02(0x01);
+  52   1        time[2]=read_at24c02(0x02);
+  53   1        time[3]=read_at24c02(0x03);
+C51 COMPILER V9.60.0.0   MAIN                                                              08/15/2020 21:53:01 PAGE 2   
 
-  55   1        P0=0xff;
-  56   1        select(6);
-  57   1        P0=0x01<<pos;
-  58   1        select(7);
-  59   1        P0=dig_code[num];
-  60   1      }
-  61          
-  62          uchar read_pcf8591(uchar ain)
-  63          {
-  64   1        uchar volta;
-  65   1        IIC_Start();
-  66   1        IIC_SendByte(0x90);
-  67   1        IIC_WaitAck();
-  68   1        IIC_SendByte(ain);
-  69   1        IIC_WaitAck();
-  70   1        IIC_Stop();
-  71   1        
-  72   1        IIC_Start();
-  73   1        IIC_SendByte(0x91);
-  74   1        IIC_WaitAck();
-  75   1        volta=IIC_RecByte();
-  76   1        IIC_Ack(0);
-  77   1        IIC_Stop();
-  78   1        
-  79   1        return volta;
-  80   1      }
-  81          
-  82          void write_at24c02(uchar address,uchar dat)
-  83          {
-  84   1        IIC_Start();
-  85   1        IIC_SendByte(0xa0);
-  86   1        IIC_WaitAck();
-  87   1        IIC_SendByte(address);
-  88   1        IIC_WaitAck();
-  89   1        IIC_SendByte(dat);
-  90   1        IIC_WaitAck();
-  91   1        IIC_Stop();
-  92   1      }
-  93          
-  94          uchar read_at24c02(uchar address)
-  95          {
-  96   1        uchar dat;
-  97   1        IIC_Start();
-  98   1        IIC_SendByte(0xa0);
-  99   1        IIC_WaitAck();
- 100   1        IIC_SendByte(address);
- 101   1        IIC_WaitAck();
- 102   1        IIC_Stop();
- 103   1        
- 104   1        IIC_Start();
- 105   1        IIC_SendByte(0xa1);
- 106   1        IIC_WaitAck();
- 107   1        dat=IIC_RecByte();
- 108   1        IIC_Ack(0);
- 109   1        IIC_Stop();
- 110   1        
- 111   1        return dat;
- 112   1      }
- 113          
- 114          
- 115          void scan_key()
- 116          {
-C51 COMPILER V9.60.0.0   MAIN                                                              08/12/2020 12:19:29 PAGE 3   
+  54   1      }
+  55          
+  56          void delay(uint t)
+  57          {
+  58   1        while(t--);
+  59   1      }
+  60          
+  61          void display(uchar pos,uchar num)
+  62          {
+  63   1        select(6);
+  64   1        P0=0x01<<pos;
+  65   1        select(7);
+  66   1        P0=dig_code[num];
+  67   1        delay(1500);
+  68   1        P0=0xff;
+  69   1        select(0);
+  70   1      }
+  71          
+  72          uchar read_pcf8591(uchar ain)
+  73          {
+  74   1        uchar volta;
+  75   1        IIC_Start();
+  76   1        IIC_SendByte(0x90);
+  77   1        IIC_WaitAck();
+  78   1        IIC_SendByte(ain);
+  79   1        IIC_WaitAck();
+  80   1        IIC_Stop();
+  81   1        
+  82   1        IIC_Start();
+  83   1        IIC_SendByte(0x91);
+  84   1        IIC_WaitAck();
+  85   1        volta=IIC_RecByte();
+  86   1        IIC_Ack(0);
+  87   1        IIC_Stop();
+  88   1        
+  89   1        return volta;
+  90   1      }
+  91          
+  92          void write_at24c02(uchar address,uchar dat)
+  93          {
+  94   1        IIC_Start();
+  95   1        IIC_SendByte(0xa0);
+  96   1        IIC_WaitAck();
+  97   1        IIC_SendByte(address);
+  98   1        IIC_WaitAck();
+  99   1        IIC_SendByte(dat);
+ 100   1        IIC_WaitAck();
+ 101   1        IIC_Stop();
+ 102   1      }
+ 103          
+ 104          uchar read_at24c02(uchar address)
+ 105          {
+ 106   1        uchar dat;
+ 107   1        IIC_Start();
+ 108   1        IIC_SendByte(0xa0);
+ 109   1        IIC_WaitAck();
+ 110   1        IIC_SendByte(address);
+ 111   1        IIC_WaitAck();
+ 112   1        IIC_Stop();
+ 113   1        
+ 114   1        IIC_Start();
+ 115   1        IIC_SendByte(0xa1);
+C51 COMPILER V9.60.0.0   MAIN                                                              08/15/2020 21:53:01 PAGE 3   
 
- 117   1        uchar i;
- 118   1        static uchar keybuff[4]={0xff,0xff,0xff,0xff};
- 119   1        keybuff[0]=(keybuff[0]<<1)|S4;
- 120   1        keybuff[1]=(keybuff[1]<<1)|S5;
- 121   1        keybuff[2]=(keybuff[2]<<1)|S6;
- 122   1        keybuff[3]=(keybuff[3]<<1)|S7;
- 123   1        for(i=0;i<4;i++)
- 124   1        {
- 125   2          if(keybuff[i]==0xff)
- 126   2          {
- 127   3            keystat[i]=1;
- 128   3          }
- 129   2          if(keybuff[i]==0x00)
- 130   2          {
- 131   3            keystat[i]=0;
- 132   3          }
- 133   2        }
- 134   1      }
- 135          
- 136          
- 137          void init_timer0(void)    //1毫秒@11.0592MHz
- 138          {
- 139   1        AUXR |= 0x80;   //定时器时钟1T模式
- 140   1        TMOD &= 0xF0;   //设置定时器模式
- 141   1        TL0 = 0xCD;   //设置定时初值
- 142   1        TH0 = 0xD4;   //设置定时初值
- 143   1        TF0 = 0;    //清除TF0标志
- 144   1        TR0 = 1;    //定时器0开始计时
- 145   1        ET0 = 1;
- 146   1        EA = 1;
- 147   1      }
- 148          
- 149          void ser_timer0() interrupt 1
- 150          {
- 151   1        static uchar update_count=0;
- 152   1        static uint display_count=0;
- 153   1        display_count++;
- 154   1        update_count++;
- 155   1        scan_key(); //每1ms扫描一次键盘
- 156   1        if(display_count==800) //每800ms闪烁一次数码管
- 157   1        {
- 158   2          flag_800ms=~flag_800ms;
- 159   2          display_count=0;
- 160   2        }
- 161   1        if(update_count==100) //每50ms更新一次at24c02与pcf8591
- 162   1        {
- 163   2          volta=read_pcf8591(3);
- 164   2      //    write_at24c02(0x00,time[0]);
- 165   2      //    write_at24c02(0x01,time[1]);
- 166   2      //    write_at24c02(0x02,time[2]);
- 167   2      //    write_at24c02(0x03,time[3]);
- 168   2          update_count=0;
- 169   2          set_pwm(); //每10ms更新一次pwm占空比
+ 116   1        IIC_WaitAck();
+ 117   1        dat=IIC_RecByte();
+ 118   1        IIC_Ack(0);
+ 119   1        IIC_Stop();
+ 120   1        
+ 121   1        return dat;
+ 122   1      }
+ 123          
+ 124          
+ 125          void scan_key()
+ 126          {
+ 127   1        uchar i;
+ 128   1        static uchar keybuff[4]={0xff,0xff,0xff,0xff};
+ 129   1        keybuff[0]=(keybuff[0]<<1)|S4;
+ 130   1        keybuff[1]=(keybuff[1]<<1)|S5;
+ 131   1        keybuff[2]=(keybuff[2]<<1)|S6;
+ 132   1        keybuff[3]=(keybuff[3]<<1)|S7;
+ 133   1        for(i=0;i<4;i++)
+ 134   1        {
+ 135   2          if(keybuff[i]==0xff)
+ 136   2          {
+ 137   3            keystat[i]=1;
+ 138   3          }
+ 139   2          if(keybuff[i]==0x00)
+ 140   2          {
+ 141   3            keystat[i]=0;
+ 142   3          }
+ 143   2        }
+ 144   1      }
+ 145          
+ 146          
+ 147          void init_timer0(void)    //1毫秒@11.0592MHz
+ 148          {
+ 149   1        AUXR |= 0x80;   //定时器时钟1T模式
+ 150   1        TMOD &= 0xF0;   //设置定时器模式
+ 151   1        TL0 = 0xCD;   //设置定时初值
+ 152   1        TH0 = 0xD4;   //设置定时初值
+ 153   1        TF0 = 0;    //清除TF0标志
+ 154   1        TR0 = 1;    //定时器0开始计时
+ 155   1        ET0 = 1;
+ 156   1        EA = 1;
+ 157   1      }
+ 158          
+ 159          void ser_timer0() interrupt 1
+ 160          {
+ 161   1        static uchar update_count=0;
+ 162   1        static uint display_count=0;
+ 163   1        display_count++;
+ 164   1        update_count++;
+ 165   1        scan_key(); //每1ms扫描一次键盘
+ 166   1        if(display_count==800) //每800ms闪烁一次数码管
+ 167   1        {
+ 168   2          flag_800ms=~flag_800ms;
+ 169   2          display_count=0;
  170   2        }
- 171   1      }
- 172          
- 173          void key_fun(uchar key)
- 174          {
- 175   1        if(key==3) //停止TR1的计数
- 176   1        {
- 177   2          if(TR1==0)
- 178   2          {
-C51 COMPILER V9.60.0.0   MAIN                                                              08/12/2020 12:19:29 PAGE 4   
+ 171   1        if(update_count==100) //每100ms更新一次at24c02与pcf8591
+ 172   1        {
+ 173   2          flag_write=~flag_write;
+ 174   2          update_count=0;
+ 175   2          set_pwm(); //每100ms更新一次pwm占空比
+ 176   2        }
+ 177   1      }
+C51 COMPILER V9.60.0.0   MAIN                                                              08/15/2020 21:53:01 PAGE 4   
 
- 179   3            TR1=1;
- 180   3          }
- 181   2          else
- 182   2          {
- 183   3            TR1=0;
- 184   3          }
- 185   2            
- 186   2        }
- 187   1        if(key==2) //改变数码管工作模式：0——熄灭，1——运行模式，2——流转间隔
- 188   1        {
- 189   2          mode++;
- 190   2          if(mode==3)
- 191   2          {
- 192   3            mode=0;
- 193   3          }
- 194   2        }
- 195   1        if(key==1&&mode==1) //增加运行模式
- 196   1        {
- 197   2          select_mode++;
- 198   2          if(select_mode==5)
- 199   2          {
- 200   3            select_mode=1;
- 201   3          }
- 202   2        }
- 203   1        if(key==0&&mode==1) //减少运行模式
- 204   1        {
- 205   2          select_mode--;
- 206   2          if(select_mode==0)
- 207   2          {
- 208   3            select_mode=4;
- 209   3          }
- 210   2        }
- 211   1        
- 212   1        if(key==1&&mode==2) //增加流转间隔
- 213   1        {
- 214   2          time[select_mode-1]++;
- 215   2          if(time[select_mode-1]==13)
- 216   2          {
- 217   3            time[select_mode-1]=4;
- 218   3          }
- 219   2        }
- 220   1        if(key==0&&mode==2) //减少流转间隔
- 221   1        {
- 222   2          time[select_mode-1]--;
- 223   2          if(time[select_mode-1]==3)
- 224   2          {
- 225   3            time[select_mode-1]=12;
- 226   3          }
- 227   2        }
- 228   1      }
- 229          
- 230          void key_press()
- 231          {
- 232   1        int i;
- 233   1        for(i=0;i<4;i++)
- 234   1        {
- 235   2          if(keystat[i]!=keybackup[i])
- 236   2          {
- 237   3            if(keybackup[i]!=0)
- 238   3            {
- 239   4              key_fun(i);
- 240   4            }
-C51 COMPILER V9.60.0.0   MAIN                                                              08/12/2020 12:19:29 PAGE 5   
+ 178          
+ 179          void key_fun(uchar key)
+ 180          {
+ 181   1        if(key==3) //停止TR1的计数
+ 182   1        {
+ 183   2          if(TR1==0)
+ 184   2          {
+ 185   3            TR1=1;
+ 186   3          }
+ 187   2          else
+ 188   2          {
+ 189   3            TR1=0;
+ 190   3          }
+ 191   2            
+ 192   2        }
+ 193   1        if(key==2) //改变数码管工作模式：0——熄灭，1——运行模式，2——流转间隔
+ 194   1        {
+ 195   2          mode++;
+ 196   2          if(mode==3)
+ 197   2          {
+ 198   3            mode=0;
+ 199   3          }
+ 200   2        }
+ 201   1        if(key==1&&mode==1) //增加运行模式
+ 202   1        {
+ 203   2          select_mode++;
+ 204   2          if(select_mode==5)
+ 205   2          {
+ 206   3            select_mode=1;
+ 207   3          }
+ 208   2        }
+ 209   1        if(key==0&&mode==1) //减少运行模式
+ 210   1        {
+ 211   2          select_mode--;
+ 212   2          if(select_mode==0)
+ 213   2          {
+ 214   3            select_mode=4;
+ 215   3          }
+ 216   2        }
+ 217   1        
+ 218   1        if(key==1&&mode==2) //增加流转间隔
+ 219   1        {
+ 220   2          time[select_mode-1]++;
+ 221   2          if(time[select_mode-1]>=13)
+ 222   2          {
+ 223   3            time[select_mode-1]=4;
+ 224   3          }
+ 225   2        }
+ 226   1        if(key==0&&mode==2) //减少流转间隔
+ 227   1        {
+ 228   2          time[select_mode-1]--;
+ 229   2          if(time[select_mode-1]<=3)
+ 230   2          {
+ 231   3            time[select_mode-1]=12;
+ 232   3          }
+ 233   2        }
+ 234   1      }
+ 235          
+ 236          void key_press()
+ 237          {
+ 238   1        int i;
+ 239   1        for(i=0;i<4;i++)
+C51 COMPILER V9.60.0.0   MAIN                                                              08/15/2020 21:53:01 PAGE 5   
 
- 241   3            keybackup[i]=keystat[i];
- 242   3          }
- 243   2        }
- 244   1      }
- 245          
- 246          void display_data()
- 247          {
- 248   1        if(mode==0) //如果数码管处于熄灭状态，长按显示亮度状态
- 249   1        {
- 250   2          if(keystat[0]==0&&mode==0)
- 251   2          {
- 252   3            while(keystat[0]==0)
- 253   3            {
- 254   4              display(6,10);
- 255   4              display(7,pwm/25);
- 256   4            }
- 257   3          }
- 258   2          else
- 259   2          {
- 260   3            select(6);
- 261   3            P0=0xff;
- 262   3            select(7);
- 263   3            P0=0xff;
- 264   3          }
- 265   2        }
- 266   1        if(mode==1) //如果选中运行模式
- 267   1        {
- 268   2          if(flag_800ms) //800ms闪烁数码管
- 269   2          {
- 270   3            display(0,10);
- 271   3            display(1,select_mode);
- 272   3            display(2,10);
- 273   3          }
- 274   2          else
+ 240   1        {
+ 241   2          if(keystat[i]!=keybackup[i])
+ 242   2          {
+ 243   3            if(keybackup[i]!=0)
+ 244   3            {
+ 245   4              key_fun(i);
+ 246   4            }
+ 247   3            keybackup[i]=keystat[i];
+ 248   3          }
+ 249   2        }
+ 250   1      }
+ 251          
+ 252          void display_data()
+ 253          {
+ 254   1        if(mode==0) //如果数码管处于熄灭状态，长按显示亮度状态
+ 255   1        {
+ 256   2          if(keystat[0]==0&&mode==0)
+ 257   2          {
+ 258   3            while(keystat[0]==0)
+ 259   3            {
+ 260   4              display(6,10);
+ 261   4              display(7,pwm/25);
+ 262   4            }
+ 263   3          }
+ 264   2          else
+ 265   2          {
+ 266   3            select(6);
+ 267   3            P0=0xff;
+ 268   3            select(7);
+ 269   3            P0=0xff;
+ 270   3          }
+ 271   2        }
+ 272   1        if(mode==1) //如果选中运行模式
+ 273   1        {
+ 274   2          if(flag_800ms) //800ms闪烁数码管
  275   2          {
- 276   3            display(0,11);
- 277   3            display(1,11);
- 278   3            display(2,11);
+ 276   3            display(0,10);
+ 277   3            display(1,select_mode);
+ 278   3            display(2,10);
  279   3          }
- 280   2          if(time[select_mode-1]>=10) //流转间隔>=1000时显示第四位
+ 280   2          else
  281   2          {
- 282   3            display(4,time[select_mode-1]/10);
- 283   3            display(5,time[select_mode-1]%10);
- 284   3          }
- 285   2          else
- 286   2          {
- 287   3            display(5,time[select_mode-1]);
- 288   3          }
- 289   2          display(6,0);
- 290   2          display(7,0);
- 291   2        }
- 292   1        if(mode==2) //如果选中流转间隔
- 293   1        {
- 294   2          display(0,10);
- 295   2          display(1,select_mode);
- 296   2          display(2,10);
- 297   2          if(flag_800ms) //800ms数码管闪烁间隔
- 298   2          {
- 299   3            if(time[select_mode-1]>=10) //如果流转间隔>=1000则显示第四位
- 300   3            {
- 301   4              display(4,time[select_mode-1]/10);
- 302   4              display(5,time[select_mode-1]%10);
-C51 COMPILER V9.60.0.0   MAIN                                                              08/12/2020 12:19:29 PAGE 6   
+ 282   3            display(0,11);
+ 283   3            display(1,11);
+ 284   3            display(2,11);
+ 285   3          }
+ 286   2          if(time[select_mode-1]>=10) //流转间隔>=1000时显示第四位
+ 287   2          {
+ 288   3            display(4,time[select_mode-1]/10);
+ 289   3            display(5,time[select_mode-1]%10);
+ 290   3          }
+ 291   2          else
+ 292   2          {
+ 293   3            display(5,time[select_mode-1]);
+ 294   3          }
+ 295   2          display(6,0);
+ 296   2          display(7,0);
+ 297   2        }
+ 298   1        if(mode==2) //如果选中流转间隔
+ 299   1        {
+ 300   2          display(0,10);
+ 301   2          display(1,select_mode);
+C51 COMPILER V9.60.0.0   MAIN                                                              08/15/2020 21:53:01 PAGE 6   
 
- 303   4            }
- 304   3            else
- 305   3            {
- 306   4              display(5,time[select_mode-1]);
- 307   4            }
- 308   3            display(6,0);
- 309   3            display(7,0);
- 310   3          }
- 311   2          else
- 312   2          {
- 313   3            display(4,11);
- 314   3            display(5,11);
- 315   3            display(6,11);
- 316   3            display(7,11);
- 317   3          }
- 318   2        }
- 319   1      }
- 320          
- 321          void set_pwm()
- 322          {
- 323   1        uchar dat;
- 324   1        dat=read_pcf8591(3);
- 325   1        if(dat<=64)
- 326   1        {
- 327   2          pwm=25;
- 328   2        }
- 329   1        else if(dat<=128)
- 330   1        {
- 331   2          pwm=50;
- 332   2        } 
- 333   1        else if(dat<=192)
- 334   1        {
- 335   2          pwm=75;
- 336   2        }
- 337   1        else
- 338   1        {
- 339   2          pwm=100;
- 340   2        }
- 341   1      }
- 342          
- 343          void init_timer1(void)    //100微秒@11.0592MHz
- 344          {
- 345   1        AUXR |= 0x40;   //定时器时钟1T模式
- 346   1        TMOD &= 0x0F;   //设置定时器模式
- 347   1        TL1 = 0xAE;   //设置定时初值
- 348   1        TH1 = 0xFB;   //设置定时初值
- 349   1        TF1 = 0;    //清除TF1标志
- 350   1        TR1 = 1;    //定时器1开始计时
- 351   1        ET1 = 1;
- 352   1        EA = 1;
- 353   1      }
- 354          
- 355          void led_run()
- 356          {
- 357   1        switch(stat)
- 358   1        {
- 359   2          case 0:
- 360   2            data_led=0xff;
- 361   2            break;
- 362   2          case 1:
- 363   2            data_led=0xfe;
- 364   2            break;
-C51 COMPILER V9.60.0.0   MAIN                                                              08/12/2020 12:19:29 PAGE 7   
+ 302   2          display(2,10);
+ 303   2          if(flag_800ms) //800ms数码管闪烁间隔
+ 304   2          {
+ 305   3            if(time[select_mode-1]>=10) //如果流转间隔>=1000则显示第四位
+ 306   3            {
+ 307   4              display(4,time[select_mode-1]/10);
+ 308   4              display(5,time[select_mode-1]%10);
+ 309   4            }
+ 310   3            else
+ 311   3            {
+ 312   4              display(5,time[select_mode-1]);
+ 313   4            }
+ 314   3            display(6,0);
+ 315   3            display(7,0);
+ 316   3          }
+ 317   2          else
+ 318   2          {
+ 319   3            display(4,11);
+ 320   3            display(5,11);
+ 321   3            display(6,11);
+ 322   3            display(7,11);
+ 323   3          }
+ 324   2        }
+ 325   1      }
+ 326          
+ 327          void set_pwm()
+ 328          {
+ 329   1        uchar dat;
+ 330   1        dat=read_pcf8591(3);
+ 331   1        if(dat<=64)
+ 332   1        {
+ 333   2          pwm=25;
+ 334   2        }
+ 335   1        else if(dat<=128)
+ 336   1        {
+ 337   2          pwm=50;
+ 338   2        } 
+ 339   1        else if(dat<=192)
+ 340   1        {
+ 341   2          pwm=75;
+ 342   2        }
+ 343   1        else
+ 344   1        {
+ 345   2          pwm=100;
+ 346   2        }
+ 347   1      }
+ 348          
+ 349          void init_timer1(void)    //100微秒@11.0592MHz
+ 350          {
+ 351   1        AUXR |= 0x40;   //定时器时钟1T模式
+ 352   1        TMOD &= 0x0F;   //设置定时器模式
+ 353   1        TL1 = 0xAE;   //设置定时初值
+ 354   1        TH1 = 0xFB;   //设置定时初值
+ 355   1        TF1 = 0;    //清除TF1标志
+ 356   1        TR1 = 1;    //定时器1开始计时
+ 357   1        ET1 = 1;
+ 358   1        EA = 1;
+ 359   1      }
+ 360          
+ 361          void led_run()
+ 362          {
+ 363   1        switch(stat)
+C51 COMPILER V9.60.0.0   MAIN                                                              08/15/2020 21:53:01 PAGE 7   
 
- 365   2          case 2:
- 366   2            data_led=0xfc;
+ 364   1        {
+ 365   2          case 0:
+ 366   2            data_led=0xff;
  367   2            break;
- 368   2          case 3:
- 369   2            data_led=0xf8;
+ 368   2          case 1:
+ 369   2            data_led=0xfe;
  370   2            break;
- 371   2          case 4:
- 372   2            data_led=0xf0;
+ 371   2          case 2:
+ 372   2            data_led=0xfc;
  373   2            break;
- 374   2          case 5:
- 375   2            data_led=0xe0;
+ 374   2          case 3:
+ 375   2            data_led=0xf8;
  376   2            break;
- 377   2          case 6:
- 378   2            data_led=0xc0;
+ 377   2          case 4:
+ 378   2            data_led=0xf0;
  379   2            break;
- 380   2          case 7:
- 381   2            data_led=0x80;
+ 380   2          case 5:
+ 381   2            data_led=0xe0;
  382   2            break;
- 383   2          case 8:
- 384   2            data_led=0x00;
+ 383   2          case 6:
+ 384   2            data_led=0xc0;
  385   2            break;
- 386   2          case 9:
- 387   2            data_led=0x7f;
+ 386   2          case 7:
+ 387   2            data_led=0x80;
  388   2            break;
- 389   2          case 10:
- 390   2            data_led=0x3f;
+ 389   2          case 8:
+ 390   2            data_led=0x00;
  391   2            break;
- 392   2          case 11:
- 393   2            data_led=0x1f;
+ 392   2          case 9:
+ 393   2            data_led=0x7f;
  394   2            break;
- 395   2          case 12:
- 396   2            data_led=0x0f;
+ 395   2          case 10:
+ 396   2            data_led=0x3f;
  397   2            break;
- 398   2          case 13:
- 399   2            data_led=0x07;
+ 398   2          case 11:
+ 399   2            data_led=0x1f;
  400   2            break;
- 401   2          case 14:
- 402   2            data_led=0x03;
+ 401   2          case 12:
+ 402   2            data_led=0x0f;
  403   2            break;
- 404   2          case 15:
- 405   2            data_led=0x01;
+ 404   2          case 13:
+ 405   2            data_led=0x07;
  406   2            break;
- 407   2          case 16:
- 408   2            data_led=0x00;
+ 407   2          case 14:
+ 408   2            data_led=0x03;
  409   2            break;
- 410   2          case 17:
- 411   2            data_led=0x7e;
+ 410   2          case 15:
+ 411   2            data_led=0x01;
  412   2            break;
- 413   2          case 18:
- 414   2            data_led=0xbd;
+ 413   2          case 16:
+ 414   2            data_led=0x00;
  415   2            break;
- 416   2          case 19:
- 417   2            data_led=0xdb;
+ 416   2          case 17:
+ 417   2            data_led=0x7e;
  418   2            break;
- 419   2          case 20:
- 420   2            data_led=0xe7;
+ 419   2          case 18:
+ 420   2            data_led=0xbd;
  421   2            break;
- 422   2          case 21:
- 423   2            data_led=0xe7;
+ 422   2          case 19:
+ 423   2            data_led=0xdb;
  424   2            break;
- 425   2          case 22:
- 426   2            data_led=0xdb;
-C51 COMPILER V9.60.0.0   MAIN                                                              08/12/2020 12:19:29 PAGE 8   
+ 425   2          case 20:
+C51 COMPILER V9.60.0.0   MAIN                                                              08/15/2020 21:53:01 PAGE 8   
 
+ 426   2            data_led=0xe7;
  427   2            break;
- 428   2          case 23:
- 429   2            data_led=0xbd;
+ 428   2          case 21:
+ 429   2            data_led=0xe7;
  430   2            break;
- 431   2          case 24:
- 432   2            data_led=0x7e;
+ 431   2          case 22:
+ 432   2            data_led=0xdb;
  433   2            break;
- 434   2        }
- 435   1      }
- 436          
- 437          void ser_timer1() interrupt 3
- 438          {
- 439   1        static uint count=0,pwm_count=0;
- 440   1        static uchar temp_mode=1;
- 441   1        count++;
- 442   1        pwm_count++;
- 443   1        if(count==time[temp_mode-1]*1000)
- 444   1        {
- 445   2          count=0;
- 446   2          led_run();
- 447   2          if(stat==24)
- 448   2          {
- 449   3            stat=0;
- 450   3          }
- 451   2          stat++;
- 452   2          if(stat==0)
- 453   2          {
- 454   3            temp_mode=1;
- 455   3          }
- 456   2          else if(stat==9)
- 457   2          {
- 458   3            temp_mode=2;
- 459   3          }
- 460   2          else if(stat==17)
+ 434   2          case 23:
+ 435   2            data_led=0xbd;
+ 436   2            break;
+ 437   2          case 24:
+ 438   2            data_led=0x7e;
+ 439   2            break;
+ 440   2        }
+ 441   1      }
+ 442          
+ 443          void ser_timer1() interrupt 3
+ 444          {
+ 445   1        static uint count=0,pwm_count=0;
+ 446   1        static uchar temp_mode=1;
+ 447   1        uchar temp=P0&0xff;
+ 448   1        uchar channel=(P2&0xe0)>>5;
+ 449   1        count++;
+ 450   1        pwm_count++;
+ 451   1        if(count==time[temp_mode-1]*1000)
+ 452   1        {
+ 453   2          count=0;
+ 454   2          led_run();
+ 455   2          if(stat==24)
+ 456   2          {
+ 457   3            stat=0;
+ 458   3          }
+ 459   2          stat++;
+ 460   2          if(stat==0)
  461   2          {
- 462   3            temp_mode=3;
+ 462   3            temp_mode=1;
  463   3          }
- 464   2          else if(stat==21)
+ 464   2          else if(stat==9)
  465   2          {
- 466   3            temp_mode=4;
+ 466   3            temp_mode=2;
  467   3          }
- 468   2        }
- 469   1        select(4);
- 470   1        P0=data_led;
- 471   1      //  if(pwm_count<=pwm)
- 472   1      //  {
- 473   1      //    select(4);
- 474   1      //    P0=data_led;
- 475   1      //    select(0);
- 476   1      //  }
- 477   1      //  else if(pwm_count<100)
- 478   1      //  {
- 479   1      //    select(4);
- 480   1      //    P0=0xff;
- 481   1      //    select(0);
- 482   1      //  }
- 483   1      //  else if(pwm_count==100)
- 484   1      //  {
- 485   1      //    pwm_count=0;
- 486   1      //  }
- 487   1      }
- 488          
-C51 COMPILER V9.60.0.0   MAIN                                                              08/12/2020 12:19:29 PAGE 9   
+ 468   2          else if(stat==17)
+ 469   2          {
+ 470   3            temp_mode=3;
+ 471   3          }
+ 472   2          else if(stat==21)
+ 473   2          {
+ 474   3            temp_mode=4;  
+ 475   3          }
+ 476   2        }
+ 477   1        
+ 478   1        if(pwm_count<=pwm)
+ 479   1        {
+ 480   2          P0=0xff;
+ 481   2          select(4);
+ 482   2          P0=data_led;
+ 483   2          select(channel);
+ 484   2          P0=temp;
+ 485   2        }
+ 486   1        else if(pwm_count<100)
+ 487   1        {
+C51 COMPILER V9.60.0.0   MAIN                                                              08/15/2020 21:53:01 PAGE 9   
 
- 489          int main()
- 490          {
- 491   1        init_sys();
- 492   1        init_timer0();
- 493   1        init_timer1();
- 494   1        while(1)
+ 488   2          P0=0xff;
+ 489   2          select(4);
+ 490   2          P0=0xff;
+ 491   2          select(channel);
+ 492   2          P0=temp;
+ 493   2        }
+ 494   1        else if(pwm_count==100)
  495   1        {
- 496   2          key_press();
- 497   2          display_data();
- 498   2        }
+ 496   2          pwm_count=0;
+ 497   2        }
+ 498   1      
  499   1      }
+ 500          
+ 501          void write_data()
+ 502          {
+ 503   1        if(flag_write)
+ 504   1        {
+ 505   2          write_at24c02(0x00,time[0]);
+ 506   2          write_at24c02(0x01,time[1]);
+ 507   2          write_at24c02(0x02,time[2]);
+ 508   2          write_at24c02(0x03,time[3]);
+ 509   2        }
+ 510   1      }
+ 511          
+ 512          int main()
+ 513          {
+ 514   1        init_sys();
+ 515   1        init_timer0();
+ 516   1        init_timer1();
+ 517   1        while(1)
+ 518   1        {
+ 519   2          key_press();
+ 520   2          display_data();
+ 521   2          write_data();
+ 522   2        }
+ 523   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1365    ----
+   CODE SIZE        =   1517    ----
    CONSTANT SIZE    =     12    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
