@@ -1,0 +1,318 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              08/21/2020 09:01:11 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include<stc15f2k60s2.h>
+   2          #include"onewire.h"
+   3          typedef unsigned char uchar;
+   4          typedef unsigned int uint;
+   5          uchar code dig_code[]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90,0xbf,0xff,0xc6};
+   6          uchar buff_tube[]={0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff};
+   7          //三种模式下的倒计时间隔
+   8          uchar time[3];
+   9          //定义初始变量：长按、触发、工作模式、pwm生成标志位、温度显示标志位、按键标志位、1s标志位、pwm占空比、50ms
+             -标志位
+  10          uchar cont=0,trg=0,mode=1,flag_pwm=1,flag_temp=0,flag_key=0,flag_1s=0,pwm=1,flag_50ms=0;
+  11          uint temp=0;
+  12          sbit SIG=P3^4;
+  13          void select(uchar channel)
+  14          {
+  15   1        switch(channel)
+  16   1        {
+  17   2          case 4:
+  18   2            P2=(P2&0x1f)|0x80;
+  19   2            break;
+  20   2          case 5:
+  21   2            P2=(P2&0x1f)|0xa0;
+  22   2            break;
+  23   2          case 6:
+  24   2            P2=(P2&0x1f)|0xc0;
+  25   2            break;
+  26   2          case 7:
+  27   2            P2=(P2&0x1f)|0xe0;
+  28   2            break;
+  29   2          case 0:
+  30   2            P2=(P2&0x1f);
+  31   2            break;
+  32   2        }
+  33   1      }
+  34          
+  35          void init_sys()
+  36          {
+  37   1        select(4);
+  38   1        P0=0xff;
+  39   1        select(5);
+  40   1        P0=0x00;
+  41   1        select(0);
+  42   1      }
+  43          
+  44          
+  45          void display(void)
+  46          {
+  47   1        static uchar index=0;
+  48   1        select(7);
+  49   1        P0=0xff;
+  50   1        select(6);
+  51   1        P0=0x01<<index;
+  52   1        select(7);
+  53   1        P0=buff_tube[index];
+C51 COMPILER V9.60.0.0   MAIN                                                              08/21/2020 09:01:11 PAGE 2   
+
+  54   1        select(0);
+  55   1        
+  56   1        index++;
+  57   1        index&=0x07;
+  58   1      }
+  59          
+  60          void scan_key()
+  61          {
+  62   1        uchar dat=P3^0xff;
+  63   1        trg=dat&(dat^cont);
+  64   1        cont=dat;
+  65   1      }
+  66          
+  67          void key_fun()
+  68          {
+  69   1        if(trg==0x01)
+  70   1        {
+  71   2          mode++;
+  72   2          if(mode>=4)
+  73   2          {
+  74   3            mode=1;
+  75   3          }
+  76   2        }
+  77   1        if(trg==0x02)
+  78   1        {
+  79   2          if(flag_key==0)
+  80   2          {
+  81   3            time[mode-1]=0;
+  82   3            flag_key=1;
+  83   3          }
+  84   2          else if(flag_key==1)
+  85   2          {
+  86   3            time[mode-1]=60;
+  87   3            flag_key=2;
+  88   3          }
+  89   2          else if(flag_key==2)
+  90   2          {
+  91   3            time[mode-1]=120;
+  92   3            flag_key=0;
+  93   3          }
+  94   2          flag_pwm=1;
+  95   2        }
+  96   1        if(trg==0x04)
+  97   1        {
+  98   2          time[mode-1]=0;
+  99   2          flag_pwm=0;
+ 100   2        }
+ 101   1        if(trg==0x08)
+ 102   1        {
+ 103   2          flag_temp=~flag_temp;
+ 104   2        }
+ 105   1      }
+ 106          
+ 107          void set_tube()
+ 108          {
+ 109   1        if(flag_temp)
+ 110   1        {
+ 111   2          buff_tube[0]=dig_code[10];
+ 112   2          buff_tube[1]=dig_code[4];
+ 113   2          buff_tube[2]=dig_code[10];
+ 114   2          buff_tube[3]=dig_code[11];
+ 115   2          buff_tube[4]=dig_code[11];
+C51 COMPILER V9.60.0.0   MAIN                                                              08/21/2020 09:01:11 PAGE 3   
+
+ 116   2          buff_tube[5]=dig_code[temp/10];
+ 117   2          buff_tube[6]=dig_code[temp%10];
+ 118   2          buff_tube[7]=dig_code[12];
+ 119   2        }
+ 120   1        else
+ 121   1        {
+ 122   2          buff_tube[0]=dig_code[10];
+ 123   2          buff_tube[1]=dig_code[mode];
+ 124   2          buff_tube[2]=dig_code[10];
+ 125   2          buff_tube[3]=dig_code[11];
+ 126   2          buff_tube[4]=dig_code[0];
+ 127   2          buff_tube[5]=dig_code[time[mode-1]/100];
+ 128   2          buff_tube[6]=dig_code[time[mode-1]%100/10];
+ 129   2          buff_tube[7]=dig_code[time[mode-1]%10];
+ 130   2        }
+ 131   1      }
+ 132          
+ 133          
+ 134          void get_temp()
+ 135          {
+ 136   1        uchar LSB,MSB;
+ 137   1        init_ds18b20();
+ 138   1        Write_DS18B20(0xcc);
+ 139   1        Write_DS18B20(0x44);
+ 140   1        init_ds18b20();
+ 141   1        Write_DS18B20(0xcc);
+ 142   1        Write_DS18B20(0xbe);
+ 143   1        LSB=Read_DS18B20();
+ 144   1        MSB=Read_DS18B20();
+ 145   1        init_ds18b20();
+ 146   1        temp=(MSB<<8)|LSB;
+ 147   1        temp=temp>>4;
+ 148   1      }
+ 149          
+ 150          void set_pwm()
+ 151          {
+ 152   1        if(mode==1)
+ 153   1        {
+ 154   2          pwm=2; //睡眠风
+ 155   2        }
+ 156   1        else if(mode==2)
+ 157   1        {
+ 158   2          pwm=3; //自然风
+ 159   2        }
+ 160   1        else if(mode==3)
+ 161   1        {
+ 162   2          pwm=7; //常风
+ 163   2        }
+ 164   1      }
+ 165          
+ 166          void set_led()
+ 167          {
+ 168   1        if(mode==1&&flag_pwm)
+ 169   1        {
+ 170   2          select(4);
+ 171   2          P0=0xfe;
+ 172   2          select(0);
+ 173   2        }
+ 174   1        else if(mode==2&&flag_pwm)
+ 175   1        {
+ 176   2          select(4);
+ 177   2          P0=0xfd;
+C51 COMPILER V9.60.0.0   MAIN                                                              08/21/2020 09:01:11 PAGE 4   
+
+ 178   2          select(0);
+ 179   2        }
+ 180   1        else if(mode==3&&flag_pwm)
+ 181   1        {
+ 182   2          select(4);
+ 183   2          P0=0xfb;
+ 184   2          select(0);
+ 185   2        }
+ 186   1        else if(!flag_pwm) //如果停止工作
+ 187   1        {
+ 188   2          select(4);
+ 189   2          P0=0xff;
+ 190   2          select(0);
+ 191   2        }
+ 192   1      }
+ 193          
+ 194          void init_timer0(void)    //100微秒@11.0592MHz
+ 195          {
+ 196   1        AUXR &= 0x7F;   //定时器时钟12T模式
+ 197   1        TMOD &= 0xF0;   //设置定时器模式
+ 198   1        TL0 = 0xA4;   //设置定时初值
+ 199   1        TH0 = 0xFF;   //设置定时初值
+ 200   1        TF0 = 0;    //清除TF0标志
+ 201   1        TR0 = 1;    //定时器0开始计时
+ 202   1        ET0 = 1;
+ 203   1        EA = 1;
+ 204   1      }
+ 205          
+ 206          void ser_timer0(void) interrupt 1
+ 207          {
+ 208   1        static uint count_50ms=0,count_1s=0;
+ 209   1        static uchar count=0,count_2ms=0;
+ 210   1        count++;
+ 211   1        count_50ms++;
+ 212   1        count_1s++;
+ 213   1        count_2ms++;
+ 214   1        if(count_2ms==20)
+ 215   1        {
+ 216   2          display();
+ 217   2          count_2ms=0;
+ 218   2        }
+ 219   1        if(flag_pwm)
+ 220   1        {
+ 221   2          if(count<=pwm)
+ 222   2          {
+ 223   3            SIG=1;
+ 224   3          }
+ 225   2          else if(count<10)
+ 226   2          {
+ 227   3            SIG=0;
+ 228   3          }
+ 229   2          else if(count==10)
+ 230   2          {
+ 231   3            count=0;
+ 232   3          }
+ 233   2        }
+ 234   1        if(count_50ms==500) //50ms时扫描按键，执行按键功能，设置占空比
+ 235   1        {
+ 236   2          count_50ms=0;
+ 237   2          flag_50ms=1;
+ 238   2        }
+ 239   1        if(count_1s==10000) //1s时读取温度，递减当前定时器
+C51 COMPILER V9.60.0.0   MAIN                                                              08/21/2020 09:01:11 PAGE 5   
+
+ 240   1        {
+ 241   2          count_1s=0;
+ 242   2          flag_1s=1;
+ 243   2        }
+ 244   1      }
+ 245          
+ 246          void set_led_off()
+ 247          {
+ 248   1        if(time[mode-1]<=0) //如果时间减少到0s则停止pwm波的生成
+ 249   1        {
+ 250   2          flag_pwm=0;
+ 251   2        }
+ 252   1        else if(time[mode-1]>120) //如果时间大于120s则将数据非法归零
+ 253   1        {
+ 254   2          time[mode-1]=0;
+ 255   2          flag_pwm=0;
+ 256   2        }
+ 257   1      }
+ 258          
+ 259          void main()
+ 260          {
+ 261   1        init_sys();
+ 262   1        init_timer0();
+ 263   1        while(1)
+ 264   1        {
+ 265   2          set_tube();
+ 266   2          set_led();
+ 267   2          set_led_off(); 
+ 268   2          if(flag_1s)
+ 269   2          {
+ 270   3            get_temp();
+ 271   3            if(flag_pwm) //如果正在运行
+ 272   3            {
+ 273   4              time[mode-1]=time[mode-1]-1;
+ 274   4            }
+ 275   3            flag_1s=0;
+ 276   3          }
+ 277   2          if(flag_50ms)
+ 278   2          {
+ 279   3            scan_key();
+ 280   3            key_fun();
+ 281   3            set_pwm();
+ 282   3            flag_50ms=0;
+ 283   3          }
+ 284   2        }
+ 285   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    836    ----
+   CONSTANT SIZE    =     13    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     29       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

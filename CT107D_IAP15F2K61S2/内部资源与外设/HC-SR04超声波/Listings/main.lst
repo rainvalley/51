@@ -1,0 +1,186 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              09/05/2020 22:19:23 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <stc15f2k60s2.h>
+   2          #include <intrins.h>
+   3          typedef unsigned char uchar;
+   4          typedef unsigned int uint;
+   5          uchar code dig_code[]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90,0xbf,0xff,0xc6};
+   6          uchar buff_tube[]={0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff};
+   7          uchar flag_200ms=0;
+   8          float distance=0;
+   9          sbit trg=P1^0;
+  10          sbit echo=P1^1;
+  11          
+  12          void select(uchar channel)
+  13          {
+  14   1        switch(channel)
+  15   1        {
+  16   2          case 4:
+  17   2            P2=(P2&0x1f)|0x80;
+  18   2            break;
+  19   2          case 5:
+  20   2            P2=(P2&0x1f)|0xa0;
+  21   2            break;
+  22   2          case 6:
+  23   2            P2=(P2&0x1f)|0xc0;
+  24   2            break;
+  25   2          case 7:
+  26   2            P2=(P2&0x1f)|0xe0;
+  27   2            break;
+  28   2          case 0:
+  29   2            P2=(P2&0x1f);
+  30   2            break;
+  31   2        }
+  32   1      }
+  33          
+  34          void init_sys()
+  35          {
+  36   1        select(4);
+  37   1        P0=0xff;
+  38   1        select(5);
+  39   1        P0=0x00;
+  40   1        select(0);
+  41   1        trg=0;
+  42   1      }
+  43          
+  44          void display()
+  45          {
+  46   1        static uchar index=0;
+  47   1        select(7);
+  48   1        P0=0xff;
+  49   1        select(6);
+  50   1        P0=0x01<<index;
+  51   1        select(7);
+  52   1        P0=buff_tube[index];
+  53   1        select(0);
+  54   1        index++;
+C51 COMPILER V9.60.0.0   MAIN                                                              09/05/2020 22:19:23 PAGE 2   
+
+  55   1        index&=0x07;
+  56   1      }
+  57          
+  58          void set_display()
+  59          {
+  60   1        buff_tube[0]=dig_code[(uchar)distance/100];
+  61   1        buff_tube[1]=dig_code[(uchar)distance%100/10];
+  62   1        buff_tube[2]=dig_code[(uchar)distance%10];
+  63   1        buff_tube[3]=0xff;
+  64   1        buff_tube[4]=0xff;
+  65   1        buff_tube[5]=0xff;
+  66   1        buff_tube[6]=0xff;
+  67   1        buff_tube[7]=0xff;
+  68   1      }
+  69          
+  70          void delay_10us()   //@11.0592MHz
+  71          {
+  72   1        unsigned char i;
+  73   1      
+  74   1        _nop_();
+  75   1        i = 25;
+  76   1        while (--i);
+  77   1      }
+  78          
+  79          void init_timer0(void)
+  80          {
+  81   1        AUXR &= 0x7F;   //定时器时钟12T模式
+  82   1        TMOD &= 0xF0;   //设置定时器模式
+  83   1        TL0 = 0x00;   //设置定时初值
+  84   1        TH0 = 0x00;   //设置定时初值
+  85   1        TF0 = 0;    //清除TF0标志
+  86   1        TR0 = 0;
+  87   1        ET0 = 1;
+  88   1        EA = 1;
+  89   1      }
+  90          
+  91          void sr04_measure()
+  92          {
+  93   1        uint time=0;
+  94   1        trg=1; 
+  95   1        delay_10us();
+  96   1        trg=0; //拉高trg保持10us以上触发测距
+  97   1        while(echo==0); //等待echo变为高电平
+  98   1        TR0=1;
+  99   1        while(echo==1&&TF0==0); //等待echo变为低电平
+ 100   1        TR0=0;
+ 101   1        if(TF0==1)
+ 102   1        {
+ 103   2          TF0=0;
+ 104   2          TH0=TL0=0;
+ 105   2          distance=999;
+ 106   2        }
+ 107   1        else
+ 108   1        {
+ 109   2          time=TH0*256+TL0;
+ 110   2          TH0=TL0=0;
+ 111   2          distance=(time*1.7)/100;
+ 112   2        }
+ 113   1      }
+ 114          
+ 115          void init_timer1(void)    //1毫秒@11.0592MHz
+ 116          {
+C51 COMPILER V9.60.0.0   MAIN                                                              09/05/2020 22:19:23 PAGE 3   
+
+ 117   1        AUXR &= 0xBF;   //定时器时钟12T模式
+ 118   1        TMOD &= 0x0F;   //设置定时器模式
+ 119   1        TL1 = 0x66;   //设置定时初值
+ 120   1        TH1 = 0xFC;   //设置定时初值
+ 121   1        TF1 = 0;    //清除TF1标志
+ 122   1        TR1 = 1;    //定时器1开始计时
+ 123   1        ET1 = 1;
+ 124   1        EA = 1;
+ 125   1      }
+ 126          
+ 127          void ser_timer1() interrupt 3
+ 128          {
+ 129   1        static count_2ms,count_200ms;
+ 130   1        count_2ms++;
+ 131   1        count_200ms++;
+ 132   1        if(count_2ms>=2)
+ 133   1        {
+ 134   2          count_2ms=0;
+ 135   2          set_display();
+ 136   2          display();
+ 137   2        }
+ 138   1        if(count_200ms>=200)
+ 139   1        {
+ 140   2          count_200ms=0;
+ 141   2          flag_200ms=1;
+ 142   2        }
+ 143   1      }
+ 144          
+ 145          void main()
+ 146          {
+ 147   1        init_sys();
+ 148   1        init_timer0();
+ 149   1        init_timer1();
+ 150   1        while(1)
+ 151   1        {
+ 152   2          if(flag_200ms)
+ 153   2          {
+ 154   3            flag_200ms=0;
+ 155   3            sr04_measure();
+ 156   3          }
+ 157   2        }
+ 158   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    494    ----
+   CONSTANT SIZE    =     13    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     18    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

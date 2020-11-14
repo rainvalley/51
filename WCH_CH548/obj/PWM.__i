@@ -1,1 +1,0 @@
-"PWM\PWM.C" OPTIMIZE (8,SPEED) BROWSE INCDIR(.\ADC;.\Compare;.\FlashRom;.\GPIO;.\Public;.\PWM;.\SPI;.\Timer;.\TouchKey;.\UART;.\USB;.\Type_C;.\Infrared;.\OLED;.\HC-SR04;.\MNPWM) DEBUG OBJECTEXTEND PRINT(.\PWM.lst) OBJECT(.\obj\PWM.obj)

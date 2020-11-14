@@ -84,7 +84,7 @@ void measure()
 	TL0=0X00;
 	TH0=0X00;
 	ET0 = 1;                                                                   //T0定时器中断开启
-    EA = 1;
+  EA = 1;
 
 	TX=1;
 	mDelayuS(15);
@@ -126,6 +126,13 @@ void control()
 	}
 }
 
+void init()
+{
+	LA=0;
+	LB=0;
+	RA=0;
+	RB=0;
+}
 
 void main()
 {
@@ -133,17 +140,11 @@ void main()
 	Buzz=0; 
 	SetPWMClkDiv(4);                                                           //PWM时钟配置,FREQ_SYS/4
 	SetPWMCycle256Clk(); 
-	PWM_SEL_CHANNEL(CH3|CH5,Enable ); 
-	/*while(1)
-	{
-		control();
-		Wave();
-	}*/
+	PWM_SEL_CHANNEL(CH3|CH5,Enable );
 	while(1)
 	{
-		ahead();
+		left();
 	}
-	
 }
 
 

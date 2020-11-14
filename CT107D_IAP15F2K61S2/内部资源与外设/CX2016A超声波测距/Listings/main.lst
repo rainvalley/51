@@ -1,0 +1,175 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              11/13/2020 16:36:08 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <stc15f2k60s2.h>
+   2          #include "wave.h"
+   3          typedef unsigned char uchar;
+   4          typedef unsigned int uint;
+   5          uchar dig_code[]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90,0xc1,0x8c,0xc8,0xff};
+   6          uchar buff_tube[]={0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff};
+   7          uchar dis,flag_100ms,buff_uart;
+   8          void select(uchar channel)
+   9          {
+  10   1        switch(channel)
+  11   1        {
+  12   2          case 4:
+  13   2            P2=(P2&0x1f)|0x80;
+  14   2            break;
+  15   2          case 5:
+  16   2            P2=(P2&0x1f)|0xa0;
+  17   2            break;
+  18   2          case 6:
+  19   2            P2=(P2&0x1f)|0xc0;
+  20   2            break;
+  21   2          case 7:
+  22   2            P2=(P2&0x1f)|0xe0;
+  23   2            break;
+  24   2          default:
+  25   2            P2=(P2&0x1f);
+  26   2            break;
+  27   2        }
+  28   1      }
+  29          
+  30          void init_sys()
+  31          {
+  32   1        select(4);
+  33   1        P0=0xff;
+  34   1        select(5);
+  35   1        P0=0x00;
+  36   1        select(0);
+  37   1      }
+  38          
+  39          void display()
+  40          {
+  41   1        static uchar index=0;
+  42   1        select(7);
+  43   1        P0=0xff;
+  44   1        select(6);
+  45   1        P0=0x01<<index;
+  46   1        select(7);
+  47   1        P0=buff_tube[index];
+  48   1        select(0);
+  49   1        index++;
+  50   1        index&=0x07;
+  51   1      }
+  52          
+  53          void set_display()
+  54          {
+C51 COMPILER V9.60.0.0   MAIN                                                              11/13/2020 16:36:08 PAGE 2   
+
+  55   1        buff_tube[0]=dig_code[dis/100];
+  56   1        buff_tube[1]=dig_code[dis%100/10];
+  57   1        buff_tube[2]=dig_code[dis%10];
+  58   1        buff_tube[3]=dig_code[13];
+  59   1        buff_tube[4]=dig_code[13];
+  60   1        buff_tube[5]=dig_code[13];
+  61   1        buff_tube[6]=dig_code[13];
+  62   1        buff_tube[7]=dig_code[13];
+  63   1      }
+  64          
+  65          void init_timer0(void)    //1毫秒@12.000MHz
+  66          {
+  67   1        AUXR &= 0x7F;   //定时器时钟12T模式
+  68   1        TMOD &= 0xF0;   //设置定时器模式
+  69   1        TL0 = 0x18;   //设置定时初值
+  70   1        TH0 = 0xFC;   //设置定时初值
+  71   1        TF0 = 0;    //清除TF0标志
+  72   1        TR0 = 1;    //定时器0开始计时
+  73   1        EA = 1;
+  74   1        ET0 = 1;
+  75   1      }
+  76          
+  77          void ser_timer0() interrupt 1
+  78          {
+  79   1        static uint count_100ms;
+  80   1        count_100ms++;
+  81   1        if(count_100ms>=100)
+  82   1        {
+  83   2          flag_100ms=1;
+  84   2          count_100ms=0;
+  85   2        }
+  86   1        set_display();
+  87   1        display();
+  88   1      }
+  89          
+  90          void init_uart(void)    //9600bps@12.000MHz
+  91          {
+  92   1        SCON = 0x50;    //8位数据,可变波特率
+  93   1        AUXR |= 0x01;   //串口1选择定时器2为波特率发生器
+  94   1        AUXR &= 0xFB;   //定时器2时钟为Fosc/12,即12T
+  95   1        T2L = 0xE6;   //设定定时初值
+  96   1        T2H = 0xFF;   //设定定时初值
+  97   1        AUXR |= 0x10;   //启动定时器2
+  98   1        EA = 1;
+  99   1        ES = 1;
+ 100   1        IP = 0x10; //设置串口优先级，避免大量发送/接受时候的误码
+ 101   1      }
+ 102          
+ 103          
+ 104          void send_string(uchar *str)
+ 105          {
+ 106   1        while(*str!='\0')
+ 107   1        {
+ 108   2          SBUF=*str;
+ 109   2          while(TI==0);
+ 110   2          TI=0;
+ 111   2          str++;
+ 112   2        }
+ 113   1      }
+ 114          
+ 115          void send_byte(uchar dat)
+ 116          {
+C51 COMPILER V9.60.0.0   MAIN                                                              11/13/2020 16:36:08 PAGE 3   
+
+ 117   1        SBUF=dat;
+ 118   1        while(TI==0);
+ 119   1        TI=0;
+ 120   1      }
+ 121          
+ 122          void ser_uart() interrupt 4
+ 123          {
+ 124   1        if(RI)
+ 125   1        {
+ 126   2          send_byte(dis);
+ 127   2          RI=0;
+ 128   2        }
+ 129   1      }
+ 130          
+ 131          int main()
+ 132          {
+ 133   1        init_sys();
+ 134   1        init_timer0();
+ 135   1        init_timer1();
+ 136   1        init_uart();
+ 137   1        send_string("Hello World!\r\n");
+ 138   1        while(1)
+ 139   1        { 
+ 140   2          if(flag_100ms)
+ 141   2          {
+ 142   3            flag_100ms=0;
+ 143   3            dis=get_dis();
+ 144   3            //send_byte(dis);
+ 145   3          }
+ 146   2        }
+ 147   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    375    ----
+   CONSTANT SIZE    =     15    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     28    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

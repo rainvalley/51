@@ -3,9 +3,9 @@
 <pre>
 <h1>礦ision Build Log</h1>
 <h2>Tool Versions:</h2>
-IDE-Version: 礦ision V5.28.0.0
-Copyright (C) 2019 ARM Ltd and ARM Germany GmbH. All rights reserved.
-License Information: 胡 亚东, 河南工业大学, LIC=JLB2Z-J132B-ITH3R-K95J5-FW8ZJ-N926G
+IDE-Version: μVision V5.31.0.0
+Copyright (C) 2020 ARM Ltd and ARM Germany GmbH. All rights reserved.
+License Information: Hu Yadong, Haut, LIC=76PLD-8U19L-SL7CN-YTSGF-S24WP-MPLZP
  
 Tool Versions:
 Toolchain:       PK51 Prof. Developers Kit  Version: 9.60.0.0
@@ -18,12 +18,15 @@ Hex Converter:   OH51.exe V2.7.0.0
 CPU DLL:         S8051.DLL V3.122.0.0
 Dialog DLL:      DP51.DLL V2.67.0.0 
 <h2>Project:</h2>
-C:\Users\Raincorn\OneDrive - stu.haut.edu.cn\Desktop\智能循迹小车\天机2020参考资料\EXAM\CH549.uvproj
-Project File Date:  03/08/2020
+C:\Users\Raincorn\Documents\Dev\51\WCH_CH548\CH549.uvproj
+Project File Date:  08/23/2020
 
 <h2>Output:</h2>
-Build target 'Target 1'
+Rebuild target 'Target 1'
+compiling DEBUG.C...
 compiling Main.C...
+compiling Timer.C...
+compiling PWM.C...
 linking...
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
     SEGMENT: ?PR?CFGFSYS?DEBUG
@@ -38,8 +41,6 @@ linking...
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
     SEGMENT: ?PR?_CH549WDTFEED?DEBUG
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
-    SEGMENT: ?PR?LEFT?MAIN
-*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
     SEGMENT: ?PR?RIGHT?MAIN
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
     SEGMENT: ?PR?SPEED_UP?MAIN
@@ -50,6 +51,8 @@ linking...
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
     SEGMENT: ?PR?CONTROL?MAIN
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?INIT?MAIN
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
     SEGMENT: ?PR?_MTIMER_X_MODINIT?TIMER
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
     SEGMENT: ?PR?_MTIMER_X_SETDATA?TIMER
@@ -59,10 +62,10 @@ linking...
     SEGMENT: ?PR?_CAP1INIT?TIMER
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
     SEGMENT: ?PR?_CAP0INIT?TIMER
-Program Size: data=75.1 xdata=0 code=4007
+Program Size: data=75.1 xdata=0 code=4016
 creating hex file from ".\obj\CH549EXAM"...
 ".\obj\CH549EXAM" - 0 Error(s), 17 Warning(s).
-Build Time Elapsed:  00:00:00
+Build Time Elapsed:  00:00:01
 </pre>
 </body>
 </html>

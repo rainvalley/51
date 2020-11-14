@@ -1,11 +1,11 @@
-C51 COMPILER V9.60.0.0   PWM                                                               03/08/2020 14:31:24 PAGE 1   
+C51 COMPILER V9.60.0.0   PWM                                                               08/23/2020 09:56:12 PAGE 1   
 
 
 C51 COMPILER V9.60.0.0, COMPILATION OF MODULE PWM
 OBJECT MODULE PLACED IN .\obj\PWM.obj
 COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE PWM\PWM.C OPTIMIZE(8,SPEED) BROWSE INCDIR(.\ADC;.\Compare;.\FlashRom;.\G
                     -PIO;.\Public;.\PWM;.\SPI;.\Timer;.\TouchKey;.\UART;.\USB;.\Type_C;.\Infrared;.\OLED;.\HC-SR04;.\MNPWM) DEBUG OBJECTEXTEN
-                    -D PRINT(.\PWM.lst) OBJECT(.\obj\PWM.obj)
+                    -D PRINT(.\PWM.lst) TABS(2) OBJECT(.\obj\PWM.obj)
 
 line level    source
 
@@ -62,7 +62,7 @@ line level    source
   51   3              }
   52   2              if(Channel&CH6)
   53   2              {
-C51 COMPILER V9.60.0.0   PWM                                                               03/08/2020 14:31:24 PAGE 2   
+C51 COMPILER V9.60.0.0   PWM                                                               08/23/2020 09:56:12 PAGE 2   
 
   54   3                  P2_MOD_OC &= ~CH6;
   55   3                  P2_DIR_PU |= CH6;
@@ -126,7 +126,7 @@ MODULE INFORMATION:   STATIC OVERLAYABLE
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
-C51 COMPILER V9.60.0.0   PWM                                                               03/08/2020 14:31:24 PAGE 3   
+C51 COMPILER V9.60.0.0   PWM                                                               08/23/2020 09:56:12 PAGE 3   
 
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----

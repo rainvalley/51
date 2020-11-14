@@ -1,0 +1,123 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              08/31/2020 11:32:19 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <stc15f2k60s2.h>
+   2          #include <intrins.h>
+   3          #define NOP {_nop_();_nop_();_nop_();_nop_();_nop_();_nop_();}
+   4          typedef unsigned char uchar;
+   5          typedef unsigned int uint;
+   6          typedef unsigned long ulong;
+   7          sbit DIN=P1^0;
+   8          void init_sys()
+   9          {
+  10   1        P2=(P2&0x1f)|0x80;
+  11   1        P0=0xff;
+  12   1        P2=(P2&0x1f)|0xa0;
+  13   1        P0=0x00;
+  14   1        P2=(P2&0x1f);
+  15   1      }
+  16          
+  17          void ws2812_init()
+  18          {
+  19   1        uchar i;
+  20   1        DIN=0;
+  21   1        for(i=0;i<=200;i++)
+  22   1        {
+  23   2          NOP;
+  24   2        }
+  25   1      }
+  26          
+  27          void ws2812_write_low()
+  28          {
+  29   1        DIN=1;
+  30   1        NOP;
+  31   1        DIN=0;
+  32   1        NOP;
+  33   1        NOP;
+  34   1        NOP;
+  35   1        NOP;
+  36   1      }
+  37          
+  38          void ws2812_write_high()
+  39          {
+  40   1        DIN=1;
+  41   1        NOP;
+  42   1        NOP;
+  43   1        NOP;
+  44   1        NOP;
+  45   1        DIN=0;
+  46   1        NOP;
+  47   1      }
+  48          
+  49          void ws2812_write_byte(uchar dat)
+  50          {
+  51   1        uchar i;
+  52   1        for(i=0;i<8;i++)
+  53   1        {
+  54   2          if(dat&0x80)
+C51 COMPILER V9.60.0.0   MAIN                                                              08/31/2020 11:32:19 PAGE 2   
+
+  55   2          {
+  56   3            ws2812_write_high();
+  57   3          }
+  58   2          else
+  59   2          {
+  60   3            ws2812_write_low();
+  61   3          }
+  62   2          dat<<=1;
+  63   2        }
+  64   1      }
+  65          
+  66          void ws2812_write_rgb(uchar r,uchar g,uchar b)
+  67          {
+  68   1        ws2812_write_byte(g);
+  69   1        ws2812_write_byte(r);
+  70   1        ws2812_write_byte(b);
+  71   1      }
+  72          
+  73          void ws2812_write_24bits(ulong dat)
+  74          {
+  75   1        ws2812_write_byte(dat>>8); //write_r
+  76   1        ws2812_write_byte(dat>>16); //write_g
+  77   1        ws2812_write_byte(dat); //write_b
+  78   1      }
+  79          
+  80          
+  81          void main()
+  82          {
+  83   1        init_sys();
+  84   1        ws2812_init();
+  85   1        ws2812_write_24bits(0x000000);
+  86   1        ws2812_write_24bits(0xff0000);
+  87   1        ws2812_write_24bits(0x00ff00);
+  88   1        ws2812_write_24bits(0x0000ff);
+  89   1        ws2812_write_24bits(0xffff00);
+  90   1        ws2812_write_24bits(0xff00ff);
+  91   1        ws2812_write_24bits(0x00ffff);
+  92   1        ws2812_write_24bits(0xffffff);
+  93   1        while(1)
+  94   1        {
+  95   2           
+  96   2        }
+  97   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    296    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       4
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

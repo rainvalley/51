@@ -1,0 +1,393 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              11/13/2020 22:26:12 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <stc15f2k60s2.h>
+   2          #include <string.h>
+   3          #include <stdio.h>
+   4          #include "ds1302.h"
+   5          #include "onewire.h"
+   6          #include "iic.h"
+   7          sbit KEY_IN_0=P4^4;
+   8          sbit KEY_IN_1=P4^2;
+   9          sbit KEY_IN_2=P3^5;
+  10          sbit KEY_IN_3=P3^4;
+  11          sbit KEY_OUT_0=P3^0;
+  12          sbit KEY_OUT_1=P3^1;
+  13          sbit KEY_OUT_2=P3^2;
+  14          sbit KEY_OUT_3=P3^3;
+  15          typedef unsigned char uchar;
+  16          typedef unsigned int uint;
+  17          uchar dig_code[]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90};
+  18          uchar buff_tube[]={0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff};
+  19          uchar key_back[4][4]={{1,1,1,1},{1,1,1,1},{1,1,1,1},{1,1,1,1}};
+  20          uchar key_stat[4][4]={{1,1,1,1},{1,1,1,1},{1,1,1,1},{1,1,1,1}};
+  21          uchar time[]={50,59,23};
+  22          uchar str[10];
+  23          uchar index=0;
+  24          uchar dis=20,p_dis=35,p_temp=30;
+  25          float volta,temp=24.23;
+  26          uchar trg,cont;
+  27          
+  28          void select(uchar channel)
+  29          {
+  30   1        switch(channel)
+  31   1        {
+  32   2          case 4:
+  33   2            P2=(P2&0x1f)|0x80;
+  34   2            break;
+  35   2          case 5:
+  36   2            P2=(P2&0x1f)|0xa0;
+  37   2            break;
+  38   2          case 6:
+  39   2            P2=(P2&0x1f)|0xc0;
+  40   2            break;
+  41   2          case 7:
+  42   2            P2=(P2&0x1f)|0xe0;
+  43   2            break;
+  44   2          default:
+  45   2            P2=(P2&0x1f);
+  46   2            break;
+  47   2        }
+  48   1      }
+  49          
+  50          void init_sys()
+  51          {
+  52   1        select(4);
+  53   1        P0=0xff;
+  54   1        select(5);
+C51 COMPILER V9.60.0.0   MAIN                                                              11/13/2020 22:26:12 PAGE 2   
+
+  55   1        P0=0x00;
+  56   1        select(0);
+  57   1      }
+  58          
+  59          void init_uart(void)    //9600bps@12.000MHz
+  60          {
+  61   1        SCON = 0x50;    //8位数据,可变波特率
+  62   1        AUXR |= 0x01;   //串口1选择定时器2为波特率发生器
+  63   1        AUXR |= 0x04;   //定时器2时钟为Fosc,即1T
+  64   1        T2L = 0xC7;   //设定定时初值
+  65   1        T2H = 0xFE;   //设定定时初值
+  66   1        AUXR |= 0x10;   //启动定时器2
+  67   1        EA = 1;
+  68   1        ES = 1;
+  69   1      }
+  70          
+  71          void send_data(uchar *str)
+  72          {
+  73   1        while(*str!='\0')
+  74   1        {
+  75   2          SBUF=*str++;
+  76   2          while(TI==0);
+  77   2          TI=0;
+  78   2        }
+  79   1      }
+  80          
+  81          void send_uart()
+  82          {
+  83   1        uchar buff[10];
+  84   1        if(strncmp(str,"ST",2)==0)
+  85   1        {
+  86   2          sprintf(buff,"$%u,%.2f\r\n",(uint)dis,temp);
+  87   2          send_data(buff);
+  88   2        }
+  89   1        else if(strncmp(str,"PARA",4)==0)
+  90   1        {
+  91   2          sprintf(buff,"$%u,%u\r\n",(uint)p_dis,(uint)p_temp);
+  92   2          send_data(buff);
+  93   2        }
+  94   1        else
+  95   1        {
+  96   2          send_data("ERROR\r\n");
+  97   2        }
+  98   1      }
+  99          
+ 100          void ser_uart() interrupt 4
+ 101          {
+ 102   1        uchar temp;
+ 103   1        if(RI)
+ 104   1        {
+ 105   2          RI=0;
+ 106   2          temp=SBUF;
+ 107   2          if(temp!='\n')
+ 108   2          {
+ 109   3            str[index]=temp;
+ 110   3            index++;
+ 111   3          }
+ 112   2          else
+ 113   2          {
+ 114   3            index=0;
+ 115   3            send_uart();
+ 116   3          }
+C51 COMPILER V9.60.0.0   MAIN                                                              11/13/2020 22:26:12 PAGE 3   
+
+ 117   2        }
+ 118   1      }
+ 119          
+ 120          void get_temp()
+ 121          {
+ 122   1        uchar LSB,MSB;
+ 123   1        init_ds18b20();
+ 124   1        Write_DS18B20(0xcc);
+ 125   1        Write_DS18B20(0x44);
+ 126   1        init_ds18b20();
+ 127   1        Write_DS18B20(0xcc);
+ 128   1        Write_DS18B20(0xbe);
+ 129   1        LSB=Read_DS18B20();
+ 130   1        MSB=Read_DS18B20();
+ 131   1        init_ds18b20();
+ 132   1        temp=(MSB<<8|LSB)*0.0625;
+ 133   1      }
+ 134          
+ 135          void dac(float volta)
+ 136          {
+ 137   1        float dat=(volta/5.0)*255;
+ 138   1        IIC_Start();
+ 139   1        IIC_SendByte(0x90);
+ 140   1        IIC_WaitAck();
+ 141   1        IIC_SendByte(0x40);
+ 142   1        IIC_WaitAck();
+ 143   1        IIC_SendByte(dat);
+ 144   1        IIC_WaitAck();
+ 145   1        IIC_Stop();
+ 146   1      }
+ 147          
+ 148          void adc()
+ 149          {
+ 150   1        IIC_Start();
+ 151   1        IIC_SendByte(0x90);
+ 152   1        IIC_WaitAck();
+ 153   1        IIC_SendByte(0x01);
+ 154   1        IIC_WaitAck();
+ 155   1        IIC_Stop();
+ 156   1        
+ 157   1        IIC_Start();
+ 158   1        IIC_SendByte(0x91);
+ 159   1        volta=IIC_RecByte()/255.0*500;
+ 160   1        IIC_Ack(0);
+ 161   1        IIC_Stop();
+ 162   1      }
+ 163          
+ 164          void save_data(uchar add,uchar dat)
+ 165          {
+ 166   1        IIC_Start();
+ 167   1        IIC_SendByte(0xa0);
+ 168   1        IIC_WaitAck();
+ 169   1        IIC_SendByte(add);
+ 170   1        IIC_WaitAck();
+ 171   1        IIC_SendByte(dat);
+ 172   1        IIC_WaitAck();
+ 173   1        IIC_Stop();
+ 174   1      }
+ 175          
+ 176          uchar read_data(uchar add)
+ 177          {
+ 178   1        uchar dat;
+C51 COMPILER V9.60.0.0   MAIN                                                              11/13/2020 22:26:12 PAGE 4   
+
+ 179   1        IIC_Start();
+ 180   1        IIC_SendByte(0xa0);
+ 181   1        IIC_WaitAck();
+ 182   1        IIC_SendByte(add);
+ 183   1        IIC_WaitAck();
+ 184   1        IIC_Stop();
+ 185   1        
+ 186   1        IIC_Start();
+ 187   1        IIC_SendByte(0xa1);
+ 188   1        dat=IIC_RecByte();
+ 189   1        IIC_Ack(0);
+ 190   1        IIC_Stop();
+ 191   1        return dat;
+ 192   1      }
+ 193          
+ 194          uchar bcd_to_num(uchar bcd)
+ 195          {
+ 196   1        uchar a,b;
+ 197   1        a=bcd/16;
+ 198   1        b=bcd%16;
+ 199   1        return 10*a+b;
+ 200   1      }
+ 201          
+ 202          uchar num_to_bcd(uchar num)
+ 203          {
+ 204   1        uchar a,b;
+ 205   1        a=num/10;
+ 206   1        b=num%10;
+ 207   1        return 16*a+b;
+ 208   1      }
+ 209          
+ 210          void write_time()
+ 211          {
+ 212   1        uchar i,add=0x80;
+ 213   1        Write_Ds1302(0x8e,0x80);
+ 214   1        for(i=0;i<3;i++)
+ 215   1        {
+ 216   2          Write_Ds1302(add,num_to_bcd(time[i]));
+ 217   2          add=add+2;
+ 218   2        }
+ 219   1        Write_Ds1302(0x8e,0x00);
+ 220   1      }
+ 221          
+ 222          void read_time()
+ 223          {
+ 224   1        uchar i,add=0x81;
+ 225   1        for(i=0;i<3;i++)
+ 226   1        {
+ 227   2          time[i]=bcd_to_num(Read_Ds1302(add));
+ 228   2          add=add+2;
+ 229   2        }
+ 230   1      }
+ 231          
+ 232          void scan_key()
+ 233          {
+ 234   1        uchar dat=P3^0xff;
+ 235   1        trg=dat&(dat^cont);
+ 236   1        cont=dat;
+ 237   1      }
+ 238          
+ 239          void display()
+ 240          {
+C51 COMPILER V9.60.0.0   MAIN                                                              11/13/2020 22:26:12 PAGE 5   
+
+ 241   1        static uchar index=0;
+ 242   1        select(7);
+ 243   1        P0=0xff;
+ 244   1        select(6);
+ 245   1        P0=0x01<<index;
+ 246   1        select(7);
+ 247   1        P0=buff_tube[index];
+ 248   1        select(0);
+ 249   1        
+ 250   1        index++;
+ 251   1        index&=0x07;
+ 252   1      }
+ 253          
+ 254          void set_display()
+ 255          {
+ 256   1        buff_tube[0]=dig_code[0];
+ 257   1        buff_tube[1]=dig_code[1];
+ 258   1        buff_tube[2]=dig_code[2];
+ 259   1        buff_tube[3]=dig_code[3];
+ 260   1        buff_tube[4]=dig_code[4];
+ 261   1        buff_tube[5]=dig_code[5];
+ 262   1        buff_tube[6]=dig_code[6];
+ 263   1        buff_tube[7]=dig_code[7];
+ 264   1      }
+ 265          
+ 266          void scan_keys()
+ 267          {
+ 268   1        uchar i;
+ 269   1        static uchar keyout=0;
+ 270   1        static uchar key_buff[4][4]={{0xff,0xff,0xff,0xff},{0xff,0xff,0xff,0xff},{0xff,0xff,0xff,0xff},{0xff,0xff
+             -,0xff,0xff}};
+ 271   1        key_buff[keyout][0]=key_buff[keyout][0]<<1|KEY_OUT_0; 
+ 272   1        key_buff[keyout][1]=key_buff[keyout][1]<<1|KEY_OUT_1; 
+ 273   1        key_buff[keyout][2]=key_buff[keyout][2]<<1|KEY_OUT_2; 
+ 274   1        key_buff[keyout][3]=key_buff[keyout][3]<<1|KEY_OUT_3; 
+ 275   1        
+ 276   1        for(i=0;i<4;i++)
+ 277   1        {
+ 278   2          if(key_buff[keyout][i]==0x00)
+ 279   2          {
+ 280   3            key_stat[keyout][i]=0;
+ 281   3          }
+ 282   2          else if(key_buff[keyout][i]==0xff)
+ 283   2          {
+ 284   3            key_stat[keyout][i]=1;
+ 285   3          }
+ 286   2        }
+ 287   1        
+ 288   1        keyout++;
+ 289   1        keyout&=0x03;
+ 290   1        
+ 291   1        switch(keyout)
+ 292   1        {
+ 293   2          case 0:KEY_OUT_3=1;KEY_OUT_0=0;break;
+ 294   2          case 1:KEY_OUT_0=1;KEY_OUT_1=0;break;
+ 295   2          case 2:KEY_OUT_1=1;KEY_OUT_2=0;break;
+ 296   2          case 3:KEY_OUT_2=1;KEY_OUT_3=0;break;
+ 297   2          default:break;
+ 298   2        }
+ 299   1        
+ 300   1      }
+ 301          
+C51 COMPILER V9.60.0.0   MAIN                                                              11/13/2020 22:26:12 PAGE 6   
+
+ 302          void key_fun(uchar i,uchar j)
+ 303          {
+ 304   1        
+ 305   1      }
+*** WARNING C280 IN LINE 302 OF main.c: 'i': unreferenced local variable
+*** WARNING C280 IN LINE 302 OF main.c: 'j': unreferenced local variable
+ 306          
+ 307          void key_press()
+ 308          {
+ 309   1        int i,j;
+ 310   1        for(i=0;i<4;i++)
+ 311   1        {
+ 312   2          for(j=0;j<4;j++)
+ 313   2          {
+ 314   3            if(key_stat[i][j]!=key_back[i][j])
+ 315   3            {
+ 316   4              if(key_stat[i][j]==0)
+ 317   4              {
+ 318   5                key_fun(i,j);
+ 319   5              }
+ 320   4              key_back[i][j]=key_stat[i][j];
+ 321   4            }
+ 322   3          }
+ 323   2        }
+ 324   1      }
+ 325          
+ 326          void init_timer0(void)    //1毫秒@12.000MHz
+ 327          {
+ 328   1        AUXR &= 0x7F;   //定时器时钟12T模式
+ 329   1        TMOD &= 0xF0;   //设置定时器模式
+ 330   1        TL0 = 0x18;   //设置定时初值
+ 331   1        TH0 = 0xFC;   //设置定时初值
+ 332   1        TF0 = 0;    //清除TF0标志
+ 333   1        TR0 = 1;    //定时器0开始计时
+ 334   1        EA = 1;
+ 335   1        ET0 = 1;
+ 336   1      }
+ 337          
+ 338          void ser_timer0() interrupt 1
+ 339          {
+ 340   1        scan_key();
+ 341   1        set_display();
+ 342   1        display();
+ 343   1      }
+ 344          
+ 345          int main()
+ 346          {
+ 347   1        init_sys();
+ 348   1        init_uart();
+ 349   1        init_timer0();
+ 350   1        while(1)
+ 351   1        {
+ 352   2          
+ 353   2        }
+ 354   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1249    ----
+   CONSTANT SIZE    =     36    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+C51 COMPILER V9.60.0.0   MAIN                                                              11/13/2020 22:26:12 PAGE 7   
+
+   DATA SIZE        =     95      29
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  2 WARNING(S),  0 ERROR(S)

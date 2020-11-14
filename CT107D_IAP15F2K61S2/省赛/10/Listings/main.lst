@@ -1,0 +1,359 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              08/29/2020 23:02:35 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <stc15f2k60s2.h>
+   2          #include "iic.h"
+   3          typedef unsigned char uchar;
+   4          typedef unsigned int uint;
+   5          uchar code dig_code[]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90,0x8e,0xc1,0xff};
+   6          uchar buff_tube[]={0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff};
+   7          uchar trg,cont,flag_measure,flag_dac,flag_led=1,flag_smg=1;
+   8          uchar flag_20ms,flag_50ms;
+   9          uint volta,freq,count_freq;
+  10          
+  11          void select(uchar channel)
+  12          {
+  13   1        switch(channel)
+  14   1        {
+  15   2          case 4:
+  16   2            P2=(P2&0x1f)|0x80;
+  17   2            break;
+  18   2          case 5:
+  19   2            P2=(P2&0x1f)|0xa0;
+  20   2            break;
+  21   2          case 6:
+  22   2            P2=(P2&0x1f)|0xc0;
+  23   2            break;
+  24   2          case 7:
+  25   2            P2=(P2&0x1f)|0xe0;
+  26   2            break;
+  27   2          default:
+  28   2            P2=(P2&0x1f);
+  29   2            break;
+  30   2        }
+  31   1      }
+  32          
+  33          void init_sys()
+  34          {
+  35   1        select(4);
+  36   1        P0=0xff;
+  37   1        select(5);
+  38   1        P0=0x00;
+  39   1        select(0);
+  40   1      }
+  41          
+  42          void display()
+  43          {
+  44   1        static uchar index;
+  45   1        select(7);
+  46   1        P0=0xff;
+  47   1        select(6);
+  48   1        P0=0x01<<index;
+  49   1        select(7);
+  50   1        P0=buff_tube[index];
+  51   1        select(0);
+  52   1        index++;
+  53   1        index&=0x07;
+  54   1      }
+C51 COMPILER V9.60.0.0   MAIN                                                              08/29/2020 23:02:35 PAGE 2   
+
+  55          
+  56          void scan_key()
+  57          {
+  58   1        uchar dat=P3^0xff;
+  59   1        trg=dat&(dat^cont);
+  60   1        cont=dat;
+  61   1      }
+  62          
+  63          void key_fun()
+  64          {
+  65   1        if(trg==0x01)
+  66   1        {
+  67   2          flag_smg=!flag_smg;
+  68   2        }
+  69   1        if(trg==0x02)
+  70   1        {
+  71   2          flag_led=!flag_led;
+  72   2        }
+  73   1        if(trg==0x04)
+  74   1        {
+  75   2          flag_dac=~flag_dac;
+  76   2        }
+  77   1        if(trg==0x08)
+  78   1        {
+  79   2          flag_measure=~flag_measure;
+  80   2        }
+  81   1      }
+  82          
+  83          void set_display()
+  84          {
+  85   1        if(flag_smg)
+  86   1        {
+  87   2          if(flag_measure==0) //电压显示
+  88   2          {
+  89   3            buff_tube[0]=dig_code[11];
+  90   3            buff_tube[1]=dig_code[12];
+  91   3            buff_tube[2]=dig_code[12];
+  92   3            buff_tube[3]=dig_code[12];
+  93   3            buff_tube[4]=dig_code[12];
+  94   3            buff_tube[5]=dig_code[volta/100]+0x80;
+  95   3            buff_tube[6]=dig_code[(volta%100)/10];
+  96   3            buff_tube[7]=dig_code[volta%10];
+  97   3          }
+  98   2          else //频率显示
+  99   2          {
+ 100   3            buff_tube[0]=dig_code[10];
+ 101   3            buff_tube[1]=dig_code[12];
+ 102   3            buff_tube[2]=dig_code[12];
+ 103   3            buff_tube[3]=dig_code[(freq/10000)%10];
+ 104   3            buff_tube[4]=dig_code[(freq/1000)%10];
+ 105   3            buff_tube[5]=dig_code[(freq/100)%10];
+ 106   3            buff_tube[6]=dig_code[(freq/10)%10];
+ 107   3            buff_tube[7]=dig_code[freq%10];
+ 108   3            if(buff_tube[3]==dig_code[0])
+ 109   3            {
+ 110   4              buff_tube[3]=0xff;
+ 111   4              if(buff_tube[4]==dig_code[0]) 
+ 112   4              {
+ 113   5                buff_tube[4]=0xff;
+ 114   5                if(buff_tube[5]==dig_code[0])
+ 115   5                {
+ 116   6                  buff_tube[5]=0xff;
+C51 COMPILER V9.60.0.0   MAIN                                                              08/29/2020 23:02:35 PAGE 3   
+
+ 117   6                  if(buff_tube[6]==dig_code[0])
+ 118   6                  {
+ 119   7                    buff_tube[6]=0xff;
+ 120   7                    if(buff_tube[7]==dig_code[0])
+ 121   7                    {
+ 122   8                      buff_tube[7]=0xff;
+ 123   8                    }
+ 124   7                  }
+ 125   6                }
+ 126   5              }
+ 127   4            }
+ 128   3          }
+ 129   2        }
+ 130   1        else
+ 131   1        {
+ 132   2          buff_tube[0]=dig_code[12];
+ 133   2          buff_tube[1]=dig_code[12];
+ 134   2          buff_tube[2]=dig_code[12];
+ 135   2          buff_tube[3]=dig_code[12];
+ 136   2          buff_tube[4]=dig_code[12];
+ 137   2          buff_tube[5]=dig_code[12];
+ 138   2          buff_tube[6]=dig_code[12];
+ 139   2          buff_tube[7]=dig_code[12];
+ 140   2        }
+ 141   1      }
+ 142          
+ 143          void adc()
+ 144          {
+ 145   1        IIC_Start();
+ 146   1        IIC_SendByte(0x90);
+ 147   1        IIC_WaitAck();
+ 148   1        IIC_SendByte(0x43);
+ 149   1        IIC_WaitAck();
+ 150   1        IIC_Stop();
+ 151   1        
+ 152   1        IIC_Start();
+ 153   1        IIC_SendByte(0x91);
+ 154   1        IIC_WaitAck();
+ 155   1        volta=IIC_RecByte()*2;
+ 156   1        IIC_Ack(0);
+ 157   1        IIC_Stop();
+ 158   1      }
+ 159          
+ 160          void dac()
+ 161          {
+ 162   1        if(flag_dac==0)
+ 163   1        {
+ 164   2          IIC_Start();
+ 165   2          IIC_SendByte(0x90);
+ 166   2          IIC_WaitAck();
+ 167   2          IIC_SendByte(0x40);
+ 168   2          IIC_WaitAck();
+ 169   2          IIC_SendByte(102);
+ 170   2          IIC_WaitAck();
+ 171   2          IIC_Stop();
+ 172   2        }
+ 173   1        else
+ 174   1        {
+ 175   2          IIC_Start();
+ 176   2          IIC_SendByte(0x90);
+ 177   2          IIC_WaitAck();
+ 178   2          IIC_SendByte(0x40);
+C51 COMPILER V9.60.0.0   MAIN                                                              08/29/2020 23:02:35 PAGE 4   
+
+ 179   2          IIC_WaitAck();
+ 180   2          IIC_SendByte(volta/2);
+ 181   2          IIC_WaitAck();
+ 182   2          IIC_Stop();
+ 183   2        }
+ 184   1      }
+ 185          
+ 186          void set_led()
+ 187          {
+ 188   1        P0=0xff;
+ 189   1        select(4);
+ 190   1        if(flag_led)
+ 191   1        {
+ 192   2          if(flag_measure==0) //测量电压
+ 193   2          {
+ 194   3            P0=0xfe;
+ 195   3            if(volta<150)
+ 196   3            {
+ 197   4              P0|=0x04;
+ 198   4            }
+ 199   3            else if(volta<250)
+ 200   3            {
+ 201   4              P0&=~0x04;
+ 202   4            }
+ 203   3            else if(volta<350)
+ 204   3            {
+ 205   4              P0|=0x04;
+ 206   4            }
+ 207   3            else
+ 208   3            {
+ 209   4              P0&=~0x04;
+ 210   4            }
+ 211   3          }
+ 212   2          else //测量NE555频率
+ 213   2          {
+ 214   3            P0=0xfd;
+ 215   3            if(volta<1000)
+ 216   3            {
+ 217   4              P0|=0x08;
+ 218   4            }
+ 219   3            else if(volta<5000)
+ 220   3            {
+ 221   4              P0&=~0x08;
+ 222   4            }
+ 223   3            else if(volta<10000)
+ 224   3            {
+ 225   4              P0|=0x08;
+ 226   4            }
+ 227   3            else
+ 228   3            {
+ 229   4              P0&=~0x08;
+ 230   4            }
+ 231   3          }
+ 232   2          if(flag_dac==0)
+ 233   2          {
+ 234   3            P0|=0x10;
+ 235   3          }
+ 236   2          else
+ 237   2          {
+ 238   3            P0&=~0x10;
+ 239   3          }
+ 240   2        }
+C51 COMPILER V9.60.0.0   MAIN                                                              08/29/2020 23:02:35 PAGE 5   
+
+ 241   1        else
+ 242   1        {
+ 243   2          P0=0xff;
+ 244   2        }
+ 245   1        select(0);
+ 246   1      }
+ 247          
+ 248          void init_timer0(void)
+ 249          {
+ 250   1        TMOD = 0x06;
+ 251   1        TL0 = TH0 = 0xff;
+ 252   1        ET0 = 1;
+ 253   1        TR0 = 1;
+ 254   1        EA = 1;
+ 255   1      }
+ 256          
+ 257          void ser_timer0()interrupt 1
+ 258          {
+ 259   1        count_freq++;
+ 260   1      }
+ 261          
+ 262          void init_timer1() //1毫秒@12.000MHz
+ 263          {
+ 264   1        TL1 = 0x18;   //设置定时初值
+ 265   1        TH1 = 0xFC;   //设置定时初值
+ 266   1        TF1 = 0;    //清除TF1标志
+ 267   1        TR1 = 1;    //定时器1开始计时
+ 268   1        ET1 = 1;
+ 269   1        EA = 1;
+ 270   1      }
+ 271          
+ 272          void ser_timer1() interrupt 3
+ 273          {
+ 274   1        static uchar count_20ms,count_2ms,count_50ms;
+ 275   1        static uint count_500ms; //注意变量范围
+ 276   1        count_20ms++;
+ 277   1        count_2ms++;
+ 278   1        count_50ms++;
+ 279   1        count_500ms++;
+ 280   1        if(count_2ms>=2)
+ 281   1        {
+ 282   2          count_2ms=0;
+ 283   2          set_display();
+ 284   2          display();
+ 285   2          set_led(); //同步扫描时不会出现闪烁
+ 286   2        }
+ 287   1        if(count_20ms>=20)
+ 288   1        {
+ 289   2          count_20ms=0;
+ 290   2          flag_20ms=~flag_20ms;
+ 291   2        }
+ 292   1        if(count_50ms>=50)
+ 293   1        {
+ 294   2          count_50ms=0;
+ 295   2          flag_50ms=~flag_50ms;
+ 296   2        }
+ 297   1        if(count_500ms>=500)  
+ 298   1        {
+ 299   2          TR0=0;
+ 300   2          count_500ms=0;
+ 301   2          freq=count_freq*2;
+ 302   2          count_freq=0;
+C51 COMPILER V9.60.0.0   MAIN                                                              08/29/2020 23:02:35 PAGE 6   
+
+ 303   2          TR0=1;
+ 304   2        }
+ 305   1      }
+ 306          
+ 307          void main()
+ 308          {
+ 309   1        init_sys();
+ 310   1        init_timer0();
+ 311   1        init_timer1();
+ 312   1        while(1)
+ 313   1        {
+ 314   2          if(flag_20ms)
+ 315   2          {
+ 316   3            scan_key();
+ 317   3            key_fun();
+ 318   3            dac(); //错开ADC DAC避免8591的数据混乱
+ 319   3          }
+ 320   2          if(flag_50ms)
+ 321   2          {
+ 322   3            adc();
+ 323   3          }
+ 324   2        }
+ 325   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1033    ----
+   CONSTANT SIZE    =     13    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     28    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

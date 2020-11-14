@@ -1,4 +1,4 @@
-BL51 BANKED LINKER/LOCATER V6.22.2.0                                                    03/08/2020  14:44:51  PAGE 1
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                    08/23/2020  09:56:12  PAGE 1
 
 
 BL51 BANKED LINKER/LOCATER V6.22.2.0, INVOKED BY:
@@ -59,7 +59,7 @@ LINK MAP OF MODULE:  .\obj\CH549EXAM (DEBUG)
             CODE    0003H     0027H     UNIT         ?PR?PUTCHAR?PUTCHAR
                     002AH     0001H                  *** GAP ***
             CODE    002BH     0003H     ABSOLUTE     
-BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  03/08/2020  14:44:51  PAGE 2
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  08/23/2020  09:56:12  PAGE 2
 
 
             CODE    002EH     0669H     UNIT         ?C?LIB_CODE
@@ -91,7 +91,8 @@ LINK MAP OF MODULE:  .\obj\CH549EXAM (DEBUG)
             CODE    0F8AH     0009H     UNIT         ?PR?RIGHT?MAIN
             CODE    0F93H     0009H     UNIT         ?PR?AHEAD?MAIN
             CODE    0F9CH     0009H     UNIT         ?PR?BACK?MAIN
-            CODE    0FA5H     0003H     UNIT         ?PR?_CH549WDTFEED?DEBUG
+            CODE    0FA5H     0009H     UNIT         ?PR?INIT?MAIN
+            CODE    0FAEH     0003H     UNIT         ?PR?_CH549WDTFEED?DEBUG
 
 
 
@@ -116,10 +117,10 @@ SEGMENT                                  BIT_GROUP          DATA_GROUP
 
 ?PR?MAIN?MAIN                         -----    -----      -----    -----
   +--> ?PR?_PWM_SEL_CHANNEL?PWM
-  +--> ?PR?AHEAD?MAIN
+  +--> ?PR?LEFT?MAIN
 
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  08/23/2020  09:56:12  PAGE 3
 
-BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  03/08/2020  14:44:51  PAGE 3
 
 
 
@@ -139,7 +140,7 @@ SYMBOL TABLE OF MODULE:  .\obj\CH549EXAM (DEBUG)
   C:0F07H         PUBLIC        _CH549WDTModeSelect
   D:00E8H         PUBLIC        IE_EX
   D:00A8H         PUBLIC        IE
-  C:0FA5H         PUBLIC        _CH549WDTFeed
+  C:0FAEH         PUBLIC        _CH549WDTFeed
   C:0F6DH         PUBLIC        CH549UART0Alter
   D:00B8H         PUBLIC        IP
   B:0098H.1       PUBLIC        TI
@@ -178,10 +179,10 @@ SYMBOL TABLE OF MODULE:  .\obj\CH549EXAM (DEBUG)
   C:0EA3H         LINE#         35
   C:0EA6H         LINE#         36
   C:0EA9H         LINE#         37
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  08/23/2020  09:56:12  PAGE 4
+
+
   C:0EACH         LINE#         39
-BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  03/08/2020  14:44:51  PAGE 4
-
-
   C:0EAFH         LINE#         40
   C:0EB2H         LINE#         48
   C:0EBAH         LINE#         65
@@ -238,10 +239,10 @@ SYMBOL TABLE OF MODULE:  .\obj\CH549EXAM (DEBUG)
   C:0CB8H         LINE#         201
   C:0CC3H         LINE#         202
   C:0CD7H         LINE#         203
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  08/23/2020  09:56:12  PAGE 5
+
+
   C:0CF0H         LINE#         204
-BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  03/08/2020  14:44:51  PAGE 5
-
-
   C:0D0CH         LINE#         206
   C:0D14H         LINE#         207
   C:0D17H         LINE#         208
@@ -274,10 +275,10 @@ SYMBOL TABLE OF MODULE:  .\obj\CH549EXAM (DEBUG)
   -------         ENDPROC       _CH549WDTMODESELECT
   -------         PROC          _CH549WDTFEED
   D:0007H         SYMBOL        tim
-  C:0FA5H         LINE#         258
-  C:0FA5H         LINE#         259
-  C:0FA5H         LINE#         260
-  C:0FA7H         LINE#         261
+  C:0FAEH         LINE#         258
+  C:0FAEH         LINE#         259
+  C:0FAEH         LINE#         260
+  C:0FB0H         LINE#         261
   -------         ENDPROC       _CH549WDTFEED
   -------         ENDMOD        DEBUG
 
@@ -298,10 +299,10 @@ SYMBOL TABLE OF MODULE:  .\obj\CH549EXAM (DEBUG)
   B:0090H.3       PUBLIC        BACK
   C:0F9CH         PUBLIC        back
   B:00A0H.2       PUBLIC        RA
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  08/23/2020  09:56:12  PAGE 6
+
+
   B:00A0H.3       PUBLIC        RB
-BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  03/08/2020  14:44:51  PAGE 6
-
-
   C:0E16H         PUBLIC        Wave
   D:00B8H         PUBLIC        IP
   C:0F8AH         PUBLIC        right
@@ -319,6 +320,7 @@ SYMBOL TABLE OF MODULE:  .\obj\CH549EXAM (DEBUG)
   D:0098H         PUBLIC        SCON
   D:0089H         PUBLIC        TMOD
   D:0088H         PUBLIC        TCON
+  C:0FA5H         PUBLIC        init
   D:0094H         PUBLIC        P2_MOD_OC
   D:000AH         PUBLIC        down
   D:00F8H         PUBLIC        SPI0_STAT
@@ -357,11 +359,11 @@ SYMBOL TABLE OF MODULE:  .\obj\CH549EXAM (DEBUG)
   -------         ENDPROC       RIGHT
   -------         PROC          AHEAD
   C:0F93H         LINE#         36
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  08/23/2020  09:56:12  PAGE 7
+
+
   C:0F93H         LINE#         37
   C:0F93H         LINE#         38
-BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  03/08/2020  14:44:51  PAGE 7
-
-
   C:0F95H         LINE#         39
   C:0F97H         LINE#         40
   C:0F99H         LINE#         41
@@ -417,11 +419,11 @@ SYMBOL TABLE OF MODULE:  .\obj\CH549EXAM (DEBUG)
   C:0D2DH         LINE#         85
   C:0D2FH         LINE#         86
   C:0D31H         LINE#         87
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  08/23/2020  09:56:12  PAGE 8
+
+
   C:0D33H         LINE#         89
   C:0D35H         LINE#         90
-BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  03/08/2020  14:44:51  PAGE 8
-
-
   C:0D3BH         LINE#         91
   C:0D3DH         LINE#         93
   C:0D40H         LINE#         94
@@ -460,18 +462,30 @@ SYMBOL TABLE OF MODULE:  .\obj\CH549EXAM (DEBUG)
   C:0F47H         LINE#         126
   C:0F47H         LINE#         127
   -------         ENDPROC       CONTROL
+  -------         PROC          INIT
+  C:0FA5H         LINE#         129
+  C:0FA5H         LINE#         130
+  C:0FA5H         LINE#         131
+  C:0FA7H         LINE#         132
+  C:0FA9H         LINE#         133
+  C:0FABH         LINE#         134
+  C:0FADH         LINE#         135
+  -------         ENDPROC       INIT
   -------         PROC          MAIN
-  C:0F1EH         LINE#         130
-  C:0F1EH         LINE#         131
-  C:0F1EH         LINE#         132
-  C:0F21H         LINE#         133
-  C:0F23H         LINE#         134
-  C:0F26H         LINE#         135
-  C:0F29H         LINE#         136
-  C:0F30H         LINE#         142
-  C:0F30H         LINE#         143
+  C:0F1EH         LINE#         137
+  C:0F1EH         LINE#         138
+  C:0F1EH         LINE#         139
+  C:0F21H         LINE#         140
+  C:0F23H         LINE#         141
+  C:0F26H         LINE#         142
+  C:0F29H         LINE#         143
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  08/23/2020  09:56:12  PAGE 9
+
+
   C:0F30H         LINE#         144
-  C:0F33H         LINE#         145
+  C:0F30H         LINE#         145
+  C:0F30H         LINE#         146
+  C:0F33H         LINE#         147
   -------         ENDPROC       MAIN
   -------         ENDMOD        MAIN
 
@@ -479,9 +493,6 @@ SYMBOL TABLE OF MODULE:  .\obj\CH549EXAM (DEBUG)
   C:0000H         SYMBOL        _ICE_DUMMY_
   D:0080H         PUBLIC        P0
   D:0090H         PUBLIC        P1
-BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  03/08/2020  14:44:51  PAGE 9
-
-
   D:00A0H         PUBLIC        P2
   D:00B0H         PUBLIC        P3
   D:00C0H         PUBLIC        P4
@@ -528,6 +539,9 @@ SYMBOL TABLE OF MODULE:  .\obj\CH549EXAM (DEBUG)
   C:0B06H         PUBLIC        mTimer2Interrupt
   D:00D0H         PUBLIC        PSW
   -------         PROC          _MTIMER_X_MODINIT
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  08/23/2020  09:56:12  PAGE 10
+
+
   D:0007H         SYMBOL        x
   D:0005H         SYMBOL        mode
   C:0D80H         LINE#         33
@@ -539,9 +553,6 @@ SYMBOL TABLE OF MODULE:  .\obj\CH549EXAM (DEBUG)
   C:0D8FH         LINE#         39
   C:0D95H         LINE#         40
   C:0D95H         LINE#         41
-BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  03/08/2020  14:44:51  PAGE 10
-
-
   C:0DA1H         LINE#         42
   C:0DA3H         LINE#         43
   C:0DA8H         LINE#         44
@@ -588,6 +599,9 @@ SYMBOL TABLE OF MODULE:  .\obj\CH549EXAM (DEBUG)
   C:0F5BH         LINE#         95
   C:0F5DH         LINE#         96
   C:0F5FH         LINE#         97
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  08/23/2020  09:56:12  PAGE 11
+
+
   C:0F61H         LINE#         98
   C:0F63H         LINE#         99
   C:0F65H         LINE#         100
@@ -599,9 +613,6 @@ SYMBOL TABLE OF MODULE:  .\obj\CH549EXAM (DEBUG)
   C:0ED8H         LINE#         114
   C:0ED8H         LINE#         115
   C:0EDAH         LINE#         116
-BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  03/08/2020  14:44:51  PAGE 11
-
-
   C:0EDCH         LINE#         117
   C:0EDEH         LINE#         118
   C:0EE0H         LINE#         119
@@ -648,6 +659,9 @@ SYMBOL TABLE OF MODULE:  .\obj\CH549EXAM (DEBUG)
 
   -------         MODULE        PWM
   C:0000H         SYMBOL        _ICE_DUMMY_
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  08/23/2020  09:56:12  PAGE 12
+
+
   D:0080H         PUBLIC        P0
   D:0090H         PUBLIC        P1
   D:00A0H         PUBLIC        P2
@@ -659,9 +673,6 @@ SYMBOL TABLE OF MODULE:  .\obj\CH549EXAM (DEBUG)
   C:0C22H         PUBLIC        _PWM_SEL_CHANNEL
   D:00B8H         PUBLIC        IP
   D:00D8H         PUBLIC        USB_INT_FG
-BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  03/08/2020  14:44:51  PAGE 12
-
-
   D:0098H         PUBLIC        SCON
   D:0088H         PUBLIC        TCON
   D:0094H         PUBLIC        P2_MOD_OC
@@ -708,6 +719,9 @@ SYMBOL TABLE OF MODULE:  .\obj\CH549EXAM (DEBUG)
   C:0C8DH         LINE#         59
   C:0C90H         LINE#         60
   C:0C93H         LINE#         61
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  08/23/2020  09:56:12  PAGE 13
+
+
   C:0C93H         LINE#         62
   C:0C94H         LINE#         64
   C:0C94H         LINE#         65
@@ -719,9 +733,6 @@ SYMBOL TABLE OF MODULE:  .\obj\CH549EXAM (DEBUG)
   C:0C9FH         LINE#         71
   C:0CA2H         LINE#         72
   C:0CA2H         LINE#         73
-BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  03/08/2020  14:44:51  PAGE 13
-
-
   C:0CAAH         LINE#         74
   C:0CAAH         LINE#         75
   -------         ENDPROC       _PWM_SEL_CHANNEL
@@ -768,6 +779,9 @@ SYMBOL TABLE OF MODULE:  .\obj\CH549EXAM (DEBUG)
   -------         MODULE        ?C?FTNPWR
   C:04EDH         PUBLIC        ?C?FTNPWR
   -------         ENDMOD        ?C?FTNPWR
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  08/23/2020  09:56:12  PAGE 14
+
+
 
   -------         MODULE        ?C?CLDPTR
   C:052DH         PUBLIC        ?C?CLDPTR
@@ -779,9 +793,6 @@ SYMBOL TABLE OF MODULE:  .\obj\CH549EXAM (DEBUG)
 
   -------         MODULE        ?C?CSTPTR
   C:0573H         PUBLIC        ?C?CSTPTR
-BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  03/08/2020  14:44:51  PAGE 14
-
-
   -------         ENDMOD        ?C?CSTPTR
 
   -------         MODULE        ?C?ULDIV
@@ -823,13 +834,13 @@ SYMBOL TABLE OF MODULE:  .\obj\CH549EXAM (DEBUG)
     SEGMENT: ?PR?_CH549WDTFEED?DEBUG
 
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
-    SEGMENT: ?PR?LEFT?MAIN
-
-*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
     SEGMENT: ?PR?RIGHT?MAIN
 
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
     SEGMENT: ?PR?SPEED_UP?MAIN
+
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  08/23/2020  09:56:12  PAGE 15
+
 
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
     SEGMENT: ?PR?SLOW_DOWN?MAIN
@@ -839,9 +850,9 @@ SYMBOL TABLE OF MODULE:  .\obj\CH549EXAM (DEBUG)
 
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
     SEGMENT: ?PR?CONTROL?MAIN
-BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  03/08/2020  14:44:51  PAGE 15
 
-
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?INIT?MAIN
 
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
     SEGMENT: ?PR?_MTIMER_X_MODINIT?TIMER
@@ -858,5 +869,5 @@ SYMBOL TABLE OF MODULE:  .\obj\CH549EXAM (DEBUG)
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
     SEGMENT: ?PR?_CAP0INIT?TIMER
 
-Program Size: data=75.1 xdata=0 code=4007
+Program Size: data=75.1 xdata=0 code=4016
 LINK/LOCATE RUN COMPLETE.  17 WARNING(S),  0 ERROR(S)

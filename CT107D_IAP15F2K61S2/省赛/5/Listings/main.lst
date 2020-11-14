@@ -1,0 +1,413 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              08/26/2020 13:14:53 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include<stc15f2k60s2.h>
+   2          #include "iic.h"
+   3          #include "ds1302.h"
+   4          typedef unsigned char uchar;
+   5          typedef unsigned int uint;
+   6          uchar code dig_code[]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90,0xbf,0xff,0xc6};
+   7          //定义变量：触发、长按、工作模式、设置的湿度阈值、当前湿度
+   8          uchar trg,cont,mode=0,limit=50,hum;
+   9          //定义标志量：自动模式下湿度阈值标志、蜂鸣器标志、灌溉标志、手动模式下达到对应湿度的标志符
+  10          uchar flag_set,flag_beep,flag_water,flag_on;
+  11          uchar buff_tube[8]={0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff};
+  12          uchar time[3]={0x00,0x30,0x08};
+  13          sbit L1=P0^0;
+  14          sbit L2=P0^1;
+  15          sbit beep=P0^6;
+  16          sbit relay=P0^4;
+  17          void save_config();
+  18          void init_ds1302();
+  19          void read_config();
+  20          
+  21          void select(uchar channel)
+  22          {
+  23   1        switch(channel)
+  24   1        {
+  25   2          case 4:
+  26   2            P2=(P2&0x1f)|0x80;
+  27   2            break;
+  28   2          case 5:
+  29   2            P2=(P2&0x1f)|0xa0;
+  30   2            break;
+  31   2          case 6:
+  32   2            P2=(P2&0x1f)|0xc0;
+  33   2            break;
+  34   2          case 7:
+  35   2            P2=(P2&0x1f)|0xe0;
+  36   2            break;
+  37   2          default:
+  38   2            P2=(P2&0x1f);
+  39   2            break;
+  40   2        }
+  41   1      }
+  42          
+  43          void init_sys()
+  44          {
+  45   1        select(5);
+  46   1        P0=0x00;
+  47   1        select(4);
+  48   1        P0=0xff;
+  49   1        select(0);
+  50   1        init_ds1302();
+  51   1        read_config();
+  52   1      }
+  53          
+  54          void display()
+C51 COMPILER V9.60.0.0   MAIN                                                              08/26/2020 13:14:53 PAGE 2   
+
+  55          {
+  56   1        static uchar index=0; 
+  57   1        select(7);
+  58   1        P0=0xff;
+  59   1        select(6);
+  60   1        P0=0x01<<index;
+  61   1        select(7);
+  62   1        P0=buff_tube[index];
+  63   1        select(0);
+  64   1        index++;
+  65   1        index&=0x07;
+  66   1      }
+  67          
+  68          void scan_key()
+  69          {
+  70   1        uchar dat=P3^0xff;
+  71   1        trg=dat&(dat^cont);
+  72   1        cont=dat;
+  73   1      }
+  74          
+  75          void fun_key()
+  76          {
+  77   1        if(trg==0x01)
+  78   1        {
+  79   2          if(mode==0) //自动模式
+  80   2          {
+  81   3            mode=1;
+  82   3          }
+  83   2          else if(mode==1) //手动模式
+  84   2          {
+  85   3            mode=0;
+  86   3          }
+  87   2        }
+  88   1        if(trg==0x02)
+  89   1        {
+  90   2          if(mode==0&&flag_set==0)
+  91   2          {
+  92   3            flag_set=1;
+  93   3          }
+  94   2          else if(mode==0&&flag_set==1)
+  95   2          {
+  96   3            save_config();
+  97   3            flag_set=0;
+  98   3          }
+  99   2          else if(mode==1)
+ 100   2          {
+ 101   3            flag_beep=!flag_beep;
+ 102   3          }
+ 103   2        }
+ 104   1        if(trg==0x04)
+ 105   1        {
+ 106   2          if(mode==0&&flag_set==1)
+ 107   2          {
+ 108   3            limit++;
+ 109   3            if(limit>=100)
+ 110   3            {
+ 111   4              limit=99;
+ 112   4            }
+ 113   3          }
+ 114   2          else if(mode==1)
+ 115   2          {
+ 116   3            flag_water=1;
+C51 COMPILER V9.60.0.0   MAIN                                                              08/26/2020 13:14:53 PAGE 3   
+
+ 117   3          }
+ 118   2        }
+ 119   1        if(trg==0x08)
+ 120   1        {
+ 121   2          if(mode==0&&flag_set==1)
+ 122   2          {
+ 123   3            if(limit<=0)
+ 124   3            {
+ 125   4              limit=1;
+ 126   4            }
+ 127   3            limit--;
+ 128   3          }
+ 129   2          else if(mode==1)
+ 130   2          {
+ 131   3            flag_water=0;
+ 132   3          }
+ 133   2        }
+ 134   1      }
+ 135          
+ 136          void save_config()
+ 137          {
+ 138   1        IIC_Start();
+ 139   1        IIC_SendByte(0xa0);
+ 140   1        IIC_WaitAck();
+ 141   1        IIC_SendByte(0x00);
+ 142   1        IIC_WaitAck();
+ 143   1        IIC_SendByte(limit);
+ 144   1        IIC_WaitAck();
+ 145   1        IIC_Stop();
+ 146   1      }
+ 147          
+ 148          void read_config()
+ 149          {
+ 150   1        IIC_Start();
+ 151   1        IIC_SendByte(0xa0);
+ 152   1        IIC_WaitAck();
+ 153   1        IIC_SendByte(0x00);
+ 154   1        IIC_WaitAck();
+ 155   1        IIC_Stop();
+ 156   1        
+ 157   1        IIC_Start();
+ 158   1        IIC_SendByte(0xa1);
+ 159   1        IIC_WaitAck();
+ 160   1        limit=IIC_RecByte();
+ 161   1        IIC_Ack(0);
+ 162   1        IIC_Stop();
+ 163   1      }
+ 164          
+ 165          uchar read_vlota()
+ 166          {
+ 167   1        uchar dat;
+ 168   1        IIC_Start();
+ 169   1        IIC_SendByte(0x90);
+ 170   1        IIC_WaitAck();
+ 171   1        IIC_SendByte(3);
+ 172   1        IIC_WaitAck();
+ 173   1        IIC_Stop();
+ 174   1        
+ 175   1        IIC_Start();
+ 176   1        IIC_SendByte(0x91);
+ 177   1        IIC_WaitAck();
+ 178   1        dat=IIC_RecByte();
+C51 COMPILER V9.60.0.0   MAIN                                                              08/26/2020 13:14:53 PAGE 4   
+
+ 179   1        IIC_Ack(0);
+ 180   1        IIC_Stop();
+ 181   1        
+ 182   1        return dat;
+ 183   1      }
+ 184          
+ 185          void init_ds1302()
+ 186          {
+ 187   1        Write_Ds1302(0x8e,0x00);
+ 188   1        Write_Ds1302(0x80,time[0]);
+ 189   1        Write_Ds1302(0x82,time[1]);
+ 190   1        Write_Ds1302(0x84,time[2]);
+ 191   1        Write_Ds1302(0x8e,0x80);
+ 192   1      }
+ 193          
+ 194          void read_ds1302()
+ 195          {
+ 196   1        time[1]=Read_Ds1302(0x83);
+ 197   1        time[2]=Read_Ds1302(0x85);
+ 198   1      }
+ 199          
+ 200          void get_hum()
+ 201          {
+ 202   1        uchar volta=read_vlota();
+ 203   1        hum=(1.0*volta/255.0)*100-1;
+ 204   1        if(hum>=255)
+ 205   1        {
+ 206   2          hum=0;
+ 207   2        }
+ 208   1      }
+ 209          
+ 210          void set_display()
+ 211          {
+ 212   1        if(mode==1||(mode==0&&flag_set==0))
+ 213   1        {
+ 214   2          buff_tube[0]=dig_code[time[2]/10];
+ 215   2          buff_tube[1]=dig_code[time[2]%10];
+ 216   2          buff_tube[2]=dig_code[10];
+ 217   2          buff_tube[3]=dig_code[time[1]/16];
+ 218   2          buff_tube[4]=dig_code[time[1]%16];
+ 219   2          buff_tube[5]=dig_code[10];
+ 220   2          buff_tube[6]=dig_code[hum/10];
+ 221   2          buff_tube[7]=dig_code[hum%10];
+ 222   2        }
+ 223   1        else if(mode==0&&flag_set==1)
+ 224   1        {
+ 225   2          buff_tube[0]=dig_code[10];
+ 226   2          buff_tube[1]=dig_code[10];
+ 227   2          buff_tube[2]=dig_code[11];
+ 228   2          buff_tube[3]=dig_code[11];
+ 229   2          buff_tube[4]=dig_code[11];
+ 230   2          buff_tube[5]=dig_code[11];
+ 231   2          buff_tube[6]=dig_code[limit/10];
+ 232   2          buff_tube[7]=dig_code[limit%10];
+ 233   2        }
+ 234   1      }
+ 235          
+ 236          void set_led(uchar dat)
+ 237          {
+ 238   1        P0=0xff;
+ 239   1        select(4);
+ 240   1        P0=dat;
+C51 COMPILER V9.60.0.0   MAIN                                                              08/26/2020 13:14:53 PAGE 5   
+
+ 241   1        select(0);
+ 242   1      }
+ 243          
+ 244          void set_beep(uchar dat)
+ 245          {
+ 246   1        P0=0x00;
+ 247   1        select(5);
+ 248   1        P0=dat;
+ 249   1        select(0);
+ 250   1      }
+ 251          
+ 252          void set_others()
+ 253          {
+ 254   1        if(mode==0)
+ 255   1        {
+ 256   2          set_led(0xfe);
+ 257   2        }
+ 258   1        else if(mode==1)
+ 259   1        {
+ 260   2          set_led(0xfd);
+ 261   2        }
+ 262   1        
+ 263   1        if(mode==0) //自动模式下
+ 264   1        {
+ 265   2          if(flag_water)
+ 266   2          {
+ 267   3            set_beep(0x10);
+ 268   3          }
+ 269   2          else
+ 270   2          {
+ 271   3            set_beep(0x00);
+ 272   3          }
+ 273   2        }
+ 274   1        else if(mode==1) //手动模式下
+ 275   1        {
+ 276   2          if(flag_on) //达到了湿度阈值
+ 277   2          {
+ 278   3            if(flag_beep==1&&flag_water==1) //蜂鸣器&灌溉同时打开
+ 279   3            {
+ 280   4              set_beep(0x50);
+ 281   4            }
+ 282   3            else if(flag_beep==1&&flag_water==0) //蜂鸣器打开&灌溉关闭
+ 283   3            {
+ 284   4              set_beep(0x40);
+ 285   4            }
+ 286   3            else if(flag_beep==0&&flag_water==1) //蜂鸣器关闭&灌溉打开
+ 287   3            {
+ 288   4              set_beep(0x10);
+ 289   4            }
+ 290   3            else //蜂鸣器&灌溉均关闭
+ 291   3            {
+ 292   4              set_beep(0x00);
+ 293   4            }
+ 294   3          }
+ 295   2          else //在湿度阈值以下
+ 296   2          {
+ 297   3            if(flag_water) //手动打开灌溉
+ 298   3            {
+ 299   4              set_beep(0x10);
+ 300   4            }
+ 301   3            else
+ 302   3            {
+C51 COMPILER V9.60.0.0   MAIN                                                              08/26/2020 13:14:53 PAGE 6   
+
+ 303   4              set_beep(0x00);
+ 304   4            }
+ 305   3          }
+ 306   2        }
+ 307   1      }
+ 308          
+ 309          void check_hum()
+ 310          {
+ 311   1        if(mode==0) //自动模式下判定flag_water
+ 312   1        {
+ 313   2          if(hum<limit)
+ 314   2          {
+ 315   3            flag_water=1;
+ 316   3          }
+ 317   2          else
+ 318   2          {
+ 319   3            flag_water=0;
+ 320   3          }
+ 321   2        } 
+ 322   1        if(mode==1) //手动模式下判定flag_on
+ 323   1        {
+ 324   2          if(hum<limit)
+ 325   2          {
+ 326   3            flag_on=1;
+ 327   3          }
+ 328   2          else
+ 329   2          {
+ 330   3            flag_on=0;
+ 331   3          }
+ 332   2        }
+ 333   1      }
+ 334          
+ 335          void init_timer0(void)    //1毫秒@11.0592MHz
+ 336          {
+ 337   1        AUXR |= 0x80;   //定时器时钟1T模式
+ 338   1        TMOD &= 0xF0;   //设置定时器模式
+ 339   1        TL0 = 0xCD;   //设置定时初值
+ 340   1        TH0 = 0xD4;   //设置定时初值
+ 341   1        TF0 = 0;    //清除TF0标志
+ 342   1        TR0 = 1;    //定时器0开始计时
+ 343   1        ET0 = 1;
+ 344   1        EA = 1;
+ 345   1      }
+ 346          
+ 347          void ser_timer0() interrupt 1
+ 348          {
+ 349   1        static uchar count_50ms,count_2ms;
+ 350   1        count_50ms++;
+ 351   1        count_2ms++;
+ 352   1        if(count_2ms>=2)
+ 353   1        {
+ 354   2          count_2ms=0;
+ 355   2          set_display();
+ 356   2          display();
+ 357   2        }
+ 358   1        if(count_50ms>=50)
+ 359   1        {
+ 360   2          count_50ms=0;
+ 361   2          read_ds1302();
+ 362   2          scan_key();
+ 363   2          fun_key();
+ 364   2        }
+C51 COMPILER V9.60.0.0   MAIN                                                              08/26/2020 13:14:53 PAGE 7   
+
+ 365   1      }
+ 366          
+ 367          void main()
+ 368          {
+ 369   1        init_sys();
+ 370   1        init_timer0();
+ 371   1        while(1)
+ 372   1        {
+ 373   2          get_hum();
+ 374   2          check_hum();
+ 375   2          set_others();
+ 376   2        }
+ 377   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1013    ----
+   CONSTANT SIZE    =     13    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     23       1
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

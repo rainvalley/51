@@ -1,0 +1,142 @@
+C51 COMPILER V9.60.0.0   KEY                                                               08/24/2020 16:06:04 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE KEY
+OBJECT MODULE PLACED IN .\Objects\key.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE key.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\key.l
+                    -st) TABS(2) OBJECT(.\Objects\key.obj)
+
+line level    source
+
+   1          #include<stc15f2k60s2.h>
+   2          typedef unsigned int uint;
+   3          typedef unsigned char uchar;
+   4          uchar code dig_code[]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90,0x88,0x80,0xc6,0xc0,0x86,0x8e,0xb
+             -f,0x7f,0xff};
+   5          #define R1_ P3^0
+   6          #define R2_ P3^1
+   7          #define R3_ P3^2
+   8          #define R4_ P3^3
+   9          #define C1_ P4^4
+  10          #define C2_ P4^2
+  11          #define C3_ P3^5
+  12          #define C4_ P3^4
+  13          #define KEY R1_|(R2_<<1)|(R3_<<2)|(R4_<<3)|(C1_<<4)|(C2_<<5)|(C3_<<6)|(C4_<<7)
+  14          sbit R1 = P3^0;
+  15          sbit R2 = P3^1;
+  16          sbit R3 = P3^2;
+  17          sbit R4 = P3^3;
+  18          sbit C1 = P4^4;
+  19          sbit C2 = P4^2;
+  20          sbit C3 = P3^5;
+  21          sbit C4 = P3^4;
+  22          uchar trg_row=0;
+  23          uchar trg_column=0;
+  24          uchar cont_row=0;
+  25          uchar cont_column=0;
+  26          
+  27          void Delay(uint t)
+  28          {
+  29   1        while(t--);
+  30   1      }
+  31          
+  32          void Select(uchar channel)
+  33          {
+  34   1        switch(channel)
+  35   1        {
+  36   2          case 4: 
+  37   2            P2=(P2&0X1f)|0X80;//不改变P2其他IO口电平的情况下改变138译码器输入
+  38   2            break;
+  39   2          case 5: 
+  40   2            P2=(P2&0X1f)|0Xa0;
+  41   2            break;
+  42   2          case 6: 
+  43   2            P2=(P2&0X1f)|0Xc0;
+  44   2            break;
+  45   2          case 7: 
+  46   2            P2=(P2&0X1f)|0Xe0;
+  47   2            break;
+  48   2        }
+  49   1          
+  50   1      }
+  51          
+  52          void Display(uchar pos,uchar dig)
+  53          {
+C51 COMPILER V9.60.0.0   KEY                                                               08/24/2020 16:06:04 PAGE 2   
+
+  54   1        Delay(200);
+  55   1        P0=0XFF;
+  56   1        Select(6);
+  57   1        P0=0X01<<pos;
+  58   1        Select(7);
+  59   1        P0=dig_code[dig];
+  60   1      }
+  61          
+  62          void Init_Sys()
+  63          {
+  64   1        Select(5);
+  65   1        P0=0X00;
+  66   1        Select(4);
+  67   1        P0=0XFF;
+  68   1      }
+  69          
+  70          void Timer0Init(void)   //50毫秒@11.0592MHz
+  71          {
+  72   1        AUXR &= 0x7F;   //定时器时钟12T模式
+  73   1        TMOD &= 0xF0;   //设置定时器模式
+  74   1        TL0 = 0x00;   //设置定时初值
+  75   1        TH0 = 0xDC;   //设置定时初值设置定时初值
+  76   1        TF0 = 0;    //清除TF0标志
+  77   1        TR0 = 1;    //定时器0开始计时
+  78   1        ET0 = 1;
+  79   1        EA = 1;
+  80   1      }
+  81          
+  82          void Scan_Key_16(void)
+  83          {
+  84   1        uchar read_row,read_column;
+  85   1        
+  86   1        R1=R2=R3=R4=1;
+  87   1        C1=C2=C3=C4=0;
+  88   1        read_row = KEY^(0x0f);
+  89   1        trg_row = read_row&(trg_row^cont_row);
+  90   1        cont_row = read_row;
+  91   1        
+  92   1        R1=R2=R3=R4=0;
+  93   1        C1=C2=C3=C4=1;
+  94   1        read_column = KEY^(0xf0);
+  95   1        trg_column = read_column&(trg_column^cont_column);
+  96   1        cont_column = read_column;
+  97   1      }
+  98          
+  99          void Ser_Timer0() interrupt 1
+ 100          {
+ 101   1        Scan_Key_16();
+ 102   1      }
+ 103          int main()
+ 104          {
+ 105   1        Init_Sys();
+ 106   1        P3 |= 0X0F;
+ 107   1        Timer0Init();
+ 108   1        while(1)
+ 109   1        {
+ 110   2          Display(0,cont_row);
+ 111   2          Display(1,cont_column);
+ 112   2        }
+ 113   1      }
+
+
+C51 COMPILER V9.60.0.0   KEY                                                               08/24/2020 16:06:04 PAGE 3   
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    325    ----
+   CONSTANT SIZE    =     19    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      4    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

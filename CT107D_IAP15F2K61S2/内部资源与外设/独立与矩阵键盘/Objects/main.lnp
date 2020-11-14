@@ -1,4 +1,4 @@
 ".\Objects\STARTUP.obj",
-".\Objects\Key_Board.obj" 
+".\Objects\key.obj" 
 TO ".\Objects\main" 
 PRINT(".\Listings\main.m51") RAMSIZE(256) 
